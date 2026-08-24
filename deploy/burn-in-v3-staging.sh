@@ -4,6 +4,7 @@ set -Eeuo pipefail
 DOMAIN="head-heart-staging.atomglobal.com"
 BASE="https://${DOMAIN}"
 SOURCE_DIR="/srv/head-heart.atomglobal.com/staging-source"
+CURRENT_DIR="/var/www/head-heart-staging.atomglobal.com/current"
 RECIPIENT="${1:-rico.m@axon.com.sg}"
 RESOLVE=(--resolve "${DOMAIN}:443:127.0.0.1")
 TMP="$(mktemp -d)"
@@ -32,7 +33,14 @@ fi
 
 http_code="$(curl -sS -o "$TMP/home.html" -w '%{http_code}' "${RESOLVE[@]}" "$BASE/")"
 [[ "$http_code" == "200" ]] || PUBLIC=FAIL
-if grep -q 'sunil-head-heart-v3' "$SOURCE_DIR/src/api/mockData.js" && grep -q 'sunil-head-heart-v3' "$SOURCE_DIR/src/uat-layout-fix.css"; then :; else PUBLIC=FAIL; fi
+if grep -R --include='*.js' -Fq 'Personal Assessment' "$CURRENT_DIR/frontend/assets" \
+  && grep -R --include='*.js' -Fq 'Corporate Assessments' "$CURRENT_DIR/frontend/assets" \
+  && grep -R --include='*.js' -Fq 'Add more (optional)' "$CURRENT_DIR/frontend/assets" \
+  && grep -R --include='*.css' -Fq 'latest-answer-note-dropdown' "$CURRENT_DIR/frontend/assets"; then
+  :
+else
+  PUBLIC=FAIL
+fi
 printf 'Public site: %s (HTTP %s)\n' "$PUBLIC" "$http_code"
 
 stamp="$(date -u +%Y%m%dT%H%M%SZ)"
