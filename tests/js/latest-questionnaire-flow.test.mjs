@@ -26,7 +26,7 @@ test("public questionnaire keeps the latest process inside the approved split br
   assert.match(layout, /Begin the free assessment/);
   assert.doesNotMatch(layout, /Powered by/);
   assert.match(main, /questionnaire-latest\.css/);
-  assert.match(branding, /startsWith\("\/media-uploads\/"\).*transparentLogoUrl/);
+  assert.match(branding, /startsWith\("\/media-uploads\/"\).*legacyLogoUrl/);
 });
 
 test("latest participant and question process remains wired to the real backend", () => {

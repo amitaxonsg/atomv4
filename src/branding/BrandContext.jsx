@@ -19,7 +19,7 @@ const defaults = {
     fieldLabelSize: "12", fieldTextSize: "14", metaTextSize: "12",
     visualTitleSize: "72", visualBodySize: "22", contentMaxWidth: "720", intakeMaxWidth: "840",
     questionMaxWidth: "880", contentGutter: "72",
-    logoUrl: transparentLogoUrl, emailLogoUrl: legacyLogoUrl,
+    logoUrl: legacyLogoUrl, emailLogoUrl: legacyLogoUrl,
     reportLogoUrl: legacyLogoUrl, faviconUrl: "/icon-192.png", bannerUrl: "",
   },
   stages: stageContent,
@@ -29,7 +29,7 @@ const defaults = {
 const BrandContext = React.createContext(defaults);
 
 function normalisePublicLogoUrl(value) {
-  return !value || value === legacyLogoUrl || String(value).startsWith("/media-uploads/") ? transparentLogoUrl : value;
+  return !value || value === transparentLogoUrl || String(value).startsWith("/media-uploads/") ? legacyLogoUrl : value;
 }
 
 function applyBranding(branding) {
