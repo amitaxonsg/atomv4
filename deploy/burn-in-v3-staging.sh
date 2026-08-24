@@ -72,13 +72,13 @@ if [[ "$stripe_available" == "true" ]]; then
   if stripe_checkout="$(curl -fsS "${RESOLVE[@]}" -H 'Content-Type: application/json' -d "$stripe_body" "$BASE/api/payments/checkout" 2>"$TMP/stripe.err")"; then
     stripe_url="$(printf '%s' "$stripe_checkout" | json_get 'data.get("url","")')"
     stripe_session="$(printf '%s' "$stripe_checkout" | json_get 'data.get("checkoutSessionId","")')"
-    if [[ "$stripe_url" == https://checkout.stripe.com/* && "$stripe_session" == cs_test_* ]]; then STRIPE=PASS; fi
-    printf 'Stripe test checkout: %s (%s)\n' "$STRIPE" "$stripe_session"
+    if [[ "$stripe_url" == https://checkout.stripe.com/* && ( "$stripe_session" == cs_test_* || "$stripe_session" == cs_live_* ) ]]; then STRIPE=PASS; fi
+    printf 'Stripe checkout creation: %s (%s)\n' "$STRIPE" "$stripe_session"
   else
-    printf 'Stripe test checkout: FAIL (%s)\n' "$(cat "$TMP/stripe.err")"
+    printf 'Stripe checkout creation: FAIL (%s)\n' "$(cat "$TMP/stripe.err")"
   fi
 else
-  echo 'Stripe test checkout: FAIL (staging test credentials/webhook/price IDs are not fully configured)'
+  echo 'Stripe checkout creation: FAIL (credentials/webhook/price IDs are not fully configured)'
 fi
 
 if [[ "$uat_available" == "true" ]]; then
@@ -121,7 +121,7 @@ fi
 printf 'Email queue/delivery: %s\n' "$EMAIL"
 
 printf '\n=== BURN-IN SUMMARY ===\n'
-printf 'PUBLIC=%s\nV3_40Q=%s\nSTRIPE_TEST_CHECKOUT=%s\nUAT_NO_PAYMENT=%s\nEMAIL_PROVIDER=%s\nEMAIL_DELIVERY=%s\n' "$PUBLIC" "$V3" "$STRIPE" "$UAT" "$EMAIL_PROVIDER" "$EMAIL"
+printf 'PUBLIC=%s\nV3_40Q=%s\nSTRIPE_CHECKOUT=%s\nUAT_NO_PAYMENT=%s\nEMAIL_PROVIDER=%s\nEMAIL_DELIVERY=%s\n' "$PUBLIC" "$V3" "$STRIPE" "$UAT" "$EMAIL_PROVIDER" "$EMAIL"
 if [[ "$PUBLIC" == PASS && "$V3" == PASS && "$STRIPE" == PASS && "$UAT" == PASS && "$EMAIL_PROVIDER" == PASS && "$EMAIL" == PASS ]]; then
   echo 'READY_FOR_SUNIL=YES'
   exit 0

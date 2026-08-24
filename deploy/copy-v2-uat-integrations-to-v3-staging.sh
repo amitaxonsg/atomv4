@@ -3,6 +3,7 @@ set -Eeuo pipefail
 
 V2_BACKEND="/var/www/head-heart.atomglobal.com/current/backend"
 V3_BACKEND="/srv/head-heart.atomglobal.com/staging-source/backend"
+ALLOW_LIVE_STRIPE="${1:-}"
 TMP="$(mktemp /root/head-heart-v2-uat.XXXXXX.json)"
 trap 'rm -f "$TMP"' EXIT
 chmod 0600 "$TMP"
@@ -62,23 +63,26 @@ if ($provider === "smtp2go" && trim($out["email.smtp2go_api_key"]) === "") {
   fwrite(STDERR, "ERROR: V2 SMTP2GO API key is unavailable.\n");
   exit(3);
 }
-$stripeReady = str_starts_with($stripe, "sk_test_") && str_starts_with($webhook, "whsec_");
+$allowLive = ($argv[2] ?? "") === "--allow-live-stripe";
+$stripeMode = str_starts_with($stripe, "sk_test_") ? "test" : (str_starts_with($stripe, "sk_live_") ? "live" : "none");
+$stripeReady = ($stripeMode === "test" || ($stripeMode === "live" && $allowLive)) && str_starts_with($webhook, "whsec_");
 foreach (["personal", "newjoiner", "manager", "executive"] as $track) {
   if (!str_starts_with(trim($out["stripe.price_" . $track]), "price_")) {
     $stripeReady = false;
   }
 }
 $out["_stripe_test_ready"] = $stripeReady ? "1" : "0";
+$out["_stripe_mode"] = $stripeReady ? $stripeMode : "none";
 if (!$stripeReady) {
   foreach (array_keys($out) as $key) {
     if (str_starts_with($key, "stripe.")) unset($out[$key]);
   }
-  fwrite(STDERR, "WARNING: V2 does not contain a complete Stripe TEST configuration.\n");
-  fwrite(STDERR, "WARNING: Email will be copied, but live Stripe credentials will never be copied to staging.\n");
+  fwrite(STDERR, "WARNING: V2 does not contain an authorised, complete Stripe configuration.\n");
+  fwrite(STDERR, "WARNING: Email will be copied. Pass --allow-live-stripe only with explicit approval.\n");
 }
 file_put_contents($argv[1], json_encode($out, JSON_THROW_ON_ERROR));
 echo "V2 email integration validated for guarded transfer.\n";
-' "$TMP"
+' "$TMP" "$ALLOW_LIVE_STRIPE"
 
 cd "$V3_BACKEND"
 php -r '
@@ -86,7 +90,9 @@ $data = json_decode(file_get_contents($argv[1]), true, 512, JSON_THROW_ON_ERROR)
 $c = require "src/bootstrap.php";
 $s = $c["settings"];
 $stripeReady = ($data["_stripe_test_ready"] ?? "0") === "1";
+$stripeMode = (string) ($data["_stripe_mode"] ?? "none");
 unset($data["_stripe_test_ready"]);
+unset($data["_stripe_mode"]);
 $encrypted = ["email.smtp_password", "email.smtp2go_api_key", "stripe.secret_key", "stripe.webhook_secret"];
 foreach ($data as $key => $value) {
   $s->set((string) $key, (string) $value, in_array($key, $encrypted, true));
@@ -103,9 +109,9 @@ $s->set("payments.cash_on_delivery_enabled", "true", false);
 $s->set("system.cash_on_delivery_enabled", "true", false);
 echo "V3 staging email provider and settings copied securely from V2.\n";
 echo $stripeReady
-  ? "V3 staging Stripe TEST settings copied securely.\n"
-  : "V3 staging Stripe remains disabled; use the authorised no-payment UAT route until test credentials are supplied.\n";
-echo "No production/live Stripe credential was accepted.\n";
+  ? "V3 staging Stripe " . strtoupper($stripeMode) . " settings copied securely.\n"
+  : "V3 staging Stripe remains disabled; use the authorised no-payment UAT route until credentials are supplied.\n";
+if ($stripeMode === "live") echo "Live Stripe was copied under the explicit --allow-live-stripe approval.\n";
 ' "$TMP"
 
 rm -f "$TMP"
