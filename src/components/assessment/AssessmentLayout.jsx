@@ -82,6 +82,7 @@ function VoteCopy({ text }) {
 }
 
 export function SelectVersion({ experience, onSelect }) {
+  const [category, setCategory] = React.useState(null);
   const landing = landingExperience(experience?.landing);
   const trackOrder = ["personal", "newjoiner", "manager", "executive"];
   const tracks = trackOrder.map(key => assessmentTracks[key]).filter(Boolean);
@@ -97,18 +98,35 @@ export function SelectVersion({ experience, onSelect }) {
       <small>{meta.questionCount} questions · {meta.sectionCount} sections · {durationLabel(meta)}</small>
     </button>;
   };
-  return <LatestPage width="640" className="latest-track-selection" brandVisible={landing.showBrandName} stageKey="version">
+  if (!category) return <LatestPage width="640" className="latest-track-selection" brandVisible={landing.showBrandName} stageKey="version">
     <h1>{landing.title}</h1>
     <p className="latest-copy"><VoteCopy text={landing.primaryCopy} /></p>
     <p className="latest-copy latest-copy--last">{landing.secondaryCopy}</p>
-    <section className="latest-track-group" aria-labelledby="personal-assessment-heading">
-      <h2 id="personal-assessment-heading">Personal Assessment</h2>
-      <div className="latest-track-cards latest-track-cards--single">{personalTracks.map(renderTrackCard)}</div>
-    </section>
-    <section className="latest-track-group" aria-labelledby="corporate-assessments-heading">
-      <h2 id="corporate-assessments-heading">Corporate Assessments</h2>
-      <div className="latest-track-cards">{corporateTracks.map(renderTrackCard)}</div>
-    </section>
+    <div className="latest-assessment-category-grid" aria-label="Choose assessment type">
+      <button className="latest-assessment-category latest-assessment-category--personal" onClick={() => setCategory("personal")}>
+        <strong>Personal Assessment</strong>
+        <span>For individuals who want to understand how they make decisions and lead their own life.</span>
+        <small>Continue to Personal →</small>
+      </button>
+      <button className="latest-assessment-category latest-assessment-category--corporate" onClick={() => setCategory("corporate")}>
+        <strong>Corporate Assessments</strong>
+        <span>For New Joiners, Managers and Executives in a workplace setting.</span>
+        <small>View Corporate options →</small>
+      </button>
+    </div>
+  </LatestPage>;
+
+  const isPersonal = category === "personal";
+  return <LatestPage width="640" className="latest-track-selection" brandVisible={landing.showBrandName} stageKey="version">
+    <button className="latest-text-back" onClick={() => setCategory(null)}>← Choose Personal or Corporate</button>
+    <p className="latest-section-code">{isPersonal ? "For individuals" : "For organisations and workplace roles"}</p>
+    <h1>{isPersonal ? "Personal Assessment" : "Corporate Assessments"}</h1>
+    <p className="latest-copy latest-copy--last">{isPersonal
+      ? "Choose the Personal assessment to explore how you make decisions and lead your own life."
+      : "Choose the Corporate assessment that best matches your current workplace role."}</p>
+    <div className={`latest-track-cards${isPersonal ? " latest-track-cards--single" : ""}`}>
+      {(isPersonal ? personalTracks : corporateTracks).map(renderTrackCard)}
+    </div>
   </LatestPage>;
 }
 
@@ -202,8 +220,12 @@ export function Questions({ track, remoteExperience, progressExperience, answers
   const saveLabel = saveState === "saving" ? "Saving…" : saveState === "saved" ? "Saved" : saveState === "error" ? "Save issue" : "";
   const lastSection = section === track.subscales.length - 1;
   const sectionEnd = offset + subscale.items.length;
-  const goBack = () => section ? setSection(section - 1) : onBack();
-  const goForward = () => lastSection ? onFinish() : setSection(section + 1);
+  const moveToSection = nextSection => {
+    setSection(nextSection);
+    window.requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }));
+  };
+  const goBack = () => section ? moveToSection(section - 1) : onBack();
+  const goForward = () => lastSection ? onFinish() : moveToSection(section + 1);
 
   return <LatestPage width="720" className="latest-questions-page" stageKey={track.key}>
     <div className="latest-question-progress">
