@@ -62,22 +62,22 @@ if ($provider === "smtp2go" && trim($out["email.smtp2go_api_key"]) === "") {
   fwrite(STDERR, "ERROR: V2 SMTP2GO API key is unavailable.\n");
   exit(3);
 }
-if (!str_starts_with($stripe, "sk_test_")) {
-  fwrite(STDERR, "ERROR: V2 Stripe key is not a test key; refusing to copy it into staging.\n");
-  exit(4);
-}
-if (!str_starts_with($webhook, "whsec_")) {
-  fwrite(STDERR, "ERROR: V2 Stripe webhook secret is unavailable or invalid.\n");
-  exit(5);
-}
+$stripeReady = str_starts_with($stripe, "sk_test_") && str_starts_with($webhook, "whsec_");
 foreach (["personal", "newjoiner", "manager", "executive"] as $track) {
   if (!str_starts_with(trim($out["stripe.price_" . $track]), "price_")) {
-    fwrite(STDERR, "ERROR: V2 Stripe test price is missing for {$track}.\n");
-    exit(6);
+    $stripeReady = false;
   }
 }
+$out["_stripe_test_ready"] = $stripeReady ? "1" : "0";
+if (!$stripeReady) {
+  foreach (array_keys($out) as $key) {
+    if (str_starts_with($key, "stripe.")) unset($out[$key]);
+  }
+  fwrite(STDERR, "WARNING: V2 does not contain a complete Stripe TEST configuration.\n");
+  fwrite(STDERR, "WARNING: Email will be copied, but live Stripe credentials will never be copied to staging.\n");
+}
 file_put_contents($argv[1], json_encode($out, JSON_THROW_ON_ERROR));
-echo "V2 UAT integrations validated for guarded transfer.\n";
+echo "V2 email integration validated for guarded transfer.\n";
 ' "$TMP"
 
 cd "$V3_BACKEND"
@@ -85,15 +85,26 @@ php -r '
 $data = json_decode(file_get_contents($argv[1]), true, 512, JSON_THROW_ON_ERROR);
 $c = require "src/bootstrap.php";
 $s = $c["settings"];
+$stripeReady = ($data["_stripe_test_ready"] ?? "0") === "1";
+unset($data["_stripe_test_ready"]);
 $encrypted = ["email.smtp_password", "email.smtp2go_api_key", "stripe.secret_key", "stripe.webhook_secret"];
 foreach ($data as $key => $value) {
   $s->set((string) $key, (string) $value, in_array($key, $encrypted, true));
+}
+$stripeKeys = [
+  "stripe.secret_key", "stripe.webhook_secret", "stripe.price_personal",
+  "stripe.price_newjoiner", "stripe.price_manager", "stripe.price_executive"
+];
+if (!$stripeReady) {
+  foreach ($stripeKeys as $key) $s->set($key, "", in_array($key, $encrypted, true));
 }
 $s->set("email.public_base_url", "https://head-heart-staging.atomglobal.com", false);
 $s->set("payments.cash_on_delivery_enabled", "true", false);
 $s->set("system.cash_on_delivery_enabled", "true", false);
 echo "V3 staging email provider and settings copied securely from V2.\n";
-echo "V3 staging Stripe TEST settings copied securely.\n";
+echo $stripeReady
+  ? "V3 staging Stripe TEST settings copied securely.\n"
+  : "V3 staging Stripe remains disabled; use the authorised no-payment UAT route until test credentials are supplied.\n";
 echo "No production/live Stripe credential was accepted.\n";
 ' "$TMP"
 
