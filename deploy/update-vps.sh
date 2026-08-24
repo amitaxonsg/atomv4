@@ -55,6 +55,18 @@ resolve_nginx_site() {
   [[ -f "$NGINX_SITE" ]] || { echo "Resolved Nginx site is not a file: $NGINX_SITE" >&2; exit 1; }
 }
 
+reload_nginx() {
+  nginx -t
+  if systemctl is-active --quiet nginx 2>/dev/null; then
+    systemctl reload nginx
+    return
+  fi
+  # Some managed VPS images run Nginx outside the nginx.service unit.  Reload
+  # the already-running master directly instead of treating a valid config as
+  # a failed deployment.  This still returns an error if no master is running.
+  nginx -s reload
+}
+
 if [[ -x /opt/node-v22/bin/node ]]; then
   export PATH="/opt/node-v22/bin:$PATH"
 fi
@@ -90,7 +102,7 @@ rollback() {
     printf '%s\n' "$PREVIOUS_COMMIT" > "$APP_ROOT/v2-deployed-commit.txt"
   fi
   systemctl reload "$PHP_FPM_SERVICE" 2>/dev/null || true
-  nginx -t >/dev/null 2>&1 && systemctl reload nginx 2>/dev/null || true
+  nginx -t >/dev/null 2>&1 && reload_nginx 2>/dev/null || true
 }
 trap 'echo "Deployment failed; restoring the previous release and Nginx site." >&2; rollback' ERR
 
@@ -178,7 +190,7 @@ printf '%s\n' "$COMMIT" > "$APP_ROOT/deployed-commit.txt"
 printf '%s\n' "$COMMIT" > "$APP_ROOT/v2-deployed-commit.txt"
 
 systemctl reload "$PHP_FPM_SERVICE"
-systemctl reload nginx
+reload_nginx
 
 HEALTH="$(curl --fail --silent --show-error --max-time 20 --resolve "$DOMAIN:443:127.0.0.1" "https://$DOMAIN/api/health")"
 grep -q '"status":"ok"' <<<"$HEALTH" || { echo "Health check did not return status ok: $HEALTH" >&2; exit 1; }

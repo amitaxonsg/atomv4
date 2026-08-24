@@ -62,7 +62,7 @@ rollback() {
     rm -f "$NGINX_CONF"
   fi
 
-  nginx -t >/dev/null 2>&1 && systemctl reload nginx || true
+  nginx -t >/dev/null 2>&1 && { systemctl is-active --quiet nginx 2>/dev/null && systemctl reload nginx || nginx -s reload; } || true
   echo "Live production was not intentionally changed."
   echo "Audit directory: $AUDIT"
   exit "$code"
@@ -274,7 +274,7 @@ if ! nginx -t; then
   exit 1
 fi
 
-if ! systemctl reload nginx; then
+if ! { systemctl is-active --quiet nginx 2>/dev/null && systemctl reload nginx || nginx -s reload; }; then
   echo "ERROR: Nginx reload failed."
   systemctl status nginx --no-pager || true
   journalctl -u nginx --since "10 minutes ago" --no-pager || true
