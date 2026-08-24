@@ -29,7 +29,7 @@ const defaults = {
 const BrandContext = React.createContext(defaults);
 
 function normalisePublicLogoUrl(value) {
-  return !value || value === legacyLogoUrl ? transparentLogoUrl : value;
+  return !value || value === legacyLogoUrl || String(value).startsWith("/media-uploads/") ? transparentLogoUrl : value;
 }
 
 function applyBranding(branding) {

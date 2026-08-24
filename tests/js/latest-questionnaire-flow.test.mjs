@@ -10,6 +10,7 @@ const routes = readFileSync(new URL("../../backend/src/assessment-experience-rou
 const service = readFileSync(new URL("../../backend/src/Services/AssessmentExperienceService.php", import.meta.url), "utf8");
 const survey = readFileSync(new URL("../../backend/src/Services/SurveyService.php", import.meta.url), "utf8");
 const main = readFileSync(new URL("../../src/main.jsx", import.meta.url), "utf8");
+const branding = readFileSync(new URL("../../src/branding/BrandContext.jsx", import.meta.url), "utf8");
 
 test("public questionnaire keeps the latest process inside the approved split branding", () => {
   assert.match(layout, /latest-questionnaire-shell/);
@@ -25,6 +26,7 @@ test("public questionnaire keeps the latest process inside the approved split br
   assert.match(layout, /Begin the free assessment/);
   assert.doesNotMatch(layout, /Powered by/);
   assert.match(main, /questionnaire-latest\.css/);
+  assert.match(branding, /startsWith\("\/media-uploads\/"\).*transparentLogoUrl/);
 });
 
 test("latest participant and question process remains wired to the real backend", () => {
