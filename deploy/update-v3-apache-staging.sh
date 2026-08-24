@@ -13,6 +13,10 @@ PHP_FPM_SERVICE="php8.3-fpm"
 PREVIOUS_RELEASE=""
 SWITCHED=0
 
+if [[ -x /opt/node-v22/bin/node ]]; then
+  export PATH="/opt/node-v22/bin:$PATH"
+fi
+
 fail() { echo "ERROR: $*" >&2; exit 1; }
 
 load_env_file() {
@@ -49,6 +53,8 @@ trap rollback ERR
 for command in git php composer mysql mysqldump gzip npm node rsync curl apache2ctl runuser; do
   command -v "$command" >/dev/null 2>&1 || fail "Missing required command: $command"
 done
+node -e 'const [major]=process.versions.node.split(".").map(Number); process.exit(major >= 22 ? 0 : 1)' \
+  || fail "Node 22 or newer is required. Checked node: $(command -v node) ($(node --version 2>/dev/null || true))"
 PHP_BIN="$(command -v php)"
 
 cd "$SOURCE_DIR"
