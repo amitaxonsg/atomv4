@@ -17,6 +17,8 @@ test("public questionnaire keeps the latest process inside the approved split br
   assert.match(layout, /reflection-portrait\.png/);
   assert.match(experience, /Every choice you make is cast by two votes/);
   assert.match(layout, /latest-track-card/);
+  assert.match(layout, /Personal Assessment/);
+  assert.match(layout, /Corporate Assessments/);
   assert.match(layout, /Begin the free assessment/);
   assert.doesNotMatch(layout, /Powered by/);
   assert.match(main, /questionnaire-latest\.css/);
@@ -27,7 +29,10 @@ test("latest participant and question process remains wired to the real backend"
   assert.match(layout, /department/);
   assert.match(layout, /level/);
   assert.match(layout, /N\/A — doesn’t apply \/ can’t answer/);
-  assert.match(layout, /Optional — describe a specific moment/);
+  assert.match(layout, /latest-answer-note-dropdown/);
+  assert.match(layout, /Add more \(optional\)/);
+  assert.match(layout, /Is there anything else you would like to add/);
+  assert.doesNotMatch(layout, /Optional — describe a specific moment/);
   assert.match(app, /createSession/);
   assert.match(app, /saveSession/);
   assert.match(app, /completeSession/);
@@ -49,7 +54,8 @@ test("landing, track cards and intake are editable from the admin CMS", () => {
 
 test("all four published assessments are offered to new participants", () => {
   assert.match(layout, /trackOrder = \["personal", "newjoiner", "manager", "executive"\]/);
-  assert.match(layout, /tracks\.map/);
+  assert.match(layout, /personalTracks\.map/);
+  assert.match(layout, /corporateTracks\.map/);
   assert.match(layout, /experience\?\.tracks\?\.\[track\.key\]/);
   assert.doesNotMatch(survey, /This assessment is not currently open for new participants/);
   assert.match(admin, /Four public assessment choices/i);

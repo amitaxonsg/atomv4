@@ -85,22 +85,30 @@ export function SelectVersion({ experience, onSelect }) {
   const landing = landingExperience(experience?.landing);
   const trackOrder = ["personal", "newjoiner", "manager", "executive"];
   const tracks = trackOrder.map(key => assessmentTracks[key]).filter(Boolean);
+  const personalTracks = tracks.filter(track => track.key === "personal");
+  const corporateTracks = tracks.filter(track => track.key !== "personal");
+  const renderTrackCard = track => {
+    const remote = experience?.tracks?.[track.key] || {};
+    const details = trackExperience(track.key, remote, remote.priceLabel || track.priceLabel);
+    const meta = { ...fallbackMeta[track.key], ...remote };
+    return <button className="latest-track-card" key={track.key} onClick={() => onSelect(track.key)}>
+      <strong>{landing.cardTitlePrefix} {track.label}</strong>
+      <span>{details.tagline}</span>
+      <small>{meta.questionCount} questions · {meta.sectionCount} sections · {durationLabel(meta)}</small>
+    </button>;
+  };
   return <LatestPage width="640" className="latest-track-selection" brandVisible={landing.showBrandName} stageKey="version">
     <h1>{landing.title}</h1>
     <p className="latest-copy"><VoteCopy text={landing.primaryCopy} /></p>
     <p className="latest-copy latest-copy--last">{landing.secondaryCopy}</p>
-    <div className="latest-track-cards">
-      {tracks.map(track => {
-        const remote = experience?.tracks?.[track.key] || {};
-        const details = trackExperience(track.key, remote, remote.priceLabel || track.priceLabel);
-        const meta = { ...fallbackMeta[track.key], ...remote };
-        return <button className="latest-track-card" key={track.key} onClick={() => onSelect(track.key)}>
-          <strong>{landing.cardTitlePrefix} {track.label}</strong>
-          <span>{details.tagline}</span>
-          <small>{meta.questionCount} questions · {meta.sectionCount} sections · {durationLabel(meta)}</small>
-        </button>;
-      })}
-    </div>
+    <section className="latest-track-group" aria-labelledby="personal-assessment-heading">
+      <h2 id="personal-assessment-heading">Personal Assessment</h2>
+      <div className="latest-track-cards latest-track-cards--single">{personalTracks.map(renderTrackCard)}</div>
+    </section>
+    <section className="latest-track-group" aria-labelledby="corporate-assessments-heading">
+      <h2 id="corporate-assessments-heading">Corporate Assessments</h2>
+      <div className="latest-track-cards">{corporateTracks.map(renderTrackCard)}</div>
+    </section>
   </LatestPage>;
 }
 
@@ -223,11 +231,15 @@ export function Questions({ track, remoteExperience, progressExperience, answers
           return <label className={current.value === value ? "selected" : ""} key={choice}><input type="radio" name={`question-${answerIndex}`} checked={current.value === value} onChange={() => onAnswer(answerIndex, value)} /><strong>{value}</strong><span>{choice}</span></label>;
         })}</div>
         {experience.allowNotApplicable && <div className="latest-na-row"><label className={current.value === "NA" ? "selected" : ""}><input type="radio" name={`question-${answerIndex}`} checked={current.value === "NA"} onChange={() => onAnswer(answerIndex, "NA")} />N/A — doesn’t apply / can’t answer</label></div>}
-        {experience.allowAnswerNotes && <textarea className="latest-answer-note" rows="2" value={current.note || ""} onChange={event => onNote(answerIndex, event.target.value)} placeholder="Optional — describe a specific moment this played out for you..." />}
       </div>;
     })}</div>
 
     {canContinue && <ProgressMessage completed={sectionEnd} copy={progressExperience} />}
+
+    {experience.allowAnswerNotes && lastSection && <details className="latest-answer-note-dropdown latest-final-note" open={Boolean(answers[answers.length - 1]?.note)}>
+      <summary>Add more (optional)</summary>
+      <textarea className="latest-answer-note" rows="3" value={answers[answers.length - 1]?.note || ""} onChange={event => onNote(answers.length - 1, event.target.value)} placeholder="Is there anything else you would like to add?" />
+    </details>}
 
     <div className="latest-question-navigation">
       <button className="latest-secondary-button" onClick={goBack}>← Back</button>
