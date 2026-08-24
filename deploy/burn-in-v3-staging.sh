@@ -15,7 +15,7 @@ V3=FAIL
 STRIPE=FAIL
 UAT=FAIL
 EMAIL=FAIL
-MAILTRAP=FAIL
+EMAIL_PROVIDER=FAIL
 
 json_get() {
   local expression="$1"
@@ -100,10 +100,12 @@ set -e
 printf '%s\n' "$email_audit"
 if [[ $audit_rc -eq 0 ]]; then
   provider="$(printf '%s' "$email_audit" | json_get 'str(data.get("effective",{}).get("provider","")).lower()')"
-  smtp_host="$(printf '%s' "$email_audit" | json_get 'str(data.get("effective",{}).get("smtpHost","")).lower()')"
-  if [[ "$provider" == "smtp" && "$smtp_host" == *mailtrap* ]]; then MAILTRAP=PASS; fi
+  smtp_password="$(printf '%s' "$email_audit" | json_get 'str(bool(data.get("secretsConfiguredInCms",{}).get("smtpPassword"))).lower()')"
+  smtp2go_key="$(printf '%s' "$email_audit" | json_get 'str(bool(data.get("secretsConfiguredInCms",{}).get("smtp2goApiKey"))).lower()')"
+  if [[ "$provider" == "smtp2go" && "$smtp2go_key" == "true" ]]; then EMAIL_PROVIDER=PASS; fi
+  if [[ "$provider" == "smtp" && "$smtp_password" == "true" ]]; then EMAIL_PROVIDER=PASS; fi
 fi
-printf 'Mailtrap configuration: %s\n' "$MAILTRAP"
+printf 'Email provider configuration: %s (%s)\n' "$EMAIL_PROVIDER" "${provider:-unknown}"
 
 printf '\n=== EMAIL DELIVERY ===\n'
 set +e
@@ -119,8 +121,8 @@ fi
 printf 'Email queue/delivery: %s\n' "$EMAIL"
 
 printf '\n=== BURN-IN SUMMARY ===\n'
-printf 'PUBLIC=%s\nV3_40Q=%s\nSTRIPE_TEST_CHECKOUT=%s\nUAT_NO_PAYMENT=%s\nMAILTRAP=%s\nEMAIL_DELIVERY=%s\n' "$PUBLIC" "$V3" "$STRIPE" "$UAT" "$MAILTRAP" "$EMAIL"
-if [[ "$PUBLIC" == PASS && "$V3" == PASS && "$STRIPE" == PASS && "$UAT" == PASS && "$MAILTRAP" == PASS && "$EMAIL" == PASS ]]; then
+printf 'PUBLIC=%s\nV3_40Q=%s\nSTRIPE_TEST_CHECKOUT=%s\nUAT_NO_PAYMENT=%s\nEMAIL_PROVIDER=%s\nEMAIL_DELIVERY=%s\n' "$PUBLIC" "$V3" "$STRIPE" "$UAT" "$EMAIL_PROVIDER" "$EMAIL"
+if [[ "$PUBLIC" == PASS && "$V3" == PASS && "$STRIPE" == PASS && "$UAT" == PASS && "$EMAIL_PROVIDER" == PASS && "$EMAIL" == PASS ]]; then
   echo 'READY_FOR_SUNIL=YES'
   exit 0
 fi

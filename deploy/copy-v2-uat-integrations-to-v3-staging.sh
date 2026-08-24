@@ -19,7 +19,7 @@ $c = require "src/bootstrap.php";
 $s = $c["settings"];
 $keys = [
   "email.provider", "email.smtp_host", "email.smtp_port", "email.smtp_username",
-  "email.smtp_password", "email.smtp_encryption",
+  "email.smtp_password", "email.smtp_encryption", "email.smtp2go_api_key",
   "stripe.secret_key", "stripe.webhook_secret",
   "stripe.price_personal", "stripe.price_newjoiner", "stripe.price_manager", "stripe.price_executive"
 ];
@@ -29,12 +29,16 @@ $provider = strtolower(trim($out["email.provider"]));
 $host = strtolower(trim($out["email.smtp_host"]));
 $stripe = trim($out["stripe.secret_key"]);
 $webhook = trim($out["stripe.webhook_secret"]);
-if ($provider !== "smtp" || !str_contains($host, "mailtrap")) {
-  fwrite(STDERR, "ERROR: V2 is not configured for Mailtrap SMTP (provider={$provider}, host={$host}).\n");
+if (!in_array($provider, ["smtp", "smtp2go"], true)) {
+  fwrite(STDERR, "ERROR: V2 email provider is unsupported ({$provider}).\n");
   exit(2);
 }
-if (trim($out["email.smtp_username"]) === "" || trim($out["email.smtp_password"]) === "") {
-  fwrite(STDERR, "ERROR: V2 Mailtrap credentials are incomplete.\n");
+if ($provider === "smtp" && ($host === "" || trim($out["email.smtp_username"]) === "" || trim($out["email.smtp_password"]) === "")) {
+  fwrite(STDERR, "ERROR: V2 SMTP credentials are incomplete.\n");
+  exit(3);
+}
+if ($provider === "smtp2go" && trim($out["email.smtp2go_api_key"]) === "") {
+  fwrite(STDERR, "ERROR: V2 SMTP2GO API key is unavailable.\n");
   exit(3);
 }
 if (!str_starts_with($stripe, "sk_test_")) {
@@ -60,14 +64,14 @@ php -r '
 $data = json_decode(file_get_contents($argv[1]), true, 512, JSON_THROW_ON_ERROR);
 $c = require "src/bootstrap.php";
 $s = $c["settings"];
-$encrypted = ["email.smtp_password", "stripe.secret_key", "stripe.webhook_secret"];
+$encrypted = ["email.smtp_password", "email.smtp2go_api_key", "stripe.secret_key", "stripe.webhook_secret"];
 foreach ($data as $key => $value) {
   $s->set((string) $key, (string) $value, in_array($key, $encrypted, true));
 }
 $s->set("email.public_base_url", "https://head-heart-staging.atomglobal.com", false);
 $s->set("payments.cash_on_delivery_enabled", "true", false);
 $s->set("system.cash_on_delivery_enabled", "true", false);
-echo "V3 staging Mailtrap settings copied securely.\n";
+echo "V3 staging email provider and settings copied securely from V2.\n";
 echo "V3 staging Stripe TEST settings copied securely.\n";
 echo "No production/live Stripe credential was accepted.\n";
 ' "$TMP"
