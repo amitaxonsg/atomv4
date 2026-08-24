@@ -17,14 +17,35 @@ cd "$V2_BACKEND"
 php -r '
 $c = require "src/bootstrap.php";
 $s = $c["settings"];
+$scalar = static function (mixed $value, string $fallback = ""): string {
+  return is_string($value) || is_numeric($value) ? (string) $value : $fallback;
+};
 $keys = [
   "email.provider", "email.smtp_host", "email.smtp_port", "email.smtp_username",
   "email.smtp_password", "email.smtp_encryption", "email.smtp2go_api_key",
   "stripe.secret_key", "stripe.webhook_secret",
   "stripe.price_personal", "stripe.price_newjoiner", "stripe.price_manager", "stripe.price_executive"
 ];
+$fallbacks = [
+  "email.provider" => (string) ($_ENV["MAIL_PROVIDER"] ?? ""),
+  "email.smtp_host" => (string) ($_ENV["SMTP_HOST"] ?? ""),
+  "email.smtp_port" => (string) ($_ENV["SMTP_PORT"] ?? ""),
+  "email.smtp_username" => (string) ($_ENV["SMTP_USERNAME"] ?? ""),
+  "email.smtp_password" => (string) ($_ENV["SMTP_PASSWORD"] ?? ""),
+  "email.smtp_encryption" => (string) ($_ENV["SMTP_ENCRYPTION"] ?? ""),
+  "email.smtp2go_api_key" => (string) ($_ENV["SMTP2GO_API_KEY"] ?? ""),
+  "stripe.secret_key" => (string) ($_ENV["STRIPE_SECRET_KEY"] ?? ""),
+  "stripe.webhook_secret" => (string) ($_ENV["STRIPE_WEBHOOK_SECRET"] ?? ""),
+  "stripe.price_personal" => (string) ($_ENV["STRIPE_PRICE_PERSONAL"] ?? ""),
+  "stripe.price_newjoiner" => (string) ($_ENV["STRIPE_PRICE_NEWJOINER"] ?? ""),
+  "stripe.price_manager" => (string) ($_ENV["STRIPE_PRICE_MANAGER"] ?? ""),
+  "stripe.price_executive" => (string) ($_ENV["STRIPE_PRICE_EXECUTIVE"] ?? ""),
+];
 $out = [];
-foreach ($keys as $key) $out[$key] = (string) $s->get($key, "");
+foreach ($keys as $key) {
+  $fallback = $fallbacks[$key] ?? "";
+  $out[$key] = $scalar($s->get($key, $fallback), $fallback);
+}
 $provider = strtolower(trim($out["email.provider"]));
 $host = strtolower(trim($out["email.smtp_host"]));
 $stripe = trim($out["stripe.secret_key"]);
