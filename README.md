@@ -59,6 +59,17 @@ The legacy `liveTrackKey` remains available for backward compatibility and deplo
 
 Existing secure resume links continue using their original assessment version. Completed answers, scoring, reports and PDFs stay tied to immutable snapshots.
 
+## V4 Growth Alignment — isolated release
+
+The frozen V4 build is on branch `sunil-v4-growth-alignment-frozen` and is
+deployed separately at `https://v4.atomglobal.com`. It retains the V3 40-live-
+question process and approved branding while adding the Growth Alignment report
+experience, 90-day retest rules and database-backed development commitments.
+No new CMS interface is included in V4; editable V4 content is stored in the
+database for the following CMS phase. Apache deployment details are in
+`docs/V4-APACHE-DEPLOYMENT.md`. V4 must use its own source directory, release
+root, database, storage, cron file and virtual host; it must not modify V3.
+
 ## Questionnaire process retained from the supplied `index.html`
 
 1. Display all four approved assessment choices.

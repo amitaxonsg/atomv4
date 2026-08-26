@@ -1,0 +1,52 @@
+# Growth Alignment V4 — Apache deployment
+
+V4 is a separate site. It must never use the V3 source checkout, database,
+storage, release directory, cron file or Apache virtual host.
+
+| Item | V4 value |
+|---|---|
+| Domain | `v4.atomglobal.com` |
+| Git branch | `sunil-v4-growth-alignment-frozen` |
+| Source checkout | `/srv/v4.atomglobal.com/source` |
+| Web releases | `/var/www/v4.atomglobal.com` |
+| Environment file | `/etc/growth-alignment/v4.env` |
+| Storage | `/var/lib/growth-alignment-v4` |
+| Backups | `/var/backups/growth-alignment-v4` |
+| Cron | `/etc/cron.d/growth-alignment-v4` |
+| Database | `growth_alignment_v4` |
+
+## First installation
+
+1. Point the `v4.atomglobal.com` A/AAAA record to this server and verify it
+   resolves before issuing TLS.
+2. Clone the repository into the V4 source path and check out the V4 branch.
+3. Run `sudo deploy/install-v4-apache.sh` to create only the isolated V4
+   folders, initial environment template and Apache site.
+4. Create the dedicated MariaDB database and restricted database user. Fill in
+   the V4 environment file with the generated V4 `APP_KEY` and database values.
+5. Run `sudo CERTBOT_EMAIL=admin@atomglobal.com deploy/install-v4-apache.sh --issue-cert`.
+6. Run `sudo deploy/update-v4-apache.sh`. It backs up the V4 database, runs
+   migrations, builds a versioned release, switches only the V4 `current`
+   symlink, configures the V4 cron, and verifies the V4 health endpoint.
+
+## Integration transfer
+
+After the first successful V4 deployment, transfer SMTP2GO and Stripe secrets
+inside the server only. Do not copy or paste secrets into Git or this document:
+
+```bash
+cd /srv/v4.atomglobal.com/source
+php deploy/copy-v3-integrations-to-v4.php \
+  /srv/head-heart.atomglobal.com/source/backend/src/bootstrap.php \
+  /srv/v4.atomglobal.com/source/backend/src/bootstrap.php \
+  --allow-live-stripe
+```
+
+Create dedicated V4 Stripe Prices for Full Reports and retests before enabling
+public payment. Price IDs are deliberately not reused from V3.
+
+## Rollback
+
+Application rollback is an atomic change of the V4 `current` symlink to the
+previous V4 release. Database migrations are forward-only; take a new backup
+before any database restore decision.

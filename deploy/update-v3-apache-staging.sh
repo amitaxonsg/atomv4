@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-SOURCE_DIR="/srv/head-heart.atomglobal.com/staging-source"
-APP_ROOT="/var/www/head-heart-staging.atomglobal.com"
-ENV_FILE="/etc/head-heart-alignment/staging.env"
-EXPECTED_STORAGE_PATH="/var/lib/head-heart-alignment-staging"
-BACKUP_DIR="/var/backups/head-heart-alignment-staging"
-CRON_FILE="/etc/cron.d/head-heart-v3-staging"
-DOMAIN="head-heart-staging.atomglobal.com"
-BRANCH="sunil-v3-clean-40q-cms"
-PHP_FPM_SERVICE="php8.3-fpm"
+SOURCE_DIR="${SOURCE_DIR:-/srv/head-heart.atomglobal.com/staging-source}"
+APP_ROOT="${APP_ROOT:-/var/www/head-heart-staging.atomglobal.com}"
+ENV_FILE="${ENV_FILE:-/etc/head-heart-alignment/staging.env}"
+EXPECTED_STORAGE_PATH="${EXPECTED_STORAGE_PATH:-/var/lib/head-heart-alignment-staging}"
+BACKUP_DIR="${BACKUP_DIR:-/var/backups/head-heart-alignment-staging}"
+CRON_FILE="${CRON_FILE:-/etc/cron.d/head-heart-v3-staging}"
+DOMAIN="${DOMAIN:-head-heart-staging.atomglobal.com}"
+BRANCH="${BRANCH:-sunil-v3-clean-40q-cms}"
+PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-php8.3-fpm}"
+EXPECTED_APP_ENV="${EXPECTED_APP_ENV:-staging}"
+CMS_APPLY_SCRIPT="${CMS_APPLY_SCRIPT:-bin/apply-v3-public-cms.php}"
 PREVIOUS_RELEASE=""
 SWITCHED=0
 
@@ -73,10 +75,9 @@ for variable in APP_ENV APP_URL APP_KEY DB_HOST DB_PORT DB_DATABASE DB_USERNAME 
   [[ -n "${!variable:-}" ]] || fail "$variable is not configured in $ENV_FILE"
 done
 
-[[ "$APP_ENV" == "staging" ]] || fail "APP_ENV must be staging, got: $APP_ENV"
-[[ "$APP_URL" == "https://$DOMAIN" ]] || fail "APP_URL is not staging: $APP_URL"
-[[ "$DB_DATABASE" == *staging* ]] || fail "DB_DATABASE does not look like staging: $DB_DATABASE"
-[[ "$STORAGE_PATH" == "$EXPECTED_STORAGE_PATH" ]] || fail "STORAGE_PATH is not staging: $STORAGE_PATH"
+[[ "$APP_ENV" == "$EXPECTED_APP_ENV" ]] || fail "APP_ENV must be $EXPECTED_APP_ENV, got: $APP_ENV"
+[[ "$APP_URL" == "https://$DOMAIN" ]] || fail "APP_URL must be https://$DOMAIN, got: $APP_URL"
+[[ "$STORAGE_PATH" == "$EXPECTED_STORAGE_PATH" ]] || fail "STORAGE_PATH must be $EXPECTED_STORAGE_PATH, got: $STORAGE_PATH"
 
 install -d -m 0755 "$APP_ROOT/releases"
 install -d -m 0750 "$BACKUP_DIR" "$STORAGE_PATH" "$STORAGE_PATH/media" "$STORAGE_PATH/reports" "$STORAGE_PATH/tmp"
@@ -93,8 +94,13 @@ ln -sfn "$ENV_FILE" "$SOURCE_DIR/backend/.env"
   composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
   composer lint
   php bin/migrate.php
-  php bin/seed.php
-  php bin/apply-v3-public-cms.php
+  if [[ "$CMS_APPLY_SCRIPT" == "bin/apply-v3-public-cms.php" ]]; then
+    php bin/seed.php
+    php bin/apply-v3-public-cms.php
+  else
+    php bin/seed.php
+    if [[ -n "$CMS_APPLY_SCRIPT" ]]; then php "$CMS_APPLY_SCRIPT"; fi
+  fi
   php ../tests/php/run.php
 )
 (
@@ -141,7 +147,7 @@ SWITCHED=0
 find "$APP_ROOT/releases" -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' | sort -nr | tail -n +11 | cut -d' ' -f2- | xargs -r rm -rf
 find "$BACKUP_DIR" -type f -name '*.sql.gz' -mtime +30 -delete
 
-echo "V3 staging updated successfully."
+echo "Apache release updated successfully."
 echo "Commit: $COMMIT"
 echo "URL: https://$DOMAIN/"
 echo "Health: $HEALTH"
