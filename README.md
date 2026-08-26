@@ -469,6 +469,65 @@ or documentation.
 The V4 Stripe account credentials may match V3, but V4 must have its own
 Stripe Product/Price IDs for the approved V4 prices. Do not reuse V3 Price IDs.
 
+### V4 burn-test record — 26 August 2026
+
+The live V4 release completed the guarded production checks successfully. The
+tests use a temporary participant and automatically remove all associated
+database records and generated files after verification.
+
+| Check | Verified result |
+|---|---|
+| Database persistence | Participant, survey session, all 40 answers, score snapshot, consent records and report were written to `growth_alignment_v4` and then removed cleanly. |
+| Report journey | Lite Report, locked Full Report, authorised Full Report unlock, private report token and PDF generation passed. |
+| SMTP2GO | Registration, resume, completion and Lite Report emails were accepted by the configured provider. |
+| Health | Database, migrations, storage, Stripe credentials, Stripe webhook, email and cron returned healthy. |
+| Content audit | All four tracks have complete Lite/Full content and score coverage from 50–250. |
+
+Run the guarded checks from the V4 source checkout using a new test mailbox
+that is not already a participant. `--send-email` sends four genuine test
+messages; it must only be used with a mailbox the operator controls.
+
+```bash
+cd /srv/v4.atomglobal.com/source
+php backend/bin/production-submission-smoke-test.php \
+  --recipient='new-test-mailbox@example.com' \
+  --track=personal \
+  --send-email \
+  --confirm=RUN-PRODUCTION-SUBMISSION-SMOKE
+
+php backend/bin/production-report-flow-smoke-test.php \
+  --recipient='another-new-test-mailbox@example.com' \
+  --track=personal \
+  --confirm=RUN-PRODUCTION-REPORT-SMOKE
+
+php backend/bin/report-flow-audit.php
+```
+
+### Payment modes and launch control
+
+V4 has two deliberately separate paths:
+
+- **Temporary UAT Test — No Payment:** enabled for Sunil's controlled review.
+  It unlocks the Full Report without charging a card and records an explicitly
+  marked UAT/manual payment. It must not remain enabled at public launch.
+- **Stripe card checkout:** the live secret and signed webhook are present, but
+  public card buttons remain disabled until the four Full Report and four
+  retest V4 Stripe Price IDs are created and stored. The eight V4 prices differ
+  from V3, so V3 Price IDs must never be copied over.
+
+After written UAT approval and immediately before public launch, disable the
+temporary UAT path. This takes effect from the database settings immediately;
+no Apache reload is needed.
+
+```bash
+cd /srv/v4.atomglobal.com/source
+php -r '$c=require "backend/src/bootstrap.php"; $c["settings"]->set("payments.cash_on_delivery_enabled", "false"); $c["settings"]->set("system.cash_on_delivery_enabled", "false"); echo "UAT no-payment checkout disabled.\n";'
+```
+
+Then create the eight dedicated V4 Stripe Products/Prices, store their Price
+IDs in V4, and complete one controlled card payment, signed-webhook, report
+unlock and refund/relock test before enabling card checkout for the public.
+
 ### Release acceptance checklist
 
 - Automated suite passes: 61 tests.
@@ -481,5 +540,7 @@ Stripe Product/Price IDs for the approved V4 prices. Do not reuse V3 Price IDs.
   responsive layout and private link.
 - Configure V4 Full Report and 90-day retest Stripe Price IDs, then complete a
   controlled payment/webhook test before enabling public checkout.
+- Disable the temporary UAT no-payment route after written client approval and
+  before the public launch.
 - Keep the V4 CMS phase deferred: V4 content/settings are database-backed, but
   no new CMS screens are included in this release.
