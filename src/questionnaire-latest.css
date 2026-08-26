@@ -657,7 +657,22 @@
 
 @media (max-width: 900px) {
   .latest-questionnaire-shell { display: block; }
-  .latest-visual-panel { display: none; }
+  .latest-visual-panel {
+    position: relative;
+    top: auto;
+    display: block;
+    width: 100%;
+    height: clamp(210px, 56.25vw, 330px);
+    min-height: 0;
+    padding: 0;
+    background-size: cover;
+  }
+
+  .latest-visual-panel::after,
+  .latest-visual-panel__logo,
+  .latest-visual-panel__copy {
+    display: none;
+  }
   .latest-questionnaire-content { display: block; min-height: 100vh; }
   .latest-public-brand { display: inline-flex; }
   .latest-questionnaire-page {

@@ -118,7 +118,7 @@ function TrackEditor({ track, onSaved }) {
       <div className="card-heading"><div><h2>Track card and introduction</h2><small>Controls this public track card and the following introduction screen.</small></div></div>
       <div className="form-grid">
         <label className="form-grid__wide">Track-card description<textarea rows="3" value={form.tagline || ""} onChange={update("tagline")} /></label>
-        <label className="form-grid__wide">Introduction heading<input value={form.introHeadline || `Head–Heart Alignment: ${track.trackName}`} onChange={update("introHeadline")} /></label>
+        <label className="form-grid__wide">Introduction heading<input value={form.introHeadline || `Growth Alignment: ${track.trackName}`} onChange={update("introHeadline")} /></label>
         <label className="form-grid__wide">Introduction copy<textarea rows="5" value={form.introBody || ""} onChange={update("introBody")} /></label>
         <label className="form-grid__wide">Lite/Full report offer<textarea rows="4" value={form.introOffer || ""} onChange={update("introOffer")} /><small>Use <code>{"{{price}}"}</code> where the CMS track price should appear.</small></label>
         <label>Heart label<input value={form.heartLabel || ""} onChange={update("heartLabel")} /></label>

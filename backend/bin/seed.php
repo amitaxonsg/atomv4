@@ -172,7 +172,7 @@ $container['db']->transaction(function () use ($container, $reference, $metadata
             . 'ON DUPLICATE KEY UPDATE public_title = VALUES(public_title), short_title = VALUES(short_title), audience_label = VALUES(audience_label), estimated_minutes_min = VALUES(estimated_minutes_min), estimated_minutes_max = VALUES(estimated_minutes_max), free_report_label = VALUES(free_report_label), paid_report_label = VALUES(paid_report_label), question_count = 40, section_count = 10, show_remaining_time = 1, show_question_count = 1, show_section_count = 1, show_autosave = 1, introductory_note = VALUES(introductory_note), last_reviewed_date = VALUES(last_reviewed_date), intro_headline = VALUES(intro_headline), intro_body = VALUES(intro_body), intro_offer = VALUES(intro_offer), heart_label = VALUES(heart_label), heart_description = VALUES(heart_description), head_label = VALUES(head_label), head_description = VALUES(head_description), intake_configuration_json = VALUES(intake_configuration_json), allow_not_applicable = VALUES(allow_not_applicable), allow_answer_notes = VALUES(allow_answer_notes), updated_at = NOW()',
             [
                 $trackId,
-                'Head–Heart Alignment: ' . $track['label'],
+                'Growth Alignment: ' . $track['label'],
                 $track['label'],
                 $track['audienceLabel'],
                 $track['durationMin'],

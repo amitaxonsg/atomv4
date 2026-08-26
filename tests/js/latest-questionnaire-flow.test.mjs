@@ -11,6 +11,7 @@ const service = readFileSync(new URL("../../backend/src/Services/AssessmentExper
 const survey = readFileSync(new URL("../../backend/src/Services/SurveyService.php", import.meta.url), "utf8");
 const main = readFileSync(new URL("../../src/main.jsx", import.meta.url), "utf8");
 const branding = readFileSync(new URL("../../src/branding/BrandContext.jsx", import.meta.url), "utf8");
+const questionnaireStyles = readFileSync(new URL("../../src/questionnaire-latest.css", import.meta.url), "utf8");
 
 test("public questionnaire keeps the latest process inside the approved split branding", () => {
   assert.match(layout, /latest-questionnaire-shell/);
@@ -27,6 +28,13 @@ test("public questionnaire keeps the latest process inside the approved split br
   assert.doesNotMatch(layout, /Powered by/);
   assert.match(main, /questionnaire-latest\.css/);
   assert.match(branding, /startsWith\("\/media-uploads\/"\).*legacyLogoUrl/);
+});
+
+test("CMS stage image remains visible above the questionnaire on mobile", () => {
+  assert.match(questionnaireStyles, /@media \(max-width: 900px\)[\s\S]*\.latest-visual-panel \{[\s\S]*display: block;/);
+  assert.match(questionnaireStyles, /height: clamp\(210px, 56\.25vw, 330px\)/);
+  assert.match(questionnaireStyles, /\.latest-visual-panel__logo,[\s\S]*\.latest-visual-panel__copy \{[\s\S]*display: none;/);
+  assert.doesNotMatch(questionnaireStyles, /@media \(max-width: 900px\)[\s\S]*?\.latest-visual-panel \{ display: none; \}/);
 });
 
 test("latest participant and question process remains wired to the real backend", () => {

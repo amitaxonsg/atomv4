@@ -18,7 +18,7 @@ final class V3ReportEnhancer
         $paidContent['profileSpectrum'] = self::profileSpectrum($snapshot['profiles'] ?? [], (string) ($profile['profile_key'] ?? ''));
         $paidContent['writtenReflections'] = self::writtenReflections($db, $sessionId, $snapshot['questions'] ?? []);
         $paidContent['methodology'] = [
-            'Instrument' => 'This Full Development Report is generated from the published Atom Global Head–Heart Alignment assessment version saved with the participant session. The V3 participant experience uses 40 statements across 10 areas, with four scored statements per area.',
+            'Instrument' => 'This Full Development Report is generated from the published Atom Global Growth Alignment assessment version saved with the participant session. The participant experience uses 40 statements across 10 areas, with four scored statements per area.',
             'Scoring' => 'Each scored response uses a 1–5 scale. Items keyed toward the Head direction are reverse-scored using 6 minus the response. N/A responses are excluded rather than treated as a midpoint.',
             'Overall score' => 'The overall score is the mean of all scored responses multiplied by 50, producing a 50–250 range. The published profile band for that assessment version determines the participant profile.',
             'Area scores' => 'Each of the 10 area scores is the mean of its scored responses multiplied by 5, producing a 5–25 range. The radar and deep-dive sections show how the overall pattern changes by context.',

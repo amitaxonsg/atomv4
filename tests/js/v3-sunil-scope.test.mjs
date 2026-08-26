@@ -170,7 +170,7 @@ test("Full Report PDF is generated and attached to paid-report emails", () => {
   assert.match(delivery, /addAttachment/);
   assert.match(processor, /paid_report_ready/);
   assert.match(processor, /\$pdf->generate\(\$reportId\)/);
-  assert.match(processor, /Head-Heart-Alignment-Full-Development-Report\.pdf/);
+  assert.match(processor, /Growth-Alignment-Full-Development-Report\.pdf/);
   assert.match(stripe, /'reportId' => \$reportAccess\['reportId'\]/);
   assert.match(uat, /'reportId' => \$access\['reportId'\]/);
   assert.match(admin, /'reportId' => \$reportId/);
@@ -178,22 +178,24 @@ test("Full Report PDF is generated and attached to paid-report emails", () => {
   assert.match(routes, /\$container\['pdf'\]->generate/);
 });
 
-test("USD 2 retake is restricted to a previous verified paid Full Report assessment", () => {
+test("V4 track-priced retest is restricted to a verified paid Full Report and 90-day wait", () => {
   const report = read("../../src/components/assessment/ReportView.jsx");
   const survey = read("../../backend/src/Services/SurveyService.php");
   const stripe = read("../../backend/src/Payments/StripeService.php");
   const reportService = read("../../backend/src/Services/ReportService.php");
 
-  assert.match(report, /Retake price: USD 2/);
-  assert.match(report, /previously completed a paid Full Development Report assessment/);
+  assert.match(report, /Retest price:/);
+  assert.match(report, /90 days after the original assessment/);
   assert.match(report, /__RETAKE__/);
   assert.match(survey, /V3_QUESTION_COUNT = 40/);
   assert.doesNotMatch(survey, /All 50 questions must be answered/);
-  assert.match(stripe, /RETAKE_AMOUNT_MINOR = 200/);
+  assert.match(stripe, /RETAKE_DEFAULTS/);
+  assert.match(stripe, /stripe\.retest_price_/);
+  assert.match(stripe, /modify\('\+' \. \$waitDays \. ' days'\)/);
   assert.match(stripe, /hasPaidAssessment\(\$sessionId\)/);
   assert.match(stripe, /provider = \? AND status = \?/);
-  assert.match(reportService, /retakeCheckoutAvailable\(int \$sessionId\)/);
-  assert.match(reportService, /\[\$sessionId, 'stripe', 'paid'\]/);
+  assert.match(reportService, /retakeCheckoutAvailable\(int \$sessionId, string \$trackKey\)/);
+  assert.match(reportService, /DATE_SUB\(NOW\(\), INTERVAL \? DAY\)/);
   assert.match(reportService, /retakeComparison/);
   assert.match(reportService, /retake_payment/);
 });

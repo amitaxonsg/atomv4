@@ -64,7 +64,7 @@ export function AssessmentMeta({ trackKey }) {
   const meta = { ...fallbackMeta[trackKey], ...(tracks[trackKey] || {}) };
   return <div className="latest-assessment-meta">
     <i className="latest-dot latest-dot--heart" />
-    <span>Head-Heart Alignment: {track.label} · {meta.freeReportLabel} · {durationLabel(meta)}</span>
+    <span>Growth Alignment: {track.label} · {meta.freeReportLabel} · {durationLabel(meta)}</span>
     <i className="latest-dot latest-dot--head" />
   </div>;
 }

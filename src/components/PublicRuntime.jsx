@@ -34,16 +34,16 @@ function AttributionTracker() {
 
 const fallbacks = {
   privacy: {
-    pageTitle: "Privacy Notice | Head–Heart Alignment",
+    pageTitle: "Privacy Notice | Growth Alignment",
     metaDescription: "How Atom Global Consulting processes assessment, payment and communication data.",
     heading: "Privacy Notice",
     introductoryContent: "Atom Global Consulting processes the information required to provide the assessment, save progress, deliver reports, handle payments and send essential service messages. Optional marketing consent is separate and may be withdrawn. Production retention periods and privacy contacts are managed through the administration settings and approved legal notice.",
   },
   terms: {
-    pageTitle: "Terms of Use | Head–Heart Alignment",
-    metaDescription: "Terms governing use of the Head–Heart Alignment assessment and reports.",
+    pageTitle: "Terms of Use | Growth Alignment",
+    metaDescription: "Terms governing use of the Growth Alignment assessment and reports.",
     heading: "Terms of Use",
-    introductoryContent: "Head–Heart Alignment is a reflective development tool, not a medical, psychological, legal or employment diagnosis. Reports should be interpreted in context. Paid report access is provided only after verified payment. The final production terms, refund policy and report disclaimer must be approved before launch.",
+    introductoryContent: "Growth Alignment is a reflective development tool, not a medical, psychological, legal or employment diagnosis. Reports should be interpreted in context. Paid report access is provided only after verified payment. The final production terms, refund policy and report disclaimer must be approved before launch.",
   },
 };
 
@@ -83,7 +83,7 @@ function PublicContentPage({ pageKey }) {
   return <main className="legal-page">
     <header className="legal-page__header"><a href="/"><BrandLogo /></a><a href="/">Return to assessment</a></header>
     <article className="legal-page__content">
-      <p className="eyebrow">Head–Heart Alignment</p>
+      <p className="eyebrow">Growth Alignment</p>
       <h1>{page.heading || page.pageTitle}</h1>
       <div className="legal-page__copy">{String(page.introductoryContent || "").split(/\n{2,}/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>
       {Array.isArray(page.faq) && page.faq.length > 0 && <section><h2>Frequently asked questions</h2>{page.faq.map((item, index) => <details key={index}><summary>{item.question}</summary><p>{item.answer}</p></details>)}</section>}

@@ -15,7 +15,7 @@ $router->add('GET', '/api/reports/{token}/pdf', function (Request $request, arra
     if (!$path) $path = $container['pdf']->generate((int) $report['id']);
     if (!$path || !is_file($path)) return Response::error('PDF generation failed.', 500);
     header('Content-Type: application/pdf');
-    header('Content-Disposition: inline; filename="head-heart-alignment-full-development-report.pdf"');
+    header('Content-Disposition: inline; filename="growth-alignment-full-development-report.pdf"');
     header('Content-Length: ' . filesize($path));
     header('Cache-Control: private, no-store');
     readfile($path);
@@ -39,6 +39,15 @@ $router->add('POST', '/api/reports/{token}/email', function (Request $request, a
         'reportId' => (int) $report['id'],
     ]);
     return Response::json(['queued' => true, 'queueId' => $queueId]);
+});
+
+$router->add('PUT', '/api/reports/{token}/commitment', function (Request $request, array $params) use ($container, $db) {
+    $token = (string) $params['token'];
+    $limiter = new RateLimiter($db);
+    if (!$limiter->hit('report-commitment:' . hash('sha256', $token), 20, 3600)) {
+        return Response::error('Please wait before saving again.', 429);
+    }
+    return Response::json($container['reports']->saveCommitment($token, (string) ($request->body['text'] ?? '')));
 });
 
 $router->add('POST', '/api/admin/reports/{id}/regenerate', function (Request $request, array $params) use ($auth, $container, $csrf) {

@@ -98,7 +98,7 @@ function AdminLogin({ onLogin }) {
       </div>
 
       {mode === "login" && <form className="admin-login__card" onSubmit={submitLogin}>
-        <div className="admin-login__mobile-logo"><BrandLogo /></div><p className="eyebrow">{isMockMode ? "Preview workspace" : "Administrator access"}</p><h2>Welcome back</h2><p className="admin-login__intro">Sign in to manage Head–Heart Alignment.</p>
+        <div className="admin-login__mobile-logo"><BrandLogo /></div><p className="eyebrow">{isMockMode ? "Preview workspace" : "Administrator access"}</p><h2>Welcome back</h2><p className="admin-login__intro">Sign in to manage Growth Alignment.</p>
         <Notice>{state.message}</Notice><Notice type="error">{state.error}</Notice>
         <label>Email address<input type="email" autoComplete="username" value={form.email} onChange={event => setForm(current => ({ ...current, email: event.target.value }))} placeholder="name@company.com" required /></label>
         <label>Password<input type="password" autoComplete="current-password" value={form.password} onChange={event => setForm(current => ({ ...current, password: event.target.value }))} placeholder="Enter your password" required /></label>
@@ -194,7 +194,7 @@ export default function AdminApp() {
 
   return <div className="admin-shell">
     <aside className="admin-sidebar">
-      <a href="/" className="admin-brand"><BrandLogo /><span>Head–Heart Alignment</span></a>
+      <a href="/" className="admin-brand"><BrandLogo /><span>Growth Alignment</span></a>
       <nav aria-label="Administration">
         {visibleSections.map(section => {
           const showGroup = section.group !== previousGroup;
@@ -213,7 +213,7 @@ export default function AdminApp() {
 
     <main className="admin-main">
       <div className="admin-context-bar">
-        <span>Head–Heart Alignment</span><strong>{safeActive}</strong>
+        <span>Growth Alignment</span><strong>{safeActive}</strong>
         <div className="admin-global-search">
           <input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search participants, reports, payments, email…" aria-label="Search administration" />
           {(search.trim().length >= 2 || searchState.loading) && <div className="admin-search-results">

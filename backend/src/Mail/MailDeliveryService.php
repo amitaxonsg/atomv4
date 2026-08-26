@@ -146,7 +146,7 @@ final class MailDeliveryService
         $websiteUrl = $this->absoluteUrl((string) $this->settings->get('email.website_url', '/'), $baseUrl);
         $privacyUrl = $this->absoluteUrl((string) $this->settings->get('email.privacy_url', '/privacy'), $baseUrl);
         $termsUrl = $this->absoluteUrl((string) $this->settings->get('email.terms_url', '/terms'), $baseUrl);
-        $footer = (string) $this->settings->get('email.footer_text', 'Head–Heart Alignment by Atom Global Consulting');
+        $footer = (string) $this->settings->get('email.footer_text', 'Growth Alignment by Atom Global Consulting');
 
         $colour = static fn(mixed $value, string $fallback): string => preg_match('/^#[0-9A-Fa-f]{6}$/', (string) $value) ? strtoupper((string) $value) : $fallback;
         $font = static function (mixed $value, string $fallback): string {
@@ -186,11 +186,11 @@ final class MailDeliveryService
             . '.ag-foot a{color:' . $muted . ';text-decoration:underline;margin:0 7px}'
             . '@media(max-width:640px){.ag-wrap{padding:14px 8px}.ag-head{padding:26px 20px 14px}.ag-content{padding:8px 22px 28px}}'
             . '</style></head><body><div class="ag-wrap"><div class="ag-card">'
-            . '<div class="ag-head"><img src="' . $safeLogo . '" alt="Atom Global"><p class="ag-kicker">Head–Heart Alignment</p></div>'
+            . '<div class="ag-head"><img src="' . $safeLogo . '" alt="Atom Global"><p class="ag-kicker">Growth Alignment</p></div>'
             . '<div class="ag-content">' . $content . '</div>'
             . '<div class="ag-foot"><strong>' . $safeFooter . '</strong><br>'
             . '<a href="' . $safeWebsite . '">Website</a><a href="' . $safePrivacy . '">Privacy</a><a href="' . $safeTerms . '">Terms</a><br>'
-            . 'This message was sent because you started, completed or administer a Head–Heart Alignment assessment.'
+            . 'This message was sent because you started, completed or administer a Growth Alignment assessment.'
             . '</div></div></div></body></html>';
     }
 

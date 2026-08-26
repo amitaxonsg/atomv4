@@ -12,9 +12,8 @@ use Stripe\Webhook;
 final class StripeService
 {
     private const RETAKE_MARKER = '__RETAKE__';
-    private const RETAKE_AMOUNT_MINOR = 200;
-    private const RETAKE_CURRENCY = 'usd';
     private const RETAKE_QUESTIONS_PER_SECTION = 4;
+    private const RETAKE_DEFAULTS = ['personal' => 299, 'newjoiner' => 995, 'manager' => 2995, 'executive' => 4995];
 
     public function __construct(private Database $db, private SettingsService $settings, private ReportService $reports, private array $config) {}
 
@@ -94,31 +93,31 @@ final class StripeService
     {
         $secret = trim((string) $this->settings->get('stripe.secret_key', $_ENV['STRIPE_SECRET_KEY'] ?? ''));
         $webhook = trim((string) $this->settings->get('stripe.webhook_secret', $_ENV['STRIPE_WEBHOOK_SECRET'] ?? ''));
-        if ($secret === '' || $webhook === '') throw new \RuntimeException('Stripe test or live credentials are not configured for the USD 2 retake.');
+        $retestPriceId = trim((string) $this->settings->get('stripe.retest_price_' . $trackKey, ''));
+        $retestAmountMinor = max(0, (int) $this->settings->get('retest.price_' . $trackKey . '_minor', self::RETAKE_DEFAULTS[$trackKey] ?? 299));
+        $waitDays = max(1, min(365, (int) $this->settings->get('retest.wait_days', 90)));
+        if ($secret === '' || $webhook === '' || $retestPriceId === '') throw new \RuntimeException('Stripe credentials and the track retest Price ID are not configured.');
 
         $survey = $this->db->fetch(
             'SELECT s.id, s.status, s.completed_at, p.email, t.track_key, t.name track_name, gr.id report_id, gr.is_unlocked FROM survey_sessions s JOIN participants p ON p.id = s.participant_id JOIN assessment_tracks t ON t.id = s.track_id JOIN generated_reports gr ON gr.survey_session_id = s.id AND gr.revoked_at IS NULL WHERE s.id = ? AND t.track_key = ? LIMIT 1',
             [$sessionId, $trackKey]
         );
         if (!$survey || $survey['status'] !== 'completed' || !(bool) $survey['is_unlocked']) {
-            throw new \InvalidArgumentException('The USD 2 retake is available only after a completed Full Development Report.');
+            throw new \InvalidArgumentException('A retest is available only after a completed Full Development Report.');
         }
         if (!$this->hasPaidAssessment($sessionId)) {
-            throw new \InvalidArgumentException('The USD 2 retake is available only to participants who previously completed a paid Full Development Report assessment.');
+            throw new \InvalidArgumentException('A retest is available only to participants who previously completed a paid Full Development Report assessment.');
+        }
+        $eligibleAt = (new \DateTimeImmutable((string) $survey['completed_at']))->modify('+' . $waitDays . ' days');
+        if ($eligibleAt > new \DateTimeImmutable('now')) {
+            throw new \InvalidArgumentException('The retest becomes available 90 days after the original assessment was completed.');
         }
 
         $stripe = new StripeClient($secret);
         $checkout = $stripe->checkout->sessions->create([
             'mode' => 'payment',
             'customer_email' => $survey['email'],
-            'line_items' => [[
-                'price_data' => [
-                    'currency' => self::RETAKE_CURRENCY,
-                    'unit_amount' => self::RETAKE_AMOUNT_MINOR,
-                    'product_data' => ['name' => 'Head–Heart Alignment 3-Month Retake'],
-                ],
-                'quantity' => 1,
-            ]],
+            'line_items' => [['price' => $retestPriceId, 'quantity' => 1]],
             'success_url' => $this->config['url'] . '/payment/success?retake=1&checkout={CHECKOUT_SESSION_ID}',
             'cancel_url' => $this->config['url'] . '/payment/cancelled?retake=1&session=' . $sessionId,
             'metadata' => [
@@ -131,9 +130,9 @@ final class StripeService
         ]);
         $this->db->execute(
             'INSERT INTO payments (survey_session_id, affiliate_id, provider, status, stripe_checkout_session_id, amount, currency, metadata_json, created_at, updated_at) VALUES (?, NULL, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
-            [$sessionId, 'stripe', 'checkout_started', $checkout->id, self::RETAKE_AMOUNT_MINOR, 'USD', json_encode($checkout->metadata)]
+            [$sessionId, 'stripe', 'checkout_started', $checkout->id, $retestAmountMinor, 'USD', json_encode($checkout->metadata)]
         );
-        return ['url' => $checkout->url, 'checkoutSessionId' => $checkout->id, 'retake' => true, 'amountMinor' => self::RETAKE_AMOUNT_MINOR, 'currency' => 'USD'];
+        return ['url' => $checkout->url, 'checkoutSessionId' => $checkout->id, 'retake' => true, 'amountMinor' => $retestAmountMinor, 'currency' => 'USD'];
     }
 
     private function completed(object $checkout): void
@@ -209,7 +208,7 @@ final class StripeService
         $attribution['retakeOfSessionId'] = $sourceSessionId;
         $attribution['retakeSourceReportId'] = (int) $sourceReport['id'];
         $attribution['retakePaidAt'] = gmdate(DATE_ATOM);
-        $attribution['retakePriceMinor'] = self::RETAKE_AMOUNT_MINOR;
+        $attribution['retakePriceMinor'] = (int) ($payment['amount'] ?? 0);
         $attribution['retakeCurrency'] = 'USD';
 
         $newSessionId = $this->db->insert(
@@ -217,7 +216,7 @@ final class StripeService
             [(int) $source['participant_id'], (int) $source['track_id'], (int) $source['assessment_version_id'], 'in_progress', hash('sha256', $resumeToken), $hours, json_encode($snapshot), json_encode($context), json_encode($attribution)]
         );
 
-        $amount = (int) ($checkout->amount_total ?? self::RETAKE_AMOUNT_MINOR);
+        $amount = (int) ($checkout->amount_total ?? $payment['amount'] ?? 0);
         $currency = strtoupper((string) ($checkout->currency ?? 'USD'));
         $this->db->execute(
             'UPDATE payments SET survey_session_id = ?, status = ?, stripe_payment_intent_id = ?, stripe_customer_id = ?, amount = ?, currency = ?, paid_at = NOW(), updated_at = NOW() WHERE id = ?',

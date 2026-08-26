@@ -239,7 +239,7 @@ final class AdminInsightsService
             'currency' => 'USD',
             'affiliateCode' => 'SAMPLE',
             'message' => 'This is a safe test of the selected email template.',
-            'subject' => 'Head–Heart Alignment template test',
+            'subject' => 'Growth Alignment template test',
             'expiresMinutes' => '60',
         ];
     }

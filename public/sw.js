@@ -1,6 +1,6 @@
 const APP_VERSION = new URL(self.location.href).searchParams.get("v") || "development";
 const SAFE_VERSION = APP_VERSION.replace(/[^a-zA-Z0-9._-]/g, "-");
-const STATIC_CACHE = `head-heart-alignment-v2-static-${SAFE_VERSION}`;
+const STATIC_CACHE = `growth-alignment-v4-static-${SAFE_VERSION}`;
 const NEVER_CACHE_ROUTES = ["/admin", "/report", "/payment"];
 const HASHED_ASSET = /(?:^|\/)[^/]*[.-][a-zA-Z0-9_-]{8,}\.(?:css|js|mjs|woff2?|ttf|otf|png|jpe?g|gif|webp|avif|svg)$/i;
 

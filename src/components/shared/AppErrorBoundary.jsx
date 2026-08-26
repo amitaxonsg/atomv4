@@ -22,7 +22,7 @@ export default class AppErrorBoundary extends React.Component {
     return <main className="fatal-error" role="alert">
       <section className="fatal-error__card">
         <img src="/media/brand/atom-global-wordmark.png?v=20260719-direct-1" alt="Atom Global Consulting" />
-        <p className="eyebrow">Head–Heart Alignment</p>
+        <p className="eyebrow">Growth Alignment</p>
         <h1>We could not load the assessment.</h1>
         <p>Please reload the page. If the problem continues, contact Atom Global support and tell us what you were trying to do.</p>
         <button className="button button--primary" type="button" onClick={() => window.location.reload()}>Reload</button>

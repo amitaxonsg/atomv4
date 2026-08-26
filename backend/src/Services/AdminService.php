@@ -61,7 +61,7 @@ final class AdminService
                 'key' => $row['track_key'],
                 'label' => $row['name'],
                 'description' => $row['description'],
-                'publicTitle' => $row['public_title'] ?: 'Head–Heart Alignment: ' . $row['name'],
+                'publicTitle' => $row['public_title'] ?: 'Growth Alignment: ' . $row['name'],
                 'shortTitle' => $row['short_title'] ?: $row['name'],
                 'audienceLabel' => $row['audience_label'],
                 'durationMin' => (int) ($row['estimated_minutes_min'] ?: 15),
@@ -301,7 +301,7 @@ final class AdminService
     public function testEmail(string $recipient, int $adminId): int
     {
         if (!filter_var($recipient, FILTER_VALIDATE_EMAIL)) throw new \InvalidArgumentException('A valid test email address is required.');
-        $id = $this->mailQueue->enqueue('admin_test', $recipient, ['subject' => 'Atom Global email configuration test', 'message' => 'The Head–Heart Alignment email queue is configured.']);
+        $id = $this->mailQueue->enqueue('admin_test', $recipient, ['subject' => 'Atom Global email configuration test', 'message' => 'The Growth Alignment email queue is configured.']);
         $this->db->execute('INSERT INTO api_connection_tests (provider_key, status, message, tested_by, tested_at) VALUES (?, ?, ?, ?, NOW())', ['email', 'success', 'Test email queued as message ' . $id, $adminId]);
         return $id;
     }

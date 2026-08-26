@@ -7,7 +7,12 @@ use AtomGlobal\Database;
 
 final class ReportService
 {
-    private const RETAKE_PRICE_MINOR = 200;
+    private const RETAKE_DEFAULTS = [
+        'personal' => 299,
+        'newjoiner' => 995,
+        'manager' => 2995,
+        'executive' => 4995,
+    ];
 
     public function __construct(
         private Database $db,
@@ -73,10 +78,12 @@ final class ReportService
             $row['checkoutAvailable'] = $this->checkoutAvailable((string) $row['trackKey']);
             $row['checkoutStatus'] = $row['checkoutAvailable'] ? 'available' : 'not_configured';
             $row['cashOnDeliveryAvailable'] = $this->cashOnDeliveryAvailable();
-            $row['retakePriceMinor'] = self::RETAKE_PRICE_MINOR;
+            $row['retakePriceMinor'] = $this->retakePriceMinor((string) $row['trackKey']);
             $row['retakeCurrency'] = 'USD';
-            $row['retakeCheckoutAvailable'] = $row['is_unlocked'] && $this->retakeCheckoutAvailable((int) $row['sessionId']);
+            $row['retakeCheckoutAvailable'] = $row['is_unlocked'] && $this->retakeCheckoutAvailable((int) $row['sessionId'], (string) $row['trackKey']);
             $row['retakeRecommendedAt'] = $this->recommendedRetakeAt((string) ($row['completedAt'] ?? ''));
+            $row['commitment'] = $this->commitment((int) $row['id']);
+            $row['reportExperience'] = $this->reportExperience();
             $this->db->execute('UPDATE generated_reports SET view_count = view_count + 1, last_viewed_at = NOW() WHERE id = ?', [$row['id']]);
         }
         return $row;
@@ -110,16 +117,68 @@ final class ReportService
         return $secret !== '' && $webhook !== '' && $price !== '';
     }
 
-    private function retakeCheckoutAvailable(int $sessionId): bool
+    private function retakeCheckoutAvailable(int $sessionId, string $trackKey): bool
     {
         $secret = trim((string) $this->settings->get('stripe.secret_key', $_ENV['STRIPE_SECRET_KEY'] ?? ''));
         $webhook = trim((string) $this->settings->get('stripe.webhook_secret', $_ENV['STRIPE_WEBHOOK_SECRET'] ?? ''));
-        if ($secret === '' || $webhook === '') return false;
+        $price = trim((string) $this->settings->get('stripe.retest_price_' . $trackKey, ''));
+        if ($secret === '' || $webhook === '' || $price === '') return false;
         $paid = $this->db->fetch(
-            'SELECT id FROM payments WHERE survey_session_id = ? AND provider = ? AND status = ? ORDER BY paid_at DESC, id DESC LIMIT 1',
-            [$sessionId, 'stripe', 'paid']
+            'SELECT pay.id FROM payments pay JOIN survey_sessions s ON s.id = pay.survey_session_id WHERE pay.survey_session_id = ? AND pay.provider = ? AND pay.status = ? AND s.completed_at <= DATE_SUB(NOW(), INTERVAL ? DAY) ORDER BY pay.paid_at DESC, pay.id DESC LIMIT 1',
+            [$sessionId, 'stripe', 'paid', $this->retakeWaitDays()]
         );
         return (bool) $paid;
+    }
+
+    public function saveCommitment(string $token, string $text): array
+    {
+        $report = $this->byToken($token);
+        if (!$report || empty($report['is_unlocked'])) {
+            throw new \InvalidArgumentException('A valid unlocked Full Development Report is required.');
+        }
+        $text = trim(preg_replace('/\s+/u', ' ', $text) ?? '');
+        if (mb_strlen($text) < 10 || mb_strlen($text) > 2000) {
+            throw new \InvalidArgumentException('Write a commitment between 10 and 2,000 characters.');
+        }
+        $date = (new \DateTimeImmutable('today'))->modify('+' . $this->retakeWaitDays() . ' days')->format('Y-m-d');
+        $this->db->execute(
+            'INSERT INTO report_commitments (generated_report_id, commitment_text, check_in_date, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW()) ON DUPLICATE KEY UPDATE commitment_text = VALUES(commitment_text), check_in_date = VALUES(check_in_date), updated_at = NOW()',
+            [(int) $report['id'], $text, $date]
+        );
+        return ['text' => $text, 'checkInDate' => $date];
+    }
+
+    private function commitment(int $reportId): ?array
+    {
+        $row = $this->db->fetch('SELECT commitment_text text, check_in_date checkInDate, updated_at updatedAt FROM report_commitments WHERE generated_report_id = ? LIMIT 1', [$reportId]);
+        return $row ?: null;
+    }
+
+    private function reportExperience(): array
+    {
+        return [
+            'commitmentHeading' => (string) $this->settings->get('reports.commitment_heading', 'My 90-day development commitment'),
+            'commitmentPrompt' => (string) $this->settings->get('reports.commitment_prompt', 'Choose one or two development areas and write down the action you will practise consistently.'),
+            'coachHeading' => (string) $this->settings->get('reports.coach_heading', 'Talk to a Coach'),
+            'coachBody' => (string) $this->settings->get('reports.coach_body', 'Turn your report into a focused development plan with an Atom Global coach.'),
+            'coachPrimaryName' => (string) $this->settings->get('reports.coach_primary_name', 'Reeta Nathwani'),
+            'coachPrimaryEmail' => (string) $this->settings->get('reports.coach_primary_email', 'reeta.nathwani@atomglobal.com'),
+            'coachSecondaryName' => (string) $this->settings->get('reports.coach_secondary_name', 'Sunil Setpaul'),
+            'coachSecondaryEmail' => (string) $this->settings->get('reports.coach_secondary_email', 'sunil.setpaul@atomglobal.com'),
+            'paymentWording' => (string) $this->settings->get('reports.payment_wording', 'Secure payment unlocks your private Full Development Report.'),
+            'paymentWordingLocation' => (string) $this->settings->get('reports.payment_wording_location', 'lite'),
+        ];
+    }
+
+    private function retakeWaitDays(): int
+    {
+        return max(1, min(365, (int) $this->settings->get('retest.wait_days', 90)));
+    }
+
+    private function retakePriceMinor(string $trackKey): int
+    {
+        $default = self::RETAKE_DEFAULTS[$trackKey] ?? self::RETAKE_DEFAULTS['personal'];
+        return max(0, (int) $this->settings->get('retest.price_' . $trackKey . '_minor', $default));
     }
 
     private function cashOnDeliveryAvailable(): bool
@@ -133,7 +192,7 @@ final class ReportService
     {
         if ($completedAt === '') return null;
         try {
-            return (new \DateTimeImmutable($completedAt))->modify('+3 months')->format(DATE_ATOM);
+            return (new \DateTimeImmutable($completedAt))->modify('+' . $this->retakeWaitDays() . ' days')->format(DATE_ATOM);
         } catch (\Throwable) {
             return null;
         }

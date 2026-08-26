@@ -48,7 +48,7 @@ final class AssessmentExperienceService
             'title' => $this->text($payload['title'] ?? '', 200),
             'primaryCopy' => $this->text($payload['primaryCopy'] ?? '', 5000),
             'secondaryCopy' => $this->text($payload['secondaryCopy'] ?? '', 5000),
-            'cardTitlePrefix' => $this->text($payload['cardTitlePrefix'] ?? 'Head-Heart Alignment:', 100),
+            'cardTitlePrefix' => $this->text($payload['cardTitlePrefix'] ?? 'Growth Alignment:', 100),
             'showBrandName' => !array_key_exists('showBrandName', $payload) || !empty($payload['showBrandName']),
             'hideSectionTitles' => !array_key_exists('hideSectionTitles', $payload) || !empty($payload['hideSectionTitles']),
             'halfwayTitle' => $this->text($payload['halfwayTitle'] ?? 'Halfway there — 20 of 40 complete.', 255),
@@ -156,7 +156,7 @@ final class AssessmentExperienceService
         $intake = $this->validateIntake($payload['intake'] ?? null);
         $values = [
             'tagline' => $this->text($payload['tagline'] ?? $track['description'] ?? '', 500),
-            'introHeadline' => $this->text($payload['introHeadline'] ?? ('Head–Heart Alignment: ' . $track['name']), 255),
+            'introHeadline' => $this->text($payload['introHeadline'] ?? ('Growth Alignment: ' . $track['name']), 255),
             'introBody' => $this->text($payload['introBody'] ?? '', 5000),
             'introOffer' => $this->text($payload['introOffer'] ?? '', 5000),
             'heartLabel' => $this->text($payload['heartLabel'] ?? 'Heart', 100) ?: 'Heart',
@@ -180,7 +180,7 @@ final class AssessmentExperienceService
             . 'allow_not_applicable = VALUES(allow_not_applicable), allow_answer_notes = VALUES(allow_answer_notes), updated_at = NOW()',
             [
                 $trackId,
-                'Head–Heart Alignment: ' . $track['name'],
+                'Growth Alignment: ' . $track['name'],
                 $track['name'],
                 'Lite Report Free',
                 'Full Report',
@@ -208,10 +208,10 @@ final class AssessmentExperienceService
     private function landing(): array
     {
         $defaults = [
-            'title' => 'Head–Heart Alignment',
+            'title' => 'Growth Alignment',
             'primaryCopy' => 'Every choice you make is cast by two votes: what you feel and what you reason. This assessment maps which one you actually hand the deciding vote to — not which one you wish you did.',
             'secondaryCopy' => "You'll answer 40 statements across 10 areas of life, get an instant free result, and can unlock a full in-depth report. Choose the version that fits you:",
-            'cardTitlePrefix' => 'Head-Heart Alignment:',
+            'cardTitlePrefix' => 'Growth Alignment:',
             'showBrandName' => true,
             'hideSectionTitles' => true,
             'halfwayTitle' => 'Halfway there — 20 of 40 complete.',

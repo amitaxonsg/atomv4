@@ -247,7 +247,7 @@ export function HelpPage() {
   const items = helpSections.filter(([title, text]) => !term || `${title} ${text}`.toLowerCase().includes(term));
   return <>
     <PageHeader eyebrow="User guide" title="Help and how it works" />
-    <section className="admin-card help-intro"><h2>Head–Heart Alignment administration</h2><p>This workspace connects the participant assessment, PHP API, MariaDB records, reports, email queue, payment events and audit history. Changes made here affect the live system only after you save or publish them.</p><input type="search" placeholder="Search help topics" value={search} onChange={event => setSearch(event.target.value)} /></section>
+    <section className="admin-card help-intro"><h2>Growth Alignment administration</h2><p>This workspace connects the participant assessment, PHP API, MariaDB records, reports, email queue, payment events and audit history. Changes made here affect the live system only after you save or publish them.</p><input type="search" placeholder="Search help topics" value={search} onChange={event => setSearch(event.target.value)} /></section>
     <div className="help-grid">{items.map(([title, text], index) => <article className="admin-card" key={title}><span>{String(index + 1).padStart(2, "0")}</span><h2>{title}</h2><p>{text}</p></article>)}</div>
     {!items.length && <Empty>No help topic matches that search.</Empty>}
     <section className="admin-card help-contact"><h2>Need clarification?</h2><p>Email <a href="mailto:amit@axon.com.sg">amit@axon.com.sg</a> with the feedback number and a screenshot or exact steps. Do not send passwords or API keys.</p></section>

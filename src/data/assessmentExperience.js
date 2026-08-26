@@ -26,10 +26,10 @@ const levelOptions = [
 ];
 
 export const landingDefaults = {
-  title: "Head–Heart Alignment",
+  title: "Growth Alignment",
   primaryCopy: "Every choice you make is cast by two votes: what you feel and what you reason. This assessment maps which one you actually hand the deciding vote to — not which one you wish you did.",
   secondaryCopy: "You'll answer 40 statements across 10 areas of life, get an instant free result, and can unlock a full in-depth report. Choose the version that fits you:",
-  cardTitlePrefix: "Head-Heart Alignment:",
+  cardTitlePrefix: "Growth Alignment:",
   showBrandName: true,
   hideSectionTitles: true,
   halfwayTitle: "Halfway there — 20 of 40 complete.",
@@ -81,7 +81,7 @@ export const questionnaireReference = {
 export const experienceDefaults = {
   personal: {
     tagline: "For anyone who wants to understand how they lead their own life.",
-    introHeadline: "Head–Heart Alignment: Personal",
+    introHeadline: "Growth Alignment: Personal",
     introBody: sharedIntro,
     introOffer: sharedOffer,
     heartLabel: "Heart",
@@ -94,7 +94,7 @@ export const experienceDefaults = {
   },
   newjoiner: {
     tagline: "For new joinees and anyone in their first 1–2 years of work — not managing anyone yet.",
-    introHeadline: "Head–Heart Alignment: New Joiner",
+    introHeadline: "Growth Alignment: New Joiner",
     introBody: sharedIntro,
     introOffer: sharedOffer,
     heartLabel: "Heart",
@@ -107,7 +107,7 @@ export const experienceDefaults = {
   },
   manager: {
     tagline: "For people managers — how you lead your team, not just yourself.",
-    introHeadline: "Head–Heart Alignment: Manager",
+    introHeadline: "Growth Alignment: Manager",
     introBody: sharedIntro,
     introOffer: sharedOffer,
     heartLabel: "Heart",
@@ -120,7 +120,7 @@ export const experienceDefaults = {
   },
   executive: {
     tagline: "For senior leaders shaping strategy and culture at scale.",
-    introHeadline: "Head–Heart Alignment: Executive",
+    introHeadline: "Growth Alignment: Executive",
     introBody: sharedIntro,
     introOffer: sharedOffer,
     heartLabel: "Heart",

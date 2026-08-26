@@ -35,7 +35,7 @@ function AssessmentMeta({ trackKey }) {
   const meta = { ...fallbackMeta[trackKey], ...(tracks[trackKey] || {}) };
   return <div className="assessment-meta">
     <i className="assessment-meta__dot assessment-meta__dot--heart" />
-    <span>Head–Heart Alignment: {track.label} · {meta.freeReportLabel} · {durationLabel(meta)}</span>
+    <span>Growth Alignment: {track.label} · {meta.freeReportLabel} · {durationLabel(meta)}</span>
     <i className="assessment-meta__dot assessment-meta__dot--head" />
   </div>;
 }
@@ -66,7 +66,7 @@ function SelectVersion({ onSelect }) {
   const { tracks } = useBranding();
   return <StageShell stageKey="version" current={1} actions={<><button className="button button--ghost" disabled><ArrowLeft /> Back</button><button className="button button--primary" onClick={() => onSelect(selected)}>Continue <ArrowRight /></button></>}>
     <AssessmentMeta trackKey={selected} />
-    <h1>Head–Heart Alignment</h1>
+    <h1>Growth Alignment</h1>
     <p className="lead">Choose the version that fits you best.</p>
     <div className="choice-stack" role="radiogroup" aria-label="Assessment version">
       {Object.values(assessmentTracks).map(track => {

@@ -26,7 +26,7 @@ foreach ($items as $item) {
                 if ($pdfPath === '' || !is_file($pdfPath)) $pdfPath = $pdf->generate($reportId);
                 $variables['_attachments'] = [[
                     'path' => $pdfPath,
-                    'filename' => 'Head-Heart-Alignment-Full-Development-Report.pdf',
+                    'filename' => 'Growth-Alignment-Full-Development-Report.pdf',
                     'mimetype' => 'application/pdf',
                 ]];
                 $item['variables_json'] = json_encode($variables, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

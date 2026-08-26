@@ -14,7 +14,7 @@ final class PdfService
     public function generate(int $reportId): string
     {
         $row = $this->db->fetch(
-            'SELECT gr.*, p.name participant_name, p.email participant_email, t.name track_name, t.track_key, s.completed_at FROM generated_reports gr JOIN survey_sessions s ON s.id = gr.survey_session_id JOIN participants p ON p.id = s.participant_id JOIN assessment_tracks t ON t.id = s.track_id WHERE gr.id = ?',
+            'SELECT gr.*, p.name participant_name, p.email participant_email, t.name track_name, t.track_key, s.completed_at, rc.commitment_text, rc.check_in_date FROM generated_reports gr JOIN survey_sessions s ON s.id = gr.survey_session_id JOIN participants p ON p.id = s.participant_id JOIN assessment_tracks t ON t.id = s.track_id LEFT JOIN report_commitments rc ON rc.generated_report_id = gr.id WHERE gr.id = ?',
             [$reportId]
         );
         if (!$row) throw new \RuntimeException('Report not found.', 404);
@@ -47,14 +47,15 @@ final class PdfService
 
         $html = '<!doctype html><html><head><meta charset="utf-8"><style>'
             . '@page{margin:25mm 19mm 22mm}body{font-family:' . $this->css($body) . ';color:' . $this->css($ink) . ';font-size:10.5pt;line-height:1.55;background:#fff}'
-            . 'h1,h2,h3,h4{font-family:' . $this->css($heading) . ';font-weight:normal;page-break-after:avoid}h1{font-size:28pt;margin:0 0 5mm}h2{font-size:18pt;margin:10mm 0 3mm;border-bottom:1px solid #ddd;padding-bottom:2mm}h3{font-size:14pt;margin:6mm 0 2mm}h4{font-size:11.5pt;margin:3mm 0 1mm}.logo{width:52mm;max-height:18mm;object-fit:contain}.brand{font-weight:bold;letter-spacing:.08em;color:' . $this->css($heart) . ';font-size:10pt}.meta{color:' . $this->css($muted) . ';font-size:8.8pt}.hero{background:' . $this->css($canvas) . ';padding:9mm;margin:7mm 0;border-left:3px solid ' . $this->css($gold) . '}.score{font-family:' . $this->css($heading) . ';font-size:27pt}.report-block{page-break-inside:avoid;border:1px solid #e4ddcf;border-radius:4px;padding:5mm;margin:4mm 0}.edge-grid{width:100%;border-collapse:separate;border-spacing:4mm}.edge-grid td{width:50%;vertical-align:top;border:1px solid #e4ddcf;padding:5mm}.subscale{page-break-inside:avoid;margin:3mm 0}.comparison-row{border-bottom:1px solid #eee;padding:2mm 0}.current-profile{border-left:3px solid ' . $this->css($gold) . ';padding-left:4mm}.radar{page-break-inside:avoid;text-align:center;margin:5mm 0}.radar-legend{font-size:9pt;color:' . $this->css($muted) . ';background:' . $this->css($canvas) . ';padding:4mm}.footer{position:fixed;bottom:-13mm;left:0;right:0;color:' . $this->css($muted) . ';font-size:8pt;text-align:center}ul,ol{padding-left:6mm;margin-top:2mm}li{margin-bottom:1.5mm}</style></head><body>'
-            . $brand . '<p class="meta">HEAD–HEART ALIGNMENT · ' . $this->h($row['track_name']) . '</p>'
-            . '<h1>' . $this->h((string) ($free['profile'] ?? 'Head–Heart Alignment Report')) . '</h1>'
+            . 'h1,h2,h3,h4{font-family:' . $this->css($heading) . ';font-weight:normal;page-break-after:avoid}h1{font-size:28pt;margin:0 0 5mm}h2{font-size:18pt;margin:10mm 0 3mm;border-bottom:1px solid #ddd;padding-bottom:2mm}h3{font-size:14pt;margin:6mm 0 2mm}h4{font-size:11.5pt;margin:3mm 0 1mm}.logo{width:52mm;max-height:18mm;object-fit:contain}.brand{font-weight:bold;letter-spacing:.08em;color:' . $this->css($heart) . ';font-size:10pt}.meta{color:' . $this->css($muted) . ';font-size:8.8pt}.hero{background:' . $this->css($canvas) . ';padding:9mm;margin:7mm 0;border-left:3px solid ' . $this->css($gold) . '}.score{font-family:' . $this->css($heading) . ';font-size:27pt}.report-block{page-break-inside:avoid;border:1px solid #e4ddcf;border-radius:4px;padding:5mm;margin:4mm 0}.edge-grid,.summary-grid{width:100%;border-collapse:separate;border-spacing:4mm}.edge-grid td,.summary-grid td{width:50%;vertical-align:top;border:1px solid #e4ddcf;padding:5mm}.subscale{page-break-inside:avoid;margin:3mm 0}.comparison-row{border-bottom:1px solid #eee;padding:2mm 0}.scale{height:3mm;background:#eee;border-radius:2mm;margin:1mm 0 3mm}.scale span{display:block;height:100%;background:' . $this->css($head) . ';border-radius:2mm}.scale-labels{display:flex;justify-content:space-between;font-size:7pt;color:' . $this->css($muted) . '}.current-profile{border-left:3px solid ' . $this->css($gold) . ';padding-left:4mm}.radar{page-break-inside:avoid;text-align:center;margin:5mm 0}.radar-legend{font-size:9pt;color:' . $this->css($muted) . ';background:' . $this->css($canvas) . ';padding:4mm}.footer{position:fixed;bottom:-13mm;left:0;right:0;color:' . $this->css($muted) . ';font-size:8pt;text-align:center}ul,ol{padding-left:6mm;margin-top:2mm}li{margin-bottom:1.5mm}</style></head><body>'
+            . $brand . '<p class="meta">GROWTH ALIGNMENT · ' . $this->h($row['track_name']) . '</p>'
+            . '<h1>' . $this->h((string) ($free['profile'] ?? 'Growth Alignment Report')) . '</h1>'
             . '<p class="meta">Prepared for ' . $this->h((string) $row['participant_name']) . ' · Completed ' . $this->h((string) ($row['completed_at'] ?? '')) . '</p>'
             . '<div class="hero"><div class="score">' . (int) ($free['total'] ?? 0) . ' / 250</div><p>' . $this->h((string) $summary) . '</p></div>'
             . $this->section('Top three strengths', $strengths)
             . $this->section('Development observations', $watchouts)
             . '<h2>Full Development Report</h2>'
+            . $this->executiveSummary($scores, $trackKey)
             . $this->radarSection($scores, $trackKey, (string) ($content['radarLegend'] ?? ''), $heart, $head)
             . $this->edgeSection($content, $trackKey)
             . $this->textBlock('Complete profile summary', $content['summary'] ?? '')
@@ -74,8 +75,10 @@ final class PdfService
             . $this->writtenReflections($content['writtenReflections'] ?? null)
             . $this->methodology($content['methodology'] ?? null)
             . $this->renderRetakeComparison(is_array($content['retakeComparison'] ?? null) ? $content['retakeComparison'] : [], $trackKey)
-            . $this->retakePlan()
-            . '<div class="footer">Head–Heart Alignment by Atom Global Consulting · Private and confidential</div></body></html>';
+            . $this->commitmentBlock((string) ($row['commitment_text'] ?? ''), (string) ($row['check_in_date'] ?? ''))
+            . $this->retakePlan($trackKey)
+            . $this->coachBlock()
+            . '<div class="footer">Growth Alignment by Atom Global Consulting · Private and confidential</div></body></html>';
 
         $options = new Options();
         $options->set('isRemoteEnabled', false);
@@ -145,6 +148,25 @@ final class PdfService
         return '<div class="report-block"><h3>Your 10-area radar and score breakdown</h3><div class="radar">' . $chart . '</div><ul>'
             . implode('', array_map(fn($item) => '<li>' . $this->h($item) . '</li>', $list)) . '</ul>'
             . ($legend !== '' ? '<p class="radar-legend"><strong>How to read the chart:</strong> ' . $this->h($legend) . '</p>' : '') . '</div>';
+    }
+
+    private function executiveSummary(array $scores, string $trackKey): string
+    {
+        if (count($scores) < 6) return '';
+        $items = [];
+        foreach ($scores as $code => $score) $items[] = ['code' => (string) $code, 'score' => (int) $score];
+        usort($items, static fn(array $a, array $b): int => $b['score'] <=> $a['score'] ?: strcmp($a['code'], $b['code']));
+        $groups = ['Highest 3' => array_slice($items, 0, 3), 'Lowest 3' => array_reverse(array_slice($items, -3))];
+        $cells = '';
+        foreach ($groups as $title => $group) {
+            $body = '<h3>' . $this->h($title) . '</h3>';
+            foreach ($group as $item) {
+                $width = max(0, min(100, (int) round($item['score'] / 25 * 100)));
+                $body .= '<div class="subscale"><strong>' . $this->h($this->areaName($trackKey, $item['code'])) . ' · ' . $item['score'] . '/25</strong><div class="scale-labels"><span>Low</span><span>Mid</span><span>High</span></div><div class="scale"><span style="width:' . $width . '%"></span></div></div>';
+            }
+            $cells .= '<td>' . $body . '</td>';
+        }
+        return '<div class="report-block"><h2>Executive Summary</h2><p>Your three highest and three lowest assessment areas show current strengths and focused development opportunities.</p><table class="summary-grid"><tr>' . $cells . '</tr></table></div>';
     }
 
     private function radarSvg(array $scores, string $trackKey, string $heart, string $head): string
@@ -290,9 +312,31 @@ final class PdfService
         return $html;
     }
 
-    private function retakePlan(): string
+    private function commitmentBlock(string $text, string $date): string
     {
-        return '<div class="report-block"><h3>3-month retake and progress check</h3><p>Commit to two or three changes from this report and practise them consistently. Retake the full 40-question assessment in about three months to compare what shifted, what stayed stable, and where old patterns still appear under pressure.</p><p><strong>Retake price: USD 2.</strong> This option is only for participants who previously completed a paid Full Development Report assessment. The new Full Development Report includes comparison with the previous result.</p></div>';
+        $heading = (string) $this->settings->get('reports.commitment_heading', 'My 90-day development commitment');
+        $prompt = (string) $this->settings->get('reports.commitment_prompt', 'Choose one or two development areas and write down the action you will practise consistently.');
+        $body = '<div class="report-block"><h3>' . $this->h($heading) . '</h3><p>' . $this->h($prompt) . '</p>';
+        if ($text !== '') $body .= '<p><strong>' . $this->h($text) . '</strong></p>';
+        if ($date !== '') $body .= '<p>Suggested check-in: ' . $this->h($date) . '</p>';
+        return $body . '</div>';
+    }
+
+    private function coachBlock(): string
+    {
+        $heading = (string) $this->settings->get('reports.coach_heading', 'Talk to a Coach');
+        $body = (string) $this->settings->get('reports.coach_body', 'Turn your report into a focused development plan with an Atom Global coach.');
+        $primary = (string) $this->settings->get('reports.coach_primary_name', 'Reeta Nathwani') . ' — ' . (string) $this->settings->get('reports.coach_primary_email', 'reeta.nathwani@atomglobal.com');
+        $secondary = (string) $this->settings->get('reports.coach_secondary_name', 'Sunil Setpaul') . ' — ' . (string) $this->settings->get('reports.coach_secondary_email', 'sunil.setpaul@atomglobal.com');
+        return '<div class="report-block"><h3>' . $this->h($heading) . '</h3><p>' . $this->h($body) . '</p><p>' . $this->h($primary) . '<br>' . $this->h($secondary) . '</p></div>';
+    }
+
+    private function retakePlan(string $trackKey): string
+    {
+        $defaults = ['personal' => 299, 'newjoiner' => 995, 'manager' => 2995, 'executive' => 4995];
+        $minor = max(0, (int) $this->settings->get('retest.price_' . $trackKey . '_minor', $defaults[$trackKey] ?? 299));
+        $price = 'US$' . number_format($minor / 100, 2);
+        return '<div class="report-block"><h3>90-day retest and progress check</h3><p>Commit to one or two development areas and practise them consistently. The retest becomes available 90 days after the original paid assessment and the new Full Development Report compares both results.</p><p><strong>Retest price: ' . $this->h($price) . '.</strong></p></div>';
     }
 
     private function areaName(string $trackKey, string $code): string

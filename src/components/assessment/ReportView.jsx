@@ -11,6 +11,23 @@ function textValue(value) {
   return "";
 }
 
+function ScaleBar({ score, max = 25 }) {
+  const value = Math.max(0, Math.min(max, Number(score) || 0));
+  const percent = (value / max) * 100;
+  return <div className="v4-scale" aria-label={`${value} out of ${max}`}>
+    <div className="v4-scale__labels"><span>Low</span><span>Mid</span><span>High</span></div>
+    <div className="v4-scale__track"><span style={{ width: `${percent}%` }} /><i style={{ left: `${percent}%` }} /></div>
+  </div>;
+}
+
+function AlignmentMeter({ score }) {
+  const value = Math.max(0, Math.min(250, Number(score) || 0));
+  return <div className="v4-meter" aria-label={`${value} out of 250`}>
+    <div className="v4-meter__labels"><span>Head-led</span><strong>{value}/250</strong><span>Heart-led</span></div>
+    <div className="v4-meter__track"><span style={{ width: `${(value / 250) * 100}%` }} /></div>
+  </div>;
+}
+
 function TextSection({ title, value }) {
   const text = textValue(value);
   if (!text) return null;
@@ -67,8 +84,20 @@ function ScoreBreakdown({ subscales, trackKey, legend }) {
   const labels = entries.map(([label]) => v3AreaName(trackKey, label, label));
   return <section className="report-card">
     <h3>Your 10-area radar and score breakdown</h3>
-    <div className="report-radar-wrap"><RadarChart values={entries.map(([, value]) => Number(value))} labels={labels} /><div className="report-score-list">{entries.map(([label, value]) => <div key={label}><span>{v3AreaName(trackKey, label, label)}</span><strong>{value}/25</strong></div>)}</div></div>
+    <div className="report-radar-wrap"><RadarChart values={entries.map(([, value]) => Number(value))} labels={labels} /><div className="report-score-list v4-score-list">{entries.map(([label, value]) => <div key={label}><span>{v3AreaName(trackKey, label, label)}</span><strong>{value}/25</strong><ScaleBar score={value} /></div>)}</div></div>
     {legend && <p className="preview-note"><strong>How to read this chart:</strong> {legend}</p>}
+  </section>;
+}
+
+function ExecutiveSummary({ subscales, trackKey }) {
+  const entries = Object.entries(subscales || {}).map(([code, score]) => ({ code, score: Number(score) || 0 }));
+  if (entries.length < 6) return null;
+  const ranked = [...entries].sort((a, b) => b.score - a.score || a.code.localeCompare(b.code));
+  const groups = [{ title: "Highest 3", items: ranked.slice(0, 3) }, { title: "Lowest 3", items: ranked.slice(-3).reverse() }];
+  return <section className="report-card v4-executive-summary">
+    <p className="eyebrow">At a glance</p><h3>Executive Summary</h3>
+    <p>Your highest and lowest assessment areas show where your current pattern is strongest and where focused development may have the greatest value.</p>
+    <div className="v4-summary-grid">{groups.map(group => <div key={group.title}><h4>{group.title}</h4>{group.items.map(item => <article key={item.code}><div><span>{v3AreaName(trackKey, item.code, item.code)}</span><strong>{item.score}/25</strong></div><ScaleBar score={item.score} /></article>)}</div>)}</div>
   </section>;
 }
 
@@ -108,6 +137,7 @@ function RetakePlan({ report }) {
   const recommended = report?.retakeRecommendedAt ? new Date(report.retakeRecommendedAt) : null;
   const recommendedLabel = recommended && !Number.isNaN(recommended.getTime()) ? recommended.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }) : "about three months from now";
   const available = isMockMode || Boolean(report?.retakeCheckoutAvailable);
+  const retakePrice = new Intl.NumberFormat(undefined, { style: "currency", currency: report?.retakeCurrency || "USD" }).format(Number(report?.retakePriceMinor || 0) / 100);
   const startRetake = async () => {
     if (!available || state.busy) return;
     setState({ busy: true, error: "" });
@@ -122,16 +152,41 @@ function RetakePlan({ report }) {
   };
   return <section className="report-card">
     <h3>3-month retake and progress check</h3>
-    <p>Commit to two or three changes from this report and work on them consistently. Retake the full 40-question assessment around <strong>{recommendedLabel}</strong> so you can compare what shifted, what stayed stable, and where old patterns still show up under pressure.</p>
-    <p><strong>Retake price: USD 2.</strong> This option is only for participants who previously completed a paid Full Development Report assessment. After verified payment, a fresh 40-question retake is created and the new Full Development Report compares the new result with the previous result in the same report.</p>
+    <p>Commit to one or two development areas and work on them consistently. Retake the full 40-question assessment around <strong>{recommendedLabel}</strong> so you can compare what shifted, what stayed stable, and where old patterns still show up under pressure.</p>
+    <p><strong>Retest price: {retakePrice}.</strong> This option becomes available 90 days after the original assessment and only for participants who paid for their Full Development Report. After verified payment, a fresh 40-question retest is created and the new report compares it with the previous result.</p>
     {state.error && <p className="form-error" role="alert">{state.error}</p>}
-    <button className="button button--primary" disabled={!available || state.busy} onClick={startRetake}>{state.busy ? "Opening USD 2 checkout…" : available ? "Retake full assessment — USD 2" : "Retake available after verified paid report"}</button>
+    <button className="button button--primary" disabled={!available || state.busy} onClick={startRetake}>{state.busy ? "Opening secure checkout…" : available ? `Retest full assessment — ${retakePrice}` : "Retest available 90 days after verified paid report"}</button>
   </section>;
+}
+
+function DevelopmentCommitment({ report, token }) {
+  const experience = report?.reportExperience || {};
+  const [text, setText] = React.useState(report?.commitment?.text || "");
+  const [state, setState] = React.useState({ busy: false, message: "", error: "" });
+  const save = async () => {
+    if (!token || state.busy) return;
+    setState({ busy: true, message: "", error: "" });
+    try {
+      const response = await fetch(`/api/reports/${encodeURIComponent(token)}/commitment`, { method: "PUT", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "Unable to save commitment");
+      const date = new Date(`${result.checkInDate}T00:00:00`);
+      const label = Number.isNaN(date.getTime()) ? result.checkInDate : date.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+      setState({ busy: false, error: "", message: `Saved. Suggested check-in: ${label}.` });
+    } catch (error) { setState({ busy: false, message: "", error: error.message }); }
+  };
+  return <section className="report-card v4-commitment"><p className="eyebrow">Make it actionable</p><h3>{experience.commitmentHeading || "My 90-day development commitment"}</h3><p>{experience.commitmentPrompt || "Choose one or two development areas and write down the action you will practise consistently."}</p><textarea rows="5" maxLength="2000" value={text} onChange={event => setText(event.target.value)} placeholder="I commit to working on…" />{state.error && <p className="form-error" role="alert">{state.error}</p>}{state.message && <p className="preview-note" role="status">{state.message}</p>}<button className="button button--primary" disabled={!token || text.trim().length < 10 || state.busy} onClick={save}>{state.busy ? "Saving…" : "Save my commitment"}</button></section>;
+}
+
+function CoachCallToAction({ report }) {
+  const value = report?.reportExperience || {};
+  const contacts = [{ name: value.coachPrimaryName, email: value.coachPrimaryEmail }, { name: value.coachSecondaryName, email: value.coachSecondaryEmail }].filter(item => item.name && item.email);
+  return <section className="report-card v4-coach"><p className="eyebrow">Optional support</p><h3>{value.coachHeading || "Talk to a Coach"}</h3><p>{value.coachBody || "Turn your report into a focused development plan with an Atom Global coach."}</p><div className="v4-coach__actions">{contacts.map(item => <a className="button button--ghost" href={`mailto:${item.email}?subject=${encodeURIComponent("Growth Alignment coaching")}`} key={item.email}>Email {item.name}</a>)}</div></section>;
 }
 
 function fullReportText(report, summary, content) {
   const lines = [
-    `${report?.trackName || "Head–Heart Alignment"} — Full Development Report`,
+    `Growth Alignment: ${report?.trackName || "Assessment"} — Full Development Report`,
     `Profile: ${summary.profile}`,
     `Overall score: ${summary.total}/250`,
     "",
@@ -177,6 +232,7 @@ function FullReportContent({ report, summary, content, token }) {
   if (!content) return <p className="preview-note">Full Report content is unavailable. Contact Atom Global support.</p>;
   return <>
     <RetakeComparison comparison={content.retakeComparison} trackKey={report?.trackKey} />
+    <ExecutiveSummary subscales={report?.paid?.subscales || summary.subscales} trackKey={report?.trackKey} />
     <ScoreBreakdown subscales={report?.paid?.subscales || summary.subscales} trackKey={report?.trackKey} legend={content.radarLegend} />
     <div className="report-columns"><EdgeCard title="Sharpest Edge" edge={content.sharpestEdge} trackKey={report?.trackKey} /><EdgeCard title="Growth Edge" edge={content.growthEdge} trackKey={report?.trackKey} /></div>
     <TextSection title="Complete profile summary" value={content.summary} />
@@ -196,7 +252,9 @@ function FullReportContent({ report, summary, content, token }) {
     <ProfileSpectrum items={content.profileSpectrum} />
     <WrittenReflections items={content.writtenReflections} />
     <Methodology items={content.methodology} />
+    <DevelopmentCommitment report={report} token={token} />
     <RetakePlan report={report} />
+    <CoachCallToAction report={report} />
     <FullReportActions report={report} summary={summary} content={content} token={token} />
     <UpgradeReasons items={content.upgradeReasons} />
     <p className="preview-note">Your private link is time-limited. Open the PDF, email it to yourself, copy it as text or print a copy for your records.</p>
@@ -236,10 +294,12 @@ export default function ReportView({ payload, token, onReset }) {
 
   const actions = <>{onReset ? <button className="button button--ghost" onClick={onReset}>Start again</button> : <a className="button button--ghost" href="/">New assessment</a>}{unlocked && token && <a className="button button--ghost" href={`/api/reports/${encodeURIComponent(token)}/pdf`} target="_blank" rel="noreferrer">Open PDF</a>}<button className="button button--primary" onClick={() => window.print()}>Print report</button></>;
 
+  const reportClass = report?.trackKey === "personal" ? "v4-report--personal" : "v4-report--professional";
   return <StageShell stageKey="report" current={4} actions={actions}>
-    <p className="eyebrow">{report?.trackName || "Head–Heart Alignment"} result</p><h1>{summary.profile}</h1>
+    <div className={`v4-report ${reportClass}`}>
+    <p className="eyebrow">Growth Alignment · {report?.trackName || "Assessment"} result</p><h1>{summary.profile}</h1>
     <p className="lead">{report?.participantName ? `${report.participantName}, this` : "This"} result was calculated by the published assessment version from your saved responses.</p>
-    <section className="report-hero"><AlignmentGauge score={summary.total} /><div><h2>Your alignment pattern</h2><p>{summary.summary}</p></div></section>
+    <section className="report-hero"><AlignmentGauge score={summary.total} /><div><h2>Your alignment pattern</h2><p>{summary.summary}</p><AlignmentMeter score={summary.total} /></div></section>
     <div className="report-columns"><section className="report-card"><h2>Top three strengths</h2><ul>{summary.strengths.slice(0, 3).map(item => <li key={item}><Check />{item}</li>)}</ul></section><section className="report-card"><h2>Development observations</h2><ul>{summary.watchouts.map(item => <li key={item}><span>—</span>{item}</li>)}</ul></section></div>
     <section className={`paid-report ${unlocked ? "unlocked" : "locked"}`}>
       <div className="paid-heading"><div><p className="eyebrow">Complete report</p><h2>{unlocked ? "Your full development report" : "This is the short version"}</h2></div>{!unlocked && <span className="lock-badge"><Lock /> Locked</span>}</div>
@@ -247,11 +307,12 @@ export default function ReportView({ payload, token, onReset }) {
         <p>Your Full Report goes deeper into the patterns behind this result and turns them into practical development guidance.</p><UpgradeReasons items={upgradePreview} locked />
         {!upgradePreview.length && <div className="locked-preview"><div><h3>10-area radar and deep dive</h3><p>See how your pattern shifts across decisions, relationships, conflict and pressure.</p></div><div><h3>Practical development roadmap</h3><p>Receive tailored actions, working-style guidance and track-specific development insights.</p></div></div>}
         {checkout.error && <p className="form-error" role="alert">{checkout.error}</p>}
-        <div className="upgrade-box"><div><span>One-time payment</span><strong>{price}</strong><small>Secure checkout · Multi-page PDF · Private report link</small></div><div className="upgrade-box__actions"><button className="button button--primary" disabled={!checkoutAvailable || checkout.busy} onClick={openCheckout}>{checkout.busy ? "Opening checkout…" : checkoutAvailable ? "Pay by card" : "Full Report checkout coming soon"} {checkoutAvailable && <ArrowRight />}</button>{cashOnDeliveryAvailable && <button className="button button--ghost" disabled={checkout.busy} onClick={openCashOnDelivery}>UAT Test — No Payment</button>}</div></div>
+        <div className="upgrade-box"><div><span>One-time payment</span><strong>{price}</strong><small>{report?.reportExperience?.paymentWording || "Secure payment unlocks your private Full Development Report."}</small></div><div className="upgrade-box__actions"><button className="button button--primary" disabled={!checkoutAvailable || checkout.busy} onClick={openCheckout}>{checkout.busy ? "Opening checkout…" : checkoutAvailable ? "Pay by card" : "Full Report checkout coming soon"} {checkoutAvailable && <ArrowRight />}</button>{cashOnDeliveryAvailable && <button className="button button--ghost" disabled={checkout.busy} onClick={openCashOnDelivery}>UAT Test — No Payment</button>}</div></div>
         {cashOnDeliveryAvailable && <p className="preview-note">UAT Test — No Payment is temporarily enabled for client testing. It unlocks the Full Report and queues the normal confirmation/report email with the PDF attachment without charging Stripe.</p>}
         {!checkoutAvailable && !cashOnDeliveryAvailable && <p className="preview-note">Your Lite Report is ready now. Full Report purchasing will open after Atom Global completes its secure payment configuration.</p>}
       </>}
     </section>
     {isMockMode && <p className="preview-note">Preview mode simulates payment. Production unlocks only after a verified Stripe webhook or authorised administrator action.</p>}
+    </div>
   </StageShell>;
 }
