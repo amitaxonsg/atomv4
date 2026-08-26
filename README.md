@@ -275,3 +275,49 @@ The merged production-ready code passed:
 ## Safe deployment rule
 
 Every deployment must back up the database and Head–Heart Nginx site, build and test a new immutable release, repoint exact Nginx paths, verify health and questionnaire configuration, retain rollback, and keep `head-heart-v2-sync.timer` disabled. New Git commits never alter production automatically.
+
+
+## V4 operational runbook — German VPS
+
+V4 is an isolated Apache deployment at `https://v4.atomglobal.com`. It must
+never modify the V3 site, database, release path, cron or virtual host.
+
+| Purpose | V4 value |
+|---|---|
+| Repository | `amitaxonsg/atomv4` |
+| Deployment branch | `sunil-v4-growth-alignment-frozen` |
+| Source checkout | `/srv/v4.atomglobal.com/source` |
+| Web releases | `/var/www/v4.atomglobal.com` |
+| Environment | `/etc/growth-alignment/v4.env` |
+| Database | `growth_alignment_v4` |
+| Storage | `/var/lib/growth-alignment-v4` |
+| Backups | `/var/backups/growth-alignment-v4` |
+| Cron | `/etc/cron.d/growth-alignment-v4` |
+| Deploy key | `/root/.ssh/atomv4_deploy` |
+
+### Normal V4 update
+
+```bash
+cd /srv/v4.atomglobal.com/source
+git pull --ff-only origin sunil-v4-growth-alignment-frozen
+chmod 0755 deploy/update-v3-apache-staging.sh
+./deploy/update-v4-apache.sh
+```
+
+The deployer backs up only the V4 database, runs migrations and tests, builds
+the frontend, atomically switches the V4 release, verifies the V4 health route
+and installs the V4 cron job. It does not alter V3.
+
+### First-install prerequisites
+
+Before the first release: point `v4.atomglobal.com` DNS to the VPS, create
+the dedicated V4 database/environment file, enable the V4 Apache site and
+issue TLS. The canonical procedure is `docs/V4-APACHE-DEPLOYMENT.md`.
+
+### Credentials and payments
+
+SMTP2GO and Stripe credentials are stored as encrypted V4 database settings.
+Transfer them only on the VPS using
+`deploy/copy-v3-integrations-to-v4.php`; never place credentials in Git,
+shell history, screenshots or chat. V4 requires dedicated Stripe Product/Price
+IDs for its approved V4 prices; do not reuse V3 Price IDs.
