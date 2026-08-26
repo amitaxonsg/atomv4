@@ -300,7 +300,6 @@ never modify the V3 site, database, release path, cron or virtual host.
 ```bash
 cd /srv/v4.atomglobal.com/source
 git pull --ff-only origin sunil-v4-growth-alignment-frozen
-chmod 0755 deploy/update-v3-apache-staging.sh
 ./deploy/update-v4-apache.sh
 ```
 
@@ -321,3 +320,20 @@ Transfer them only on the VPS using
 `deploy/copy-v3-integrations-to-v4.php`; never place credentials in Git,
 shell history, screenshots or chat. V4 requires dedicated Stripe Product/Price
 IDs for its approved V4 prices; do not reuse V3 Price IDs.
+
+
+### V4 PHP-FPM safety check
+
+Before accepting a deployment, confirm that the API executes PHP and never returns
+PHP source code:
+
+```bash
+curl --fail --silent --show-error \
+  --resolve v4.atomglobal.com:443:127.0.0.1 \
+  https://v4.atomglobal.com/api/health
+```
+
+The response must be JSON with `"status":"ok"`. A response beginning with
+`<?php` is a security incident: disable only the V4 site with
+`a2dissite v4.atomglobal.com.conf && systemctl reload apache2`, correct the
+V4 PHP-FPM handler, and retest before re-enabling it.
