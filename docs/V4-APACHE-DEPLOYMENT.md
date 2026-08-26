@@ -45,6 +45,52 @@ php deploy/copy-v3-integrations-to-v4.php \
 Create dedicated V4 Stripe Prices for Full Reports and retests before enabling
 public payment. Price IDs are deliberately not reused from V3.
 
+## UAT payment control and launch checklist
+
+The temporary **UAT Test — No Payment** option is for controlled client review
+only. It creates a clearly marked manual/UAT payment, unlocks the Full Report
+and sends the normal report messages without creating a Stripe charge. Do not
+leave it enabled once V4 is publicly launched.
+
+After written UAT approval, disable both settings on the VPS:
+
+```bash
+cd /srv/v4.atomglobal.com/source
+php -r '$c=require "backend/src/bootstrap.php"; $c["settings"]->set("payments.cash_on_delivery_enabled", "false"); $c["settings"]->set("system.cash_on_delivery_enabled", "false"); echo "UAT no-payment checkout disabled.\n";'
+```
+
+Before enabling live card checkout, create and configure eight dedicated V4
+Stripe Price IDs: one Full Report and one 90-day retest price for each of
+Personal, New Joiner, Manager and Executive. Finish one controlled payment,
+signed webhook, report unlock and refund/relock test. The live credentials and
+webhook alone do not make checkout ready; a configured V4 Price ID is required
+for every public buy button.
+
+## Burn-test procedure
+
+The following guarded commands verify V4 database persistence, reporting/PDF
+and real SMTP2GO acceptance. They clean their temporary participant, survey,
+report, email-queue and generated-file records afterwards. Use newly created
+test mailboxes only.
+
+```bash
+cd /srv/v4.atomglobal.com/source
+php backend/bin/production-submission-smoke-test.php \
+  --recipient='new-test-mailbox@example.com' \
+  --track=personal \
+  --send-email \
+  --confirm=RUN-PRODUCTION-SUBMISSION-SMOKE
+
+php backend/bin/production-report-flow-smoke-test.php \
+  --recipient='another-new-test-mailbox@example.com' \
+  --track=personal \
+  --confirm=RUN-PRODUCTION-REPORT-SMOKE
+
+php backend/bin/report-flow-audit.php
+curl --fail --silent --show-error --resolve v4.atomglobal.com:443:127.0.0.1 \
+  https://v4.atomglobal.com/api/health
+```
+
 ## Rollback
 
 Application rollback is an atomic change of the V4 `current` symlink to the
