@@ -41,7 +41,8 @@ cat > "$SITE_FILE" <<EOF
 <VirtualHost *:80>
     ServerName $DOMAIN
     DocumentRoot $APP_ROOT/current/frontend
-    Redirect permanent / https://$DOMAIN/
+    RewriteEngine On
+    RewriteRule ^ https://$DOMAIN%{REQUEST_URI} [R=301,L]
     ErrorLog \${APACHE_LOG_DIR}/$DOMAIN-error.log
     CustomLog \${APACHE_LOG_DIR}/$DOMAIN-access.log combined
 </VirtualHost>
@@ -51,10 +52,14 @@ cat > "$SITE_FILE" <<EOF
     DocumentRoot $APP_ROOT/current/frontend
 
     <Directory $APP_ROOT/current/frontend>
-        Options -Indexes
+        Options -Indexes +FollowSymLinks
         AllowOverride None
         Require all granted
-        FallbackResource /index.html
+        RewriteEngine On
+        RewriteCond %{REQUEST_URI} !^/api/
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteRule ^ /index.html [L]
     </Directory>
 
     Alias /api $APP_ROOT/current/backend/public
@@ -63,9 +68,15 @@ cat > "$SITE_FILE" <<EOF
         AllowOverride None
         Require all granted
         DirectoryIndex index.php
+        AcceptPathInfo On
         RewriteEngine On
         RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
         RewriteRule ^ index.php [QSA,L]
+
+        <FilesMatch "\\.php$">
+            SetHandler "proxy:unix:/run/php/php8.3-fpm.sock|fcgi://localhost/"
+        </FilesMatch>
     </Directory>
 
     SetEnvIf Request_URI "^/(admin|report|payment|assessment)" NOINDEX=1
