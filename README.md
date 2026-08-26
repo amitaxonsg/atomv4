@@ -337,3 +337,149 @@ The response must be JSON with `"status":"ok"`. A response beginning with
 `<?php` is a security incident: disable only the V4 site with
 `a2dissite v4.atomglobal.com.conf && systemctl reload apache2`, correct the
 V4 PHP-FPM handler, and retest before re-enabling it.
+
+
+## V4 German VPS — technical handover
+
+This section is the operational source of truth for V4. It describes the
+separate live deployment completed on the German VPS and is safe to share with
+future technical maintainers. It intentionally contains no passwords, API
+keys, tokens, database dumps or private report links.
+
+### Server and software
+
+| Component | Verified V4 setup |
+|---|---|
+| Public URL | `https://v4.atomglobal.com` |
+| VPS | German VPS, `161.97.137.234` |
+| Web server | Apache HTTP Server with `mod_rewrite`, `mod_headers`, `mod_ssl`, `mod_proxy` and `mod_proxy_fcgi` |
+| PHP runtime | PHP 8.3-FPM, socket `/run/php/php8.3-fpm.sock` |
+| Application | React/Vite frontend, PHP API, MariaDB |
+| TLS | Let's Encrypt; certificate files under `/etc/letsencrypt/live/v4.atomglobal.com/` |
+| Certificate renewal | Certbot scheduled renewal |
+| Git repository | `git@github.com:amitaxonsg/atomv4.git` |
+| Live branch | `sunil-v4-growth-alignment-frozen` |
+| Mirror branch | `main` |
+
+### Isolation boundaries
+
+V4 is independent from V3. Never point V4 at a V3 database, source directory,
+release directory, storage path, cron file, Apache virtual host or environment
+file.
+
+| Resource | V4 location |
+|---|---|
+| Git source | `/srv/v4.atomglobal.com/source` |
+| Immutable releases | `/var/www/v4.atomglobal.com/releases/` |
+| Active release symlink | `/var/www/v4.atomglobal.com/current` |
+| Environment file | `/etc/growth-alignment/v4.env` |
+| Environment directory owner/mode | `root:www-data`, `0750` |
+| V4 database | `growth_alignment_v4` |
+| Database account | `growth_alignment_v4@localhost` |
+| Persistent storage | `/var/lib/growth-alignment-v4` |
+| SQL backups | `/var/backups/growth-alignment-v4` |
+| Application cron | `/etc/cron.d/growth-alignment-v4` |
+| Apache site | `/etc/apache2/sites-available/v4.atomglobal.com.conf` |
+| V4 PHP-FPM conf | `/etc/apache2/conf-available/v4-php-fpm.conf` |
+| VPS Git deploy key | `/root/.ssh/atomv4_deploy` |
+
+The source checkout is configured with its dedicated deploy key. Do not use the
+key for other repositories and do not copy the private key off the VPS.
+
+### Standard future update
+
+Run as root on the German VPS:
+
+```bash
+cd /srv/v4.atomglobal.com/source
+git pull --ff-only origin sunil-v4-growth-alignment-frozen
+./deploy/update-v4-apache.sh
+```
+
+The deployer checks source/environment requirements, backs up only the V4
+database, installs PHP dependencies, runs migrations and V4 tests, builds the
+frontend, creates an immutable release, switches only the V4 `current`
+symlink, reloads PHP-FPM/Apache, installs the V4 cron and verifies V4 health.
+A failure after a release switch restores the prior V4 release.
+
+### Apache and API security
+
+The V4 API is an Apache alias at `/api` routed to:
+
+```
+/var/www/v4.atomglobal.com/current/backend/public
+```
+
+Its directory block must retain all of the following:
+
+- `AcceptPathInfo On`
+- internal rewrite of non-file/non-directory routes to `index.php`
+- PHP-FPM `SetHandler` using `/run/php/php8.3-fpm.sock`
+- frontend rewrite that explicitly excludes `/api/`
+
+A health response beginning with `<?php` means PHP source is being exposed.
+Treat that as a security incident: disable only the V4 site, repair the PHP-FPM
+handler, test locally, then re-enable it. A valid response is JSON:
+
+```bash
+curl --fail --silent --show-error \
+  --resolve v4.atomglobal.com:443:127.0.0.1 \
+  https://v4.atomglobal.com/api/health
+```
+
+Expected minimum health state:
+
+```json
+{"status":"ok","checks":{"database":true,"migrations":true,"storage":true,"cron":true}}
+```
+
+After integration transfer, `stripe`, `stripeWebhook` and `email` should
+also be `true`. `feedbackGitHub` is optional and is not a launch blocker.
+
+### TLS and vhost validation
+
+DNS for `v4.atomglobal.com` must resolve to the VPS before certificate
+issuance. Validate Apache after every vhost change:
+
+```bash
+apache2ctl configtest
+systemctl reload apache2
+certbot certificates
+```
+
+Do not modify V3 Apache sites while maintaining V4.
+
+### Credentials and Stripe
+
+V3 SMTP2GO and Stripe live credentials were transferred into V4 through the
+server-only helper. The helper uses isolated PHP processes so the V3 and V4
+Composer autoloaders do not conflict:
+
+```bash
+php deploy/copy-v3-integrations-to-v4.php \
+  /srv/head-heart.atomglobal.com/source/backend/src/bootstrap.php \
+  /srv/v4.atomglobal.com/source/backend/src/bootstrap.php \
+  --allow-live-stripe
+```
+
+It transfers values directly into V4 encrypted settings and does not print
+credential values. Never put secrets in Git, shell history, screenshots, chat
+or documentation.
+
+The V4 Stripe account credentials may match V3, but V4 must have its own
+Stripe Product/Price IDs for the approved V4 prices. Do not reuse V3 Price IDs.
+
+### Release acceptance checklist
+
+- Automated suite passes: 61 tests.
+- Vite production build succeeds.
+- Apache configuration validates.
+- V4 health returns JSON, never PHP source.
+- Database, migrations, storage, Stripe, webhook, email and cron are healthy.
+- Confirm a real desktop and mobile journey for both Personal and Professional:
+  track selection, 40 questions in 10 groups of four, autosave/resume, report,
+  responsive layout and private link.
+- Configure V4 Full Report and 90-day retest Stripe Price IDs, then complete a
+  controlled payment/webhook test before enabling public checkout.
+- Keep the V4 CMS phase deferred: V4 content/settings are database-backed, but
+  no new CMS screens are included in this release.
