@@ -15,4 +15,4 @@ export PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-php8.3-fpm}"
 export EXPECTED_APP_ENV="${EXPECTED_APP_ENV:-production}"
 export CMS_APPLY_SCRIPT="${CMS_APPLY_SCRIPT:-}"
 
-exec "$(dirname "$0")/update-v3-apache-staging.sh"
+exec /usr/bin/env bash "$(dirname "$0")/update-v3-apache-staging.sh"
