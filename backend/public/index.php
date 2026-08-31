@@ -66,7 +66,13 @@ $router->add('POST', '/api/payments/checkout', function (Request $request) use (
 });
 $router->add('POST', '/api/payments/cash-on-delivery', function (Request $request) use ($container, $config) {
     $cash = new CashOnDeliveryService($container['db'], $container['settings'], $container['reports'], $config);
-    return Response::json($cash->checkout((int) ($request->body['sessionId'] ?? 0), (string) ($request->body['track'] ?? '')));
+    $result = $cash->checkout((int) ($request->body['sessionId'] ?? 0), (string) ($request->body['track'] ?? ''));
+    $delivery = $container['mailQueueProcessor']->processIds($result['emailQueueIds'] ?? []);
+    unset($result['emailQueueIds']);
+    $allSent = count($delivery) === 2 && count(array_filter($delivery, static fn(array $item): bool => $item['status'] === 'sent')) === 2;
+    $result['emailDelivery'] = $allSent ? 'sent' : 'retrying';
+    $result['successUrl'] .= '&email=' . rawurlencode($result['emailDelivery']);
+    return Response::json($result);
 });
 $router->add('POST', '/api/stripe/webhook', function (Request $request) use ($container, $config) {
     $stripe = new StripeService($container['db'], $container['settings'], $container['reports'], $config);

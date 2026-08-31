@@ -5,6 +5,7 @@ use AtomGlobal\Database;
 use AtomGlobal\Env;
 use AtomGlobal\Mail\MailDeliveryService;
 use AtomGlobal\Mail\MailQueue;
+use AtomGlobal\Mail\MailQueueProcessor;
 use AtomGlobal\Security\Crypto;
 use AtomGlobal\Services\AdminInsightsService;
 use AtomGlobal\Services\AdminService;
@@ -31,6 +32,8 @@ $settings = new SettingsService($db, $crypto);
 $reports = new ReportService($db, $settings, $config);
 $mailQueue = new MailQueue($db);
 $pdf = new PdfService($db, $settings, $config);
+$mailDelivery = new MailDeliveryService($db, $settings);
+$mailQueueProcessor = new MailQueueProcessor($db, $mailQueue, $mailDelivery, $pdf);
 
 return [
     'config' => $config,
@@ -42,7 +45,8 @@ return [
     'surveys' => new SurveyService($db, new ScoringService(), $reports, $mailQueue, $settings, $config),
     'health' => new HealthService($db, $config, $settings),
     'mailQueue' => $mailQueue,
-    'mailDelivery' => new MailDeliveryService($db, $settings),
+    'mailDelivery' => $mailDelivery,
+    'mailQueueProcessor' => $mailQueueProcessor,
     'passwordReset' => new PasswordResetService($db, $mailQueue, $config),
     'pdf' => $pdf,
     'reportAdmin' => new ReportAdminService($db, $reports, $pdf, $mailQueue, $config),

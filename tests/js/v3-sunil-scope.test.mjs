@@ -159,7 +159,7 @@ test("Full Development Report covers Sunil complete content and sharing scope", 
 
 test("Full Report PDF is generated and attached to paid-report emails", () => {
   const delivery = read("../../backend/src/Mail/MailDeliveryService.php");
-  const processor = read("../../backend/bin/process-email-queue.php");
+  const processor = read("../../backend/src/Mail/MailQueueProcessor.php");
   const stripe = read("../../backend/src/Payments/StripeService.php");
   const uat = read("../../backend/src/Payments/CashOnDeliveryService.php");
   const admin = read("../../backend/src/Services/ReportAdminService.php");
@@ -169,7 +169,7 @@ test("Full Report PDF is generated and attached to paid-report emails", () => {
   assert.match(delivery, /fileblob/);
   assert.match(delivery, /addAttachment/);
   assert.match(processor, /paid_report_ready/);
-  assert.match(processor, /\$pdf->generate\(\$reportId\)/);
+  assert.match(processor, /\$this->pdf->generate\(\$reportId\)/);
   assert.match(processor, /Growth-Alignment-Full-Development-Report\.pdf/);
   assert.match(stripe, /'reportId' => \$reportAccess\['reportId'\]/);
   assert.match(uat, /'reportId' => \$access\['reportId'\]/);

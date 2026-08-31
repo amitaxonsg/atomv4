@@ -6,9 +6,10 @@ const CONFIRMATION = 'RUN-PRODUCTION-REPORT-SMOKE';
 const TRACKS = ['personal', 'newjoiner', 'manager', 'executive'];
 const EXPECTED_QUESTION_COUNT = 40;
 
-$options = getopt('', ['recipient:', 'track::', 'confirm:']);
+$options = getopt('', ['recipient:', 'track::', 'send-email', 'confirm:']);
 $recipient = strtolower(trim((string) ($options['recipient'] ?? '')));
 $trackKey = strtolower(trim((string) ($options['track'] ?? 'personal')));
+$sendEmail = array_key_exists('send-email', $options);
 $confirmation = (string) ($options['confirm'] ?? '');
 
 if ($confirmation !== CONFIRMATION) {
@@ -159,6 +160,30 @@ try {
 
     $pdfPath = $pdf->generate((int) ($completed['reportId'] ?? 0));
     passReport(is_file($pdfPath) && filesize($pdfPath) > 1000, 'Unlocked Full Report PDF was generated');
+
+    if ($sendEmail) {
+        $cash = new \AtomGlobal\Payments\CashOnDeliveryService(
+            $db,
+            $container['settings'],
+            $reports,
+            $container['config']
+        );
+        $checkout = $cash->checkout($sessionId, $trackKey);
+        $delivery = $container['mailQueueProcessor']->processIds($checkout['emailQueueIds'] ?? []);
+        passReport(count($delivery) === 2, 'UAT checkout processed the payment and Full Report email queue items immediately');
+        passReport(
+            count(array_filter($delivery, static fn(array $item): bool => $item['status'] === 'sent')) === 2,
+            'SMTP2GO accepted the UAT payment confirmation and professional PDF report email'
+        );
+        $paidDelivery = array_values(array_filter(
+            $delivery,
+            static fn(array $item): bool => $item['templateKey'] === 'paid_report_ready' && $item['status'] === 'sent'
+        ));
+        passReport(
+            count($paidDelivery) === 1 && trim((string) ($paidDelivery[0]['messageId'] ?? '')) !== '',
+            'Professional PDF report email recorded its provider message id'
+        );
+    }
 
     echo "REPORT FLOW SMOKE TEST PASSED. Temporary records will now be removed.\n";
 } catch (Throwable $error) {

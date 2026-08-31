@@ -87,15 +87,17 @@ final class CashOnDeliveryService
                 'paymentMethod' => 'Cash on Delivery',
                 'reportId' => $access['reportId'],
             ];
-            $this->enqueue('payment_successful', (string) $survey['email'], $variables);
-            $this->enqueue('paid_report_ready', (string) $survey['email'], $variables);
+            $emailQueueIds = [
+                $this->enqueue('payment_successful', (string) $survey['email'], $variables),
+                $this->enqueue('paid_report_ready', (string) $survey['email'], $variables),
+            ];
 
             $this->db->execute(
                 'INSERT INTO audit_logs (admin_user_id, action, entity_type, entity_id, after_json, created_at) VALUES (NULL, ?, ?, ?, ?, NOW())',
                 ['payment.cash_on_delivery_uat', 'payment', (string) $paymentId, json_encode(['surveySessionId' => $sessionId])]
             );
 
-            return ['paymentId' => $paymentId, ...$access];
+            return ['paymentId' => $paymentId, 'emailQueueIds' => $emailQueueIds, ...$access];
         });
 
         return [
@@ -118,9 +120,9 @@ final class CashOnDeliveryService
         ];
     }
 
-    private function enqueue(string $template, string $recipient, array $variables): void
+    private function enqueue(string $template, string $recipient, array $variables): int
     {
-        $this->db->execute(
+        return $this->db->insert(
             'INSERT INTO email_queue (template_key, recipient_email, variables_json, status, attempts, scheduled_at, created_at) VALUES (?, ?, ?, ?, 0, NOW(), NOW())',
             [$template, strtolower($recipient), json_encode($variables), 'queued']
         );

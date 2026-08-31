@@ -10,6 +10,7 @@ function PaymentStatus({ cancelled = false }) {
   const params = new URLSearchParams(window.location.search);
   const method = params.get("method") || "";
   const reportUrl = params.get("report") || "";
+  const emailDelivery = params.get("email") || "queued";
   const uatNoPayment = method === "cash-on-delivery";
 
   return <StageShell>
@@ -18,7 +19,9 @@ function PaymentStatus({ cancelled = false }) {
     <p className="lead">{cancelled
       ? "Nothing was charged. Return to your private report link when you are ready to try again."
       : uatNoPayment
-        ? "UAT Test — No Payment is enabled for client testing. No Stripe charge was made. Your Full Report has been unlocked and the normal confirmation and PDF report emails have been queued."
+        ? emailDelivery === "sent"
+          ? "UAT Test — No Payment is enabled for client testing. No Stripe charge was made. Your Full Report has been unlocked, and the confirmation and PDF report emails were accepted by the email provider."
+          : "UAT Test — No Payment is enabled for client testing. No Stripe charge was made. Your Full Report has been unlocked, but email delivery is retrying in the background."
         : "Stripe is confirming your payment. After the signed webhook is verified, a fresh private Full Report link and PDF report email are sent."}</p>
     {uatNoPayment && reportUrl
       ? <a className="button button--primary" href={reportUrl}>Open Full Report</a>

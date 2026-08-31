@@ -84,12 +84,20 @@ php backend/bin/production-submission-smoke-test.php \
 php backend/bin/production-report-flow-smoke-test.php \
   --recipient='another-new-test-mailbox@example.com' \
   --track=personal \
+  --send-email \
   --confirm=RUN-PRODUCTION-REPORT-SMOKE
 
 php backend/bin/report-flow-audit.php
 curl --fail --silent --show-error --resolve v4.atomglobal.com:443:127.0.0.1 \
   https://v4.atomglobal.com/api/health
 ```
+
+With `--send-email`, the report-flow burn test uses the guarded UAT checkout,
+processes both post-checkout messages immediately, generates the professional
+Full Development Report PDF attachment and requires a provider message ID for
+the accepted `paid_report_ready` email. If immediate delivery fails, the queue
+retains its normal retry state and the burn test fails instead of reporting a
+false success.
 
 ## Rollback
 
