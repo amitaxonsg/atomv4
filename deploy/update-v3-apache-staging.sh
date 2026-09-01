@@ -11,7 +11,10 @@ DOMAIN="${DOMAIN:-head-heart-staging.atomglobal.com}"
 BRANCH="${BRANCH:-sunil-v3-clean-40q-cms}"
 PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-php8.3-fpm}"
 EXPECTED_APP_ENV="${EXPECTED_APP_ENV:-staging}"
-CMS_APPLY_SCRIPT="${CMS_APPLY_SCRIPT:-bin/apply-v3-public-cms.php}"
+# Default to the V3 CMS normaliser only when the variable is truly unset.
+# V4 deliberately exports an empty value so this shared deployer must preserve
+# that empty value and never apply V3 content to the isolated V4 database.
+CMS_APPLY_SCRIPT="${CMS_APPLY_SCRIPT-bin/apply-v3-public-cms.php}"
 PREVIOUS_RELEASE=""
 SWITCHED=0
 
