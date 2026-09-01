@@ -30,10 +30,12 @@ test("public questionnaire keeps the latest process inside the approved split br
   assert.match(branding, /startsWith\("\/media-uploads\/"\).*legacyLogoUrl/);
 });
 
-test("CMS stage image remains visible above the questionnaire on mobile", () => {
+test("CMS stage image remains visible on mobile and the logo sits in the right content panel", () => {
   assert.match(questionnaireStyles, /@media \(max-width: 900px\)[\s\S]*\.latest-visual-panel \{[\s\S]*display: block;/);
   assert.match(questionnaireStyles, /height: clamp\(210px, 56\.25vw, 330px\)/);
-  assert.match(questionnaireStyles, /\.latest-visual-panel__logo,[\s\S]*\.latest-visual-panel__copy \{[\s\S]*display: none;/);
+  assert.doesNotMatch(layout, /latest-visual-panel__logo/);
+  assert.match(questionnaireStyles, /\.latest-public-brand \{[\s\S]*display: flex;[\s\S]*justify-content: flex-end;/);
+  assert.match(questionnaireStyles, /object-position: right center/);
   assert.doesNotMatch(questionnaireStyles, /@media \(max-width: 900px\)[\s\S]*?\.latest-visual-panel \{ display: none; \}/);
 });
 
