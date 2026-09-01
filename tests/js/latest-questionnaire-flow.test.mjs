@@ -14,14 +14,21 @@ const branding = readFileSync(new URL("../../src/branding/BrandContext.jsx", imp
 const questionnaireStyles = readFileSync(new URL("../../src/questionnaire-latest.css", import.meta.url), "utf8");
 const mockData = readFileSync(new URL("../../src/api/mockData.js", import.meta.url), "utf8");
 const v4LandingImageMigration = readFileSync(new URL("../../database/migrations/017_v4_restore_supplied_landing_image.sql", import.meta.url), "utf8");
+const v4AllStageImageMigration = readFileSync(new URL("../../database/migrations/018_v4_use_supplied_image_all_stages.sql", import.meta.url), "utf8");
 
 test("public questionnaire keeps the latest process inside the approved split branding", () => {
   assert.match(layout, /latest-questionnaire-shell/);
   assert.match(layout, /latest-visual-panel/);
   assert.match(layout, /reflection-portrait\.png/);
   assert.match(mockData, /version: \{ image: "\/media\/stages\/reflection-portrait\.png"/);
+  assert.equal((mockData.match(/image: "\/media\/stages\/reflection-portrait\.png"/g) || []).length, 7);
+  assert.equal((mockData.match(/mobileImage: ""/g) || []).length, 7);
+  assert.doesNotMatch(mockData, /sunil-head-heart-v3\.webp|reflection-mobile\.webp/);
   assert.match(v4LandingImageMigration, /stage_key = 'version'/);
   assert.match(v4LandingImageMigration, /\/media\/stages\/reflection-portrait\.png/);
+  assert.match(v4AllStageImageMigration, /UPDATE content_stages AS stage/);
+  assert.match(v4AllStageImageMigration, /stage\.mobile_media_id = NULL/);
+  assert.doesNotMatch(v4AllStageImageMigration, /WHERE stage\.stage_key/);
   assert.match(experience, /Every choice you make is cast by two votes/);
   assert.match(layout, /latest-track-card/);
   assert.match(layout, /Personal Assessment/);
