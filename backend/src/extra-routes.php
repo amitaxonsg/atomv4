@@ -38,7 +38,9 @@ $router->add('POST', '/api/reports/{token}/email', function (Request $request, a
         'paidReportUrl' => $reportUrl,
         'reportId' => (int) $report['id'],
     ]);
-    return Response::json(['queued' => true, 'queueId' => $queueId]);
+    $delivery = $container['mailQueueProcessor']->processIds([$queueId]);
+    $sent = count($delivery) === 1 && ($delivery[0]['status'] ?? '') === 'sent';
+    return Response::json(['queued' => true, 'queueId' => $queueId, 'delivery' => $sent ? 'sent' : 'retrying']);
 });
 
 $router->add('PUT', '/api/reports/{token}/commitment', function (Request $request, array $params) use ($container, $db) {
