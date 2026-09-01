@@ -590,9 +590,50 @@ Then create the eight dedicated V4 Stripe Products/Prices, store their Price
 IDs in V4, and complete one controlled card payment, signed-webhook, report
 unlock and refund/relock test before enabling card checkout for the public.
 
+### Pre-UAT clean baseline and report handoff
+
+The V4 frontend and protected Admin workspace are wired to the PHP API for all
+16 modules: Dashboard, Participants, Questionnaire, Assessments, Content,
+Branding, Reports, Payments, Email, Affiliates, Analytics, SEO, Settings,
+Audit, Feedback and Help. Affiliate definitions are maintained in Admin while
+clicks, attributions, conversions and commissions remain isolated V4 activity.
+
+Both checkout choices open separately from the original Lite Report. The UAT
+no-payment path opens the Full Report directly. Stripe returns to a preparation
+page which polls the signed-webhook result and then replaces itself with the
+private Full Report. The participant-facing fallback is labelled **Show the
+Report**. The unlocked report provides **Download PDF**, **Email me the PDF**,
+print and copy controls. A successful Stripe or UAT unlock immediately attempts
+the normal confirmation email and the professional PDF attachment; failed
+provider attempts remain in the retry queue.
+
+Before Spencer begins UAT, deploy and run the guarded burn-in checks. After the
+temporary burn-in records have cleaned themselves up, take the deployer's V4
+database backup and clear historical pre-UAT activity:
+
+```bash
+cd /srv/v4.atomglobal.com/source
+php backend/bin/reset-v4-uat-data.php --confirm=RESET-V4-UAT-DATA
+```
+
+The reset refuses to run unless both the database and application URL are the
+isolated V4 production values. It removes participants, sessions, answers,
+reports/PDFs, payments, webhook events, report delivery, email activity,
+affiliate activity, analytics, feedback and earlier test/audit activity. It
+preserves administrators, roles, questions/assessment definitions, report
+templates, CMS/content/media, branding, settings, email templates, alert and
+retention configuration, and the affiliate definitions themselves. It prints
+before/after counts and leaves one real system audit entry recording the reset.
+
+The UAT handoff to Spencer is sent only after deployment, live health, burn-in
+and the final clean-baseline verification all pass. Sunil is copied on that
+handoff. A real card charge is not part of routine UAT unless Amit explicitly
+authorises it.
+
 ### Release acceptance checklist
 
-- Automated suite passes: 61 tests.
+- Automated suite passes with no failures (the exact count can grow as release
+  regressions are added).
 - Vite production build succeeds.
 - Apache configuration validates.
 - V4 health returns JSON, never PHP source.
