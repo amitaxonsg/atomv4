@@ -14,12 +14,12 @@ final class PasswordResetService
         private array $config,
     ) {}
 
-    public function request(string $email): void
+    public function request(string $email): ?int
     {
         $email = strtolower(trim($email));
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return;
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return null;
         $user = $this->db->fetch('SELECT id, email, display_name FROM admin_users WHERE email = ? AND is_active = 1 LIMIT 1', [$email]);
-        if (!$user) return;
+        if (!$user) return null;
 
         $token = bin2hex(random_bytes(32));
         $this->db->transaction(function () use ($user, $token) {
@@ -27,12 +27,13 @@ final class PasswordResetService
             $this->db->execute('INSERT INTO password_reset_tokens (admin_user_id, token_hash, expires_at, created_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 60 MINUTE), NOW())', [$user['id'], hash('sha256', $token)]);
         });
         $resetUrl = rtrim((string) $this->config['url'], '/') . '/admin/reset-password?token=' . rawurlencode($token);
-        $this->mailQueue->enqueue('password_reset', $user['email'], [
+        $queueId = $this->mailQueue->enqueue('password_reset', $user['email'], [
             'adminName' => $user['display_name'],
             'resetUrl' => $resetUrl,
             'expiresMinutes' => 60,
         ]);
         $this->db->execute('INSERT INTO audit_logs (admin_user_id, action, entity_type, entity_id, created_at) VALUES (?, ?, ?, ?, NOW())', [$user['id'], 'admin.password_reset_requested', 'admin_user', (string) $user['id']]);
+        return $queueId;
     }
 
     public function confirm(string $token, string $password): void
