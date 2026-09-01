@@ -93,6 +93,14 @@ Participant PDFs remain private and are available only after the Full Report is
 unlocked. The expected attachment name is
 `Growth-Alignment-Full-Development-Report.pdf`.
 
+The V4 landing visual must use Sunil's original supplied repository asset at
+`/media/stages/reflection-portrait.png` (image commit `2196068`). Migration
+`017_v4_restore_supplied_landing_image.sql` restores that exact CMS selection if
+an older Head–Heart image is still assigned. The separate landing overlay copy
+is anchored at the bottom of the desktop visual; the public Atom Global logo is
+rendered in the top-right of the content panel. Do not regenerate, redraw or
+replace Sunil's supplied image.
+
 #### Spencer UAT handoff
 
 Use a fresh mailbox or a plus-address for each new submission. Test desktop and
