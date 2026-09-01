@@ -29,24 +29,9 @@
   background: linear-gradient(180deg, rgba(10, 8, 6, .06) 28%, rgba(10, 8, 6, .58) 100%);
 }
 
-.latest-visual-panel__logo,
 .latest-visual-panel__copy {
   position: relative;
   z-index: 1;
-}
-
-.latest-visual-panel__logo {
-  display: inline-flex;
-  width: fit-content;
-  max-width: 74%;
-}
-
-.latest-visual-panel__logo img {
-  display: block;
-  width: min(260px, 100%);
-  max-height: 72px;
-  object-fit: contain;
-  object-position: left center;
 }
 
 .latest-visual-panel__copy {
@@ -114,8 +99,9 @@
 }
 
 .latest-public-brand {
-  display: none;
+  display: flex;
   align-items: center;
+  justify-content: flex-end;
   margin-bottom: 34px;
   text-decoration: none;
 }
@@ -125,7 +111,7 @@
   width: min(250px, 68vw);
   max-height: 58px;
   object-fit: contain;
-  object-position: left center;
+  object-position: right center;
 }
 
 .latest-questionnaire-page h1 {
@@ -669,12 +655,11 @@
   }
 
   .latest-visual-panel::after,
-  .latest-visual-panel__logo,
   .latest-visual-panel__copy {
     display: none;
   }
   .latest-questionnaire-content { display: block; min-height: 100vh; }
-  .latest-public-brand { display: inline-flex; }
+  .latest-public-brand { display: flex; }
   .latest-questionnaire-page {
     width: min(calc(100% - 36px), var(--latest-page-width, 720px));
     padding: 34px 0 58px;
