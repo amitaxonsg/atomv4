@@ -220,17 +220,19 @@ function FullReportActions({ report, summary, content, token }) {
       const response = await fetch(`/api/reports/${encodeURIComponent(token)}/email`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: "{}" });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.message || "Unable to email report");
-      setState({ message: "Full Development Report queued to your email with the PDF attached.", busy: false });
+      setState({ message: result.delivery === "sent" ? "Your Full Development Report and PDF were accepted by the email provider." : "Your Full Development Report is queued and email delivery will retry automatically.", busy: false });
     } catch (error) {
       setState({ message: error.message, busy: false });
     }
   };
-  return <section className="report-card"><h3>Save or share your report</h3><p>Keep a copy of this report for your development work and your three-month comparison.</p><div className="upgrade-box__actions"><button className="button button--ghost" onClick={copy}>Copy as text</button><button className="button button--ghost" disabled={!token || state.busy} onClick={email}>{state.busy ? "Queuing email…" : "Email to self"}</button></div>{state.message && <p className="preview-note" role="status">{state.message}</p>}</section>;
+  const pdfUrl = token ? `/api/reports/${encodeURIComponent(token)}/pdf` : "";
+  return <section className="report-card v4-report-delivery"><p className="eyebrow">Your report is ready</p><h3>Keep your Full Development Report</h3><p>Download the professional PDF now, send it to your registered email, or keep a printed copy for your development work.</p><div className="v4-report-delivery__actions">{token && <a className="button button--primary" href={pdfUrl} download="Growth-Alignment-Full-Development-Report.pdf">Download PDF</a>}<button className="button button--ghost" disabled={!token || state.busy} onClick={email}>{state.busy ? "Sending PDF…" : "Email me the PDF"}</button><button className="button button--ghost" onClick={() => window.print()}>Print report</button><button className="button button--ghost" onClick={copy}>Copy as text</button></div>{state.message && <p className="preview-note" role="status">{state.message}</p>}</section>;
 }
 
 function FullReportContent({ report, summary, content, token }) {
   if (!content) return <p className="preview-note">Full Report content is unavailable. Contact Atom Global support.</p>;
   return <>
+    <FullReportActions report={report} summary={summary} content={content} token={token} />
     <RetakeComparison comparison={content.retakeComparison} trackKey={report?.trackKey} />
     <ExecutiveSummary subscales={report?.paid?.subscales || summary.subscales} trackKey={report?.trackKey} />
     <ScoreBreakdown subscales={report?.paid?.subscales || summary.subscales} trackKey={report?.trackKey} legend={content.radarLegend} />
@@ -255,7 +257,6 @@ function FullReportContent({ report, summary, content, token }) {
     <DevelopmentCommitment report={report} token={token} />
     <RetakePlan report={report} />
     <CoachCallToAction report={report} />
-    <FullReportActions report={report} summary={summary} content={content} token={token} />
     <UpgradeReasons items={content.upgradeReasons} />
     <p className="preview-note">Your private link is time-limited. Open the PDF, email it to yourself, copy it as text or print a copy for your records.</p>
   </>;
@@ -274,25 +275,41 @@ export default function ReportView({ payload, token, onReset }) {
 
   const openCheckout = async () => {
     if (!checkoutAvailable) return;
+    const checkoutWindow = window.open("about:blank", "_blank");
+    if (checkoutWindow) checkoutWindow.opener = null;
     setCheckout({ busy: true, error: "" });
     try {
       const result = await api.createCheckout({ sessionId: report.sessionId, track: report.trackKey });
-      if (result.preview) window.location.reload(); else window.location.href = result.url;
-    } catch (error) { setCheckout({ busy: false, error: error.message }); }
+      if (result.preview) {
+        if (checkoutWindow) checkoutWindow.close();
+        window.location.reload();
+      } else if (checkoutWindow) checkoutWindow.location.replace(result.url);
+      else window.location.href = result.url;
+    } catch (error) {
+      if (checkoutWindow) checkoutWindow.close();
+      setCheckout({ busy: false, error: error.message });
+    }
   };
 
   const openCashOnDelivery = async () => {
     if (!cashOnDeliveryAvailable || checkout.busy) return;
+    const reportWindow = window.open("about:blank", "_blank");
+    if (reportWindow) reportWindow.opener = null;
     setCheckout({ busy: true, error: "" });
     try {
       const response = await fetch("/api/payments/cash-on-delivery", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sessionId: report.sessionId, track: report.trackKey }) });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.message || "UAT no-payment checkout failed");
-      window.location.href = result.successUrl || result.reportUrl;
-    } catch (error) { setCheckout({ busy: false, error: error.message }); }
+      if (reportWindow) reportWindow.location.replace(result.reportUrl || result.successUrl);
+      else window.location.href = result.reportUrl || result.successUrl;
+      setCheckout({ busy: false, error: "" });
+    } catch (error) {
+      if (reportWindow) reportWindow.close();
+      setCheckout({ busy: false, error: error.message });
+    }
   };
 
-  const actions = <>{onReset ? <button className="button button--ghost" onClick={onReset}>Start again</button> : <a className="button button--ghost" href="/">New assessment</a>}{unlocked && token && <a className="button button--ghost" href={`/api/reports/${encodeURIComponent(token)}/pdf`} target="_blank" rel="noreferrer">Open PDF</a>}<button className="button button--primary" onClick={() => window.print()}>Print report</button></>;
+  const actions = <>{onReset ? <button className="button button--ghost" onClick={onReset}>Start again</button> : <a className="button button--ghost" href="/">New assessment</a>}{unlocked && token && <a className="button button--ghost" href={`/api/reports/${encodeURIComponent(token)}/pdf`} download="Growth-Alignment-Full-Development-Report.pdf">Download PDF</a>}<button className="button button--primary" onClick={() => window.print()}>Print report</button></>;
 
   const reportClass = report?.trackKey === "personal" ? "v4-report--personal" : "v4-report--professional";
   return <StageShell stageKey="report" current={4} actions={actions}>
