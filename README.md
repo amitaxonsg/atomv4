@@ -70,6 +70,50 @@ database for the following CMS phase. Apache deployment details are in
 `docs/V4-APACHE-DEPLOYMENT.md`. V4 must use its own source directory, release
 root, database, storage, cron file and virtual host; it must not modify V3.
 
+### V4 checkout and report-delivery update — 1 September 2026
+
+The production candidate for the smoother checkout and Full Report journey is
+maintained on `sunil-v4-smooth-checkout-crm-blueprint`. The original
+`sunil-v4-growth-alignment-frozen` branch remains the rollback baseline. This
+release keeps all V4 isolation boundaries unchanged and adds:
+
+- the V4 logo in the top-right of the content panel so it blends with the page;
+- a separate checkout/UAT browser tab, leaving the assessment result available;
+- automatic return to the unlocked Full Report after verified payment;
+- a professional Full Report action bar with **Download PDF**, **Email me the
+  PDF**, **Print** and **Copy link**;
+- immediate payment/full-report email delivery attempts with the existing queue
+  and retry process retained as a safety net;
+- a checkout-status API used by the success page to wait for the signed payment
+  confirmation before revealing the private report;
+- `docs/V4-CRM-CMS-GO-LIVE-BLUEPRINT.md`, defining the proposed clean V4 CRM/CMS
+  phase without copying V3 code.
+
+Participant PDFs remain private and are available only after the Full Report is
+unlocked. The expected attachment name is
+`Growth-Alignment-Full-Development-Report.pdf`.
+
+#### Spencer UAT handoff
+
+Use a fresh mailbox or a plus-address for each new submission. Test desktop and
+mobile, and send feedback by replying to the handoff email with the browser,
+device, track, exact steps, expected result, actual result and a screenshot.
+
+1. Complete a new assessment and confirm the Lite Report is displayed.
+2. Select **Temporary UAT Test — No Payment** and confirm a new tab opens.
+3. Confirm the new tab automatically presents the unlocked Full Report.
+4. Download the PDF, open it, and confirm the content matches the on-screen
+   report.
+5. Select **Email me the PDF** and confirm the participant receives the message
+   with the expected PDF attachment.
+6. Confirm **Print** and **Copy link** work and the private report link reopens
+   the same report.
+7. Check that the logo is positioned cleanly at the top-right on desktop and
+   mobile without covering content.
+8. Do not make a real Stripe charge unless Amit explicitly authorises the live
+   card test. Record proposed tweaks for Rico and Amit; production changes
+   require Amit's approval.
+
 ## Questionnaire process retained from the supplied `index.html`
 
 1. Display all four approved assessment choices.
