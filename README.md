@@ -139,6 +139,65 @@ Use a fresh mailbox or a plus-address for each new submission. Test desktop and
 mobile, and send feedback by replying to the handoff email with the browser,
 device, track, exact steps, expected result, actual result and a screenshot.
 
+##### Central Spencer status — 1 September 2026
+
+Use this section as the repository memory before any further V4 revision. A
+source fix is not a UAT pass: Spencer must retest the live deployed build and
+record the result. Preserve every failed finding and append the later retest;
+do not delete or rewrite the original observation. Spencer's notes are evidence
+for consolidation only. Amit and Rico decide the grouped implementation scope
+before another V4 update is made.
+
+**Engineering completed and automated locally**
+
+- Admin Branding is wired to the public logo, landing/Admin-login banner,
+  favicon, Apple touch icon, web manifest, email logo and report logo.
+- Admin Content remains wired to questionnaire stage copy and stage images;
+  the Branding banner changes only the landing visual.
+- JPG, PNG, GIF, WebP, AVIF and safe SVG uploads are accepted, with ICO also
+  accepted for favicons.
+- Published branding and assessment configuration use no-store responses, and
+  the initial public render waits for both sources to prevent fallback logo,
+  retired-image and heading flashes on a hard refresh.
+- The retired `/media/stages/sunil-head-heart-v3.webp` asset is removed from
+  the V4 public build, and Sunil's supplied repository image remains the
+  approved questionnaire visual; it must not be recreated.
+- Checkout opens separately from the Lite Report. The authorised UAT route
+  opens the Full Report directly; verified card payment returns to the private
+  report once the signed webhook is confirmed.
+- The Full Report provides Download PDF, Email me the PDF, Print and Copy link.
+  Successful card/UAT unlocks attempt immediate confirmation and PDF delivery,
+  while provider failures remain in the retry queue.
+- The regression suite passed 78 tests and the Vite production build completed
+  successfully for the branding-wiring change.
+
+**Pending live deployment confirmation and Spencer retest**
+
+- Confirm GitHub, VPS source and the deployed-release marker identify the same
+  revision, then record the full deployed commit and live health result.
+- From Admin Branding, upload and publish a transparent logo and a separate
+  JPG/GIF banner. Hard-refresh desktop and mobile and verify the public site and
+  Admin login use the published assets without a white box or an older image.
+- Publish a new favicon and verify the browser icon, Apple touch icon and web
+  manifest after a fresh reload.
+- Confirm a hard refresh never flashes `Growth Alignment`, a fallback logo or
+  the retired Head-Heart image before the published Head-Heart content loads.
+- Confirm Admin Content stage-image changes appear in the correct questionnaire
+  stages and do not overwrite the Branding landing banner.
+- Complete a fresh Personal and Professional questionnaire journey and confirm
+  the participant, answers, Lite Report, Full Report, payment and email events
+  are recorded in the matching Admin modules.
+- Exercise the authorised no-payment UAT path and verify Show the Report,
+  Download PDF, Email me the PDF, Print and Copy link end to end, including
+  actual mailbox receipt and the professional PDF content/layout.
+- Test card checkout only after Amit explicitly authorises the transaction;
+  verify successful payment returns to the private Full Report and delivers
+  the PDF email. Record Stripe/webhook/provider evidence without exposing
+  secrets.
+- Record any remaining email-provider failure, `feedbackGitHub` health warning,
+  browser/device difference or visual issue as pending; do not silently mark it
+  passed from an automated test alone.
+
 1. Complete a new assessment and confirm the Lite Report is displayed.
 2. Select **Temporary UAT Test — No Payment** and confirm a new tab opens.
 3. Confirm the new tab automatically presents the unlocked Full Report.
