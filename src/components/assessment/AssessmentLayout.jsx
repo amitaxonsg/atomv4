@@ -28,7 +28,7 @@ function VisualPanel({ stageKey = "version" }) {
   const { branding, stages } = useBranding();
   const stage = stages?.[stageKey] || stages?.version || {};
   const overlay = Math.max(0, Math.min(90, Number(stage.overlay ?? 40))) / 100;
-  const image = (stageKey === "version" && branding.bannerUrl) || stage.image || "/media/stages/reflection-portrait.png";
+  const image = branding.bannerUrl || stage.image || "/media/stages/reflection-portrait.png";
   return <aside
     className="latest-visual-panel"
     aria-label={stage.alt || "A reflective professional moment"}
