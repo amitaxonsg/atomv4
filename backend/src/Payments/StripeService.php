@@ -58,13 +58,14 @@ final class StripeService
         return ['url' => $checkout->url, 'checkoutSessionId' => $checkout->id];
     }
 
-    public function webhook(string $payload, string $signature): void
+    public function webhook(string $payload, string $signature): array
     {
         $secret = $this->settings->get('stripe.webhook_secret', $_ENV['STRIPE_WEBHOOK_SECRET'] ?? '');
         if (!$secret) throw new \RuntimeException('Stripe webhook secret is not configured.');
         $event = Webhook::constructEvent($payload, $signature, $secret);
+        $emailQueueIds = [];
 
-        $this->db->transaction(function () use ($event) {
+        $this->db->transaction(function () use ($event, &$emailQueueIds) {
             $exists = $this->db->fetch('SELECT id, status FROM stripe_webhook_events WHERE stripe_event_id = ? FOR UPDATE', [$event->id]);
             if ($exists && $exists['status'] === 'processed') return;
             $eventId = $exists ? (int) $exists['id'] : $this->db->insert(
@@ -73,12 +74,12 @@ final class StripeService
             );
 
             try {
-                match ($event->type) {
+                $emailQueueIds = match ($event->type) {
                     'checkout.session.completed' => $this->completed($event->data->object),
                     'checkout.session.async_payment_failed' => $this->failed($event->data->object, 'failed'),
                     'checkout.session.expired' => $this->failed($event->data->object, 'abandoned'),
                     'charge.refunded' => $this->refunded($event->data->object),
-                    default => null,
+                    default => [],
                 };
                 $this->db->execute('UPDATE stripe_webhook_events SET status = ?, processed_at = NOW(), failure_reason = NULL WHERE id = ?', ['processed', $eventId]);
             } catch (\Throwable $error) {
@@ -87,6 +88,34 @@ final class StripeService
                 throw $error;
             }
         });
+
+        return $emailQueueIds;
+    }
+
+    public function checkoutStatus(string $checkoutSessionId): array
+    {
+        $checkoutSessionId = trim($checkoutSessionId);
+        if (!preg_match('/^cs_(?:test_|live_)?[A-Za-z0-9_]+$/', $checkoutSessionId)) {
+            throw new \InvalidArgumentException('Invalid checkout session.', 422);
+        }
+
+        $payment = $this->db->fetch(
+            'SELECT pay.status, pay.metadata_json, gr.is_unlocked '
+            . 'FROM payments pay LEFT JOIN generated_reports gr ON gr.survey_session_id = pay.survey_session_id AND gr.revoked_at IS NULL '
+            . 'WHERE pay.stripe_checkout_session_id = ? LIMIT 1',
+            [$checkoutSessionId]
+        );
+        if (!$payment) throw new \RuntimeException('Checkout session was not found.', 404);
+
+        $metadata = json_decode((string) ($payment['metadata_json'] ?? '{}'), true) ?: [];
+        $reportUrl = (string) ($metadata['reportUrl'] ?? '');
+        $ready = $payment['status'] === 'paid' && (bool) ($payment['is_unlocked'] ?? false) && $reportUrl !== '';
+
+        return [
+            'status' => (string) $payment['status'],
+            'reportReady' => $ready,
+            'reportUrl' => $ready ? $reportUrl : null,
+        ];
     }
 
     private function retakeCheckout(int $sessionId, string $trackKey): array
@@ -135,26 +164,29 @@ final class StripeService
         return ['url' => $checkout->url, 'checkoutSessionId' => $checkout->id, 'retake' => true, 'amountMinor' => $retestAmountMinor, 'currency' => 'USD'];
     }
 
-    private function completed(object $checkout): void
+    private function completed(object $checkout): array
     {
-        if (($checkout->payment_status ?? '') !== 'paid') return;
+        if (($checkout->payment_status ?? '') !== 'paid') return [];
         $purpose = (string) ($checkout->metadata->payment_purpose ?? 'full_report');
         if ($purpose === 'retake') {
-            $this->completedRetake($checkout);
-            return;
+            return $this->completedRetake($checkout);
         }
 
         $sessionId = (int) ($checkout->metadata->survey_session_id ?? 0);
         if ($sessionId < 1) throw new \RuntimeException('Stripe metadata does not contain a survey session.');
         $payment = $this->db->fetch('SELECT * FROM payments WHERE stripe_checkout_session_id = ? FOR UPDATE', [$checkout->id]);
         if (!$payment) throw new \RuntimeException('Stripe checkout payment record was not found.');
-        if ($payment['status'] === 'paid') return;
+        if ($payment['status'] === 'paid') return [];
 
         $amount = (int) ($checkout->amount_total ?? 0);
         $currency = strtoupper((string) ($checkout->currency ?? 'USD'));
         $this->db->execute('UPDATE payments SET status = ?, stripe_payment_intent_id = ?, stripe_customer_id = ?, amount = ?, currency = ?, paid_at = NOW(), updated_at = NOW() WHERE id = ?', ['paid', $checkout->payment_intent ?? null, $checkout->customer ?? null, $amount, $currency, $payment['id']]);
         $this->reports->unlockBySession($sessionId, 'stripe_webhook');
         $reportAccess = $this->rotateReportAccess($sessionId);
+        $paymentMetadata = json_decode((string) ($payment['metadata_json'] ?? '{}'), true) ?: [];
+        $paymentMetadata['reportUrl'] = $reportAccess['reportUrl'];
+        $paymentMetadata['generatedReportId'] = $reportAccess['reportId'];
+        $this->db->execute('UPDATE payments SET metadata_json = ?, updated_at = NOW() WHERE id = ?', [json_encode($paymentMetadata), $payment['id']]);
         $this->db->execute('UPDATE affiliate_attributions SET conversion_at = COALESCE(conversion_at, NOW()) WHERE survey_session_id = ?', [$sessionId]);
 
         if ($payment['affiliate_id']) {
@@ -168,6 +200,7 @@ final class StripeService
         }
 
         $participant = $this->db->fetch('SELECT p.name, p.email, t.name track_name FROM survey_sessions s JOIN participants p ON p.id = s.participant_id JOIN assessment_tracks t ON t.id = s.track_id WHERE s.id = ?', [$sessionId]);
+        $emailQueueIds = [];
         if ($participant) {
             $variables = [
                 'participantName' => $participant['name'],
@@ -178,18 +211,19 @@ final class StripeService
                 'paidReportUrl' => $reportAccess['reportUrl'],
                 'reportId' => $reportAccess['reportId'],
             ];
-            $this->enqueue('payment_successful', $participant['email'], $variables);
-            $this->enqueue('paid_report_ready', $participant['email'], $variables);
+            $emailQueueIds[] = $this->enqueue('payment_successful', $participant['email'], $variables);
+            $emailQueueIds[] = $this->enqueue('paid_report_ready', $participant['email'], $variables);
         }
+        return $emailQueueIds;
     }
 
-    private function completedRetake(object $checkout): void
+    private function completedRetake(object $checkout): array
     {
         $sourceSessionId = (int) ($checkout->metadata->source_survey_session_id ?? $checkout->metadata->survey_session_id ?? 0);
         if ($sourceSessionId < 1) throw new \RuntimeException('Retake checkout does not contain a source survey session.');
         $payment = $this->db->fetch('SELECT * FROM payments WHERE stripe_checkout_session_id = ? FOR UPDATE', [$checkout->id]);
         if (!$payment) throw new \RuntimeException('Retake payment record was not found.');
-        if ($payment['status'] === 'paid') return;
+        if ($payment['status'] === 'paid') return [];
 
         $source = $this->db->fetch(
             'SELECT s.*, p.name participant_name, p.email participant_email, t.name track_name, t.track_key FROM survey_sessions s JOIN participants p ON p.id = s.participant_id JOIN assessment_tracks t ON t.id = s.track_id WHERE s.id = ? AND s.status = ? LIMIT 1',
@@ -228,13 +262,14 @@ final class StripeService
         );
 
         $resumeUrl = rtrim((string) $this->config['url'], '/') . '/?resume=' . rawurlencode($resumeToken);
-        $this->enqueue('survey_resume_link', (string) $source['participant_email'], [
+        $queueId = $this->enqueue('survey_resume_link', (string) $source['participant_email'], [
             'participantName' => $source['participant_name'],
             'trackName' => $source['track_name'] . ' Retake',
             'resumeUrl' => $resumeUrl,
             'amount' => number_format($amount / 100, 2),
             'currency' => $currency,
         ]);
+        return [$queueId];
     }
 
     private function hasPaidAssessment(int $sessionId): bool
@@ -288,18 +323,19 @@ final class StripeService
         ];
     }
 
-    private function failed(object $checkout, string $status): void
+    private function failed(object $checkout, string $status): array
     {
         $this->db->execute('UPDATE payments SET status = ?, updated_at = NOW() WHERE stripe_checkout_session_id = ?', [$status, $checkout->id]);
         $this->db->execute('INSERT INTO notification_events (event_key, severity, entity_type, entity_id, title, message, payload_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())', ['payment_' . $status, $status === 'failed' ? 'warning' : 'info', 'payment', (string) $checkout->id, 'Stripe payment ' . $status, 'A checkout was marked ' . $status . '.', json_encode(['checkout' => $checkout->id])]);
+        return [];
     }
 
-    private function refunded(object $charge): void
+    private function refunded(object $charge): array
     {
         $paymentIntent = (string) ($charge->payment_intent ?? '');
-        if ($paymentIntent === '') return;
+        if ($paymentIntent === '') return [];
         $payment = $this->db->fetch('SELECT * FROM payments WHERE stripe_payment_intent_id = ? FOR UPDATE', [$paymentIntent]);
-        if (!$payment) return;
+        if (!$payment) return [];
         $report = $this->db->fetch('SELECT id, pdf_path FROM generated_reports WHERE survey_session_id = ? FOR UPDATE', [$payment['survey_session_id']]);
         $this->db->execute('UPDATE payments SET status = ?, refunded_at = NOW(), updated_at = NOW() WHERE id = ?', ['refunded', $payment['id']]);
         if ($report) {
@@ -307,10 +343,11 @@ final class StripeService
             $this->db->execute('UPDATE affiliate_commissions SET status = ?, adjustment_note = ?, updated_at = NOW() WHERE payment_id = ?', ['void', 'Payment refunded', $payment['id']]);
             if (!empty($report['pdf_path']) && is_file($report['pdf_path'])) @unlink($report['pdf_path']);
         }
+        return [];
     }
 
-    private function enqueue(string $template, string $recipient, array $variables): void
+    private function enqueue(string $template, string $recipient, array $variables): int
     {
-        $this->db->execute('INSERT INTO email_queue (template_key, recipient_email, variables_json, status, attempts, scheduled_at, created_at) VALUES (?, ?, ?, ?, 0, NOW(), NOW())', [$template, strtolower($recipient), json_encode($variables), 'queued']);
+        return $this->db->insert('INSERT INTO email_queue (template_key, recipient_email, variables_json, status, attempts, scheduled_at, created_at) VALUES (?, ?, ?, ?, 0, NOW(), NOW())', [$template, strtolower($recipient), json_encode($variables), 'queued']);
     }
 }
