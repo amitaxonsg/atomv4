@@ -9,6 +9,8 @@ const admin = readFileSync(new URL("../../src/components/admin/QuestionnairePage
 const routes = readFileSync(new URL("../../backend/src/assessment-experience-routes.php", import.meta.url), "utf8");
 const service = readFileSync(new URL("../../backend/src/Services/AssessmentExperienceService.php", import.meta.url), "utf8");
 const healthService = readFileSync(new URL("../../backend/src/Services/HealthService.php", import.meta.url), "utf8");
+const passwordResetService = readFileSync(new URL("../../backend/src/Services/PasswordResetService.php", import.meta.url), "utf8");
+const routeBundle = readFileSync(new URL("../../backend/src/route-bundle.php", import.meta.url), "utf8");
 const survey = readFileSync(new URL("../../backend/src/Services/SurveyService.php", import.meta.url), "utf8");
 const main = readFileSync(new URL("../../src/main.jsx", import.meta.url), "utf8");
 const branding = readFileSync(new URL("../../src/branding/BrandContext.jsx", import.meta.url), "utf8");
@@ -109,4 +111,13 @@ test("admin warns that material question changes affect interpretation and histo
   assert.match(admin, /Do not replace a question with a different question/);
   assert.match(admin, /full meaning change can invalidate comparisons and report interpretation/);
   assert.match(admin, /published versions are immutable/);
+});
+
+test("admin password reset attempts immediate delivery and retains the retry queue", () => {
+  assert.match(passwordResetService, /public function request\(string \$email\): \?int/);
+  assert.match(passwordResetService, /\$queueId = \$this->mailQueue->enqueue\('password_reset'/);
+  assert.match(passwordResetService, /return \$queueId;/);
+  assert.match(routeBundle, /\$queueId = \$container\['passwordReset'\]->request\(\$email\)/);
+  assert.match(routeBundle, /\$container\['mailQueueProcessor'\]->processIds\(\[\$queueId\]\)/);
+  assert.match(routeBundle, /return Response::json\(\['accepted' => true\]\)/);
 });
