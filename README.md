@@ -65,10 +65,12 @@ The frozen V4 build is on branch `sunil-v4-growth-alignment-frozen` and is
 deployed separately at `https://v4.atomglobal.com`. It retains the V3 40-live-
 question process and approved branding while adding the Growth Alignment report
 experience, 90-day retest rules and database-backed development commitments.
-No new CMS interface is included in V4; editable V4 content is stored in the
-database for the following CMS phase. Apache deployment details are in
-`docs/V4-APACHE-DEPLOYMENT.md`. V4 must use its own source directory, release
-root, database, storage, cron file and virtual host; it must not modify V3.
+The protected V4 Admin is live-wired to the isolated V4 PHP API and MariaDB.
+Questionnaire content, stage images, branding, reports, payments, email,
+affiliates, SEO, settings, audit and feedback are managed without modifying V3.
+Apache deployment details are in `docs/V4-APACHE-DEPLOYMENT.md`. V4 must use
+its own source directory, release root, database, storage, cron file and virtual
+host; it must not modify V3.
 
 The existing protected V4 administration portal is available at
 `https://v4.atomglobal.com/admin`. The separate clean V4 CRM/CMS described in
@@ -96,6 +98,26 @@ release keeps all V4 isolation boundaries unchanged and adds:
 Participant PDFs remain private and are available only after the Full Report is
 unlocked. The expected attachment name is
 `Growth-Alignment-Full-Development-Report.pdf`.
+
+### V4 Admin branding and media wiring — 1 September 2026
+
+**Admin → Branding** is the source of truth for the public logo, the landing and
+Admin-login banner, favicon, email logo, report logo, colours, typography and
+layout tokens. Uploading an asset creates its V4 `media_library` record; select
+**Save draft** and then **Publish** to place the approved values in published
+settings. Public configuration is served without caching so a refreshed page
+uses the published asset URL instead of a built-in legacy logo.
+
+**Admin → Content** remains the source of truth for stage-specific questionnaire
+images and copy. The Branding banner overrides the landing visual only; later
+stage images continue to use their Content records. Supported image uploads are
+JPG, PNG, GIF, WebP, AVIF and safe SVG, with ICO additionally accepted for the
+favicon. The browser icon, Apple touch icon and public web manifest all use the
+published favicon.
+
+The initial public render waits for both branding and questionnaire content.
+This prevents a hard refresh from briefly showing a fallback logo, retired
+image or fallback heading before the published Admin configuration arrives.
 
 Every V4 questionnaire and report stage must use Sunil's original supplied
 repository asset at `/media/stages/reflection-portrait.png` (image commit
@@ -347,7 +369,7 @@ never modify the V3 site, database, release path, cron or virtual host.
 | Purpose | V4 value |
 |---|---|
 | Repository | `amitaxonsg/atomv4` |
-| Deployment branch | `sunil-v4-growth-alignment-frozen` |
+| Deployment branch | `sunil-v4-smooth-checkout-crm-blueprint` |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
 | Web releases | `/var/www/v4.atomglobal.com` |
 | Environment | `/etc/growth-alignment/v4.env` |
@@ -361,7 +383,7 @@ never modify the V3 site, database, release path, cron or virtual host.
 
 ```bash
 cd /srv/v4.atomglobal.com/source
-git pull --ff-only origin sunil-v4-growth-alignment-frozen
+git pull --ff-only origin sunil-v4-smooth-checkout-crm-blueprint
 ./deploy/update-v4-apache.sh
 ```
 
@@ -420,7 +442,7 @@ keys, tokens, database dumps or private report links.
 | TLS | Let's Encrypt; certificate files under `/etc/letsencrypt/live/v4.atomglobal.com/` |
 | Certificate renewal | Certbot scheduled renewal |
 | Git repository | `git@github.com:amitaxonsg/atomv4.git` |
-| Live branch | `sunil-v4-growth-alignment-frozen` |
+| Live branch | `sunil-v4-smooth-checkout-crm-blueprint` |
 | Mirror branch | `main` |
 
 ### Isolation boundaries
@@ -454,7 +476,7 @@ Run as root on the German VPS:
 
 ```bash
 cd /srv/v4.atomglobal.com/source
-git pull --ff-only origin sunil-v4-growth-alignment-frozen
+git pull --ff-only origin sunil-v4-smooth-checkout-crm-blueprint
 ./deploy/update-v4-apache.sh
 ```
 

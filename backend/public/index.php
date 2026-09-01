@@ -51,7 +51,24 @@ $auditLogin = static function (?array $user, string $action) use ($db): void {
 // Public system and participant routes.
 $router->add('GET', '/api/health', fn() => Response::json($container['health']->check()));
 $router->add('GET', '/api/csrf', fn() => Response::json(['token' => Csrf::token()]));
-$router->add('GET', '/api/public/configuration', fn() => Response::json($admin->publicConfiguration()));
+$router->add('GET', '/api/public/configuration', function () use ($admin) {
+    header('Cache-Control: no-store, max-age=0');
+    return Response::json($admin->publicConfiguration());
+});
+$router->add('GET', '/api/public/manifest', function () use ($container) {
+    header('Cache-Control: no-store, max-age=0');
+    $favicon = trim((string) $container['settings']->get('branding.favicon_url', '/icon-192.png')) ?: '/icon-192.png';
+    return Response::json([
+        'name' => 'Growth Alignment',
+        'short_name' => 'Growth Align',
+        'description' => 'A reflective self-assessment from Atom Global Consulting.',
+        'start_url' => '/',
+        'display' => 'standalone',
+        'background_color' => '#F7F4EF',
+        'theme_color' => '#F7F4EF',
+        'icons' => [['src' => $favicon, 'sizes' => 'any']],
+    ]);
+});
 $router->add('POST', '/api/survey-sessions', fn(Request $request) => Response::json($container['surveys']->create($request->body), 201));
 $router->add('GET', '/api/survey-sessions/resume/{token}', fn(Request $request, array $params) => Response::json($container['surveys']->resume($params['token'])));
 $router->add('PATCH', '/api/survey-sessions/{id}', fn(Request $request, array $params) => Response::json($container['surveys']->save((int) $params['id'], $request->body)));

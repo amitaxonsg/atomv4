@@ -5,6 +5,7 @@ use AtomGlobal\Http\Request;
 use AtomGlobal\Http\Response;
 
 $router->add('GET', '/api/public/assessment-experience', function () use ($container) {
+    header('Cache-Control: no-store, max-age=0');
     return Response::json($container['assessmentExperience']->publicConfiguration());
 });
 

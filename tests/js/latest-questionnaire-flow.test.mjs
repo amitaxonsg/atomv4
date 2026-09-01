@@ -55,7 +55,8 @@ test("public questionnaire keeps the latest process inside the approved split br
   assert.match(layout, /Begin the free assessment/);
   assert.doesNotMatch(layout, /Powered by/);
   assert.match(main, /questionnaire-latest\.css/);
-  assert.match(branding, /startsWith\("\/media-uploads\/"\).*legacyLogoUrl/);
+  assert.doesNotMatch(branding, /startsWith\("\/media-uploads\/"\).*legacyLogoUrl/);
+  assert.match(branding, /return url \|\| transparentLogoUrl/);
 });
 
 test("CMS stage image remains visible on mobile and the logo sits in the right content panel", () => {

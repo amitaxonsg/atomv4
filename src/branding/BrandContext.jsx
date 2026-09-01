@@ -19,7 +19,7 @@ const defaults = {
     fieldLabelSize: "12", fieldTextSize: "14", metaTextSize: "12",
     visualTitleSize: "72", visualBodySize: "22", contentMaxWidth: "720", intakeMaxWidth: "840",
     questionMaxWidth: "880", contentGutter: "72",
-    logoUrl: legacyLogoUrl, emailLogoUrl: legacyLogoUrl,
+    logoUrl: transparentLogoUrl, emailLogoUrl: legacyLogoUrl,
     reportLogoUrl: legacyLogoUrl, faviconUrl: "/icon-192.png", bannerUrl: "",
   },
   stages: stageContent,
@@ -29,7 +29,8 @@ const defaults = {
 const BrandContext = React.createContext(defaults);
 
 function normalisePublicLogoUrl(value) {
-  return !value || value === transparentLogoUrl || String(value).startsWith("/media-uploads/") ? legacyLogoUrl : value;
+  const url = String(value || "").trim();
+  return url || transparentLogoUrl;
 }
 
 function applyBranding(branding) {
@@ -74,8 +75,11 @@ function applyBranding(branding) {
     "--button-radius": `${Number(branding.buttonRadius || 8)}px`,
   };
   Object.entries(tokens).forEach(([key, value]) => value && root.style.setProperty(key, value));
-  const favicon = document.querySelector('link[rel="icon"]');
-  if (favicon && branding.faviconUrl) favicon.href = branding.faviconUrl;
+  if (branding.faviconUrl) {
+    document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]')
+      .forEach(link => { link.href = branding.faviconUrl; });
+  }
+  root.dataset.brandingReady = "true";
 }
 
 export function BrandProvider({ children }) {
@@ -106,7 +110,9 @@ export function BrandProvider({ children }) {
     return () => { active = false; };
   }, []);
 
-  return <BrandContext.Provider value={{ ...configuration, loaded }}>{children}</BrandContext.Provider>;
+  return <BrandContext.Provider value={{ ...configuration, loaded }}>
+    {loaded ? children : <div className="brand-bootstrap" role="status" aria-label="Loading website" />}
+  </BrandContext.Provider>;
 }
 
 export function useBranding() {

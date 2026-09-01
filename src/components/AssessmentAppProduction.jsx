@@ -143,20 +143,22 @@ export default function AssessmentAppProduction() {
   const [section, setSection] = React.useState(0);
   const [session, setSession] = React.useState(null);
   const [report, setReport] = React.useState(null);
-  const [experience, setExperience] = React.useState({ landing: null, tracks: {} });
+  const [experience, setExperience] = React.useState(null);
+  const [experienceLoaded, setExperienceLoaded] = React.useState(false);
   const [error, setError] = React.useState("");
   const [busy, setBusy] = React.useState(false);
   const [saveState, setSaveState] = React.useState("");
 
   const fallbackTrack = trackKey ? assessmentTracks[trackKey] : null;
   const track = buildRuntimeTrack(fallbackTrack, session?.assessment);
-  const remoteExperience = trackKey ? experience.tracks?.[trackKey] || {} : {};
+  const remoteExperience = trackKey ? experience?.tracks?.[trackKey] || {} : {};
 
   React.useEffect(() => {
     let active = true;
     api.publicAssessmentExperience()
       .then(data => { if (active) setExperience(data || { landing: null, tracks: {} }); })
-      .catch(() => {});
+      .catch(() => { if (active) setExperience({ landing: null, tracks: {} }); })
+      .finally(() => { if (active) setExperienceLoaded(true); });
     return () => { active = false; };
   }, []);
 
@@ -269,6 +271,7 @@ export default function AssessmentAppProduction() {
   const updateAnswer = (index, value) => setAnswers(current => current.map((answer, answerIndex) => answerIndex === index ? { ...answer, value } : answer));
   const updateNote = (index, note) => setAnswers(current => current.map((answer, answerIndex) => answerIndex === index ? { ...answer, note } : answer));
 
+  if (!experienceLoaded) return <div className="experience-bootstrap" role="status" aria-label="Loading assessment" />;
   if (stage === "select") return <SelectVersion experience={experience} onSelect={selectTrack} />;
   if (stage === "intro" && fallbackTrack) return <TrackIntroduction track={fallbackTrack} remoteExperience={remoteExperience} onBack={() => setStage("select")} onContinue={() => setStage("details")} />;
   if (stage === "details" && fallbackTrack) return <ParticipantDetails track={fallbackTrack} remoteExperience={remoteExperience} participant={participant} setParticipant={setParticipant} onBack={() => setStage("intro")} onContinue={begin} error={error} busy={busy} />;

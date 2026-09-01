@@ -10,9 +10,12 @@ final class MediaService
     private const EXTENSIONS = [
         'image/jpeg' => 'jpg',
         'image/png' => 'png',
+        'image/gif' => 'gif',
         'image/webp' => 'webp',
         'image/avif' => 'avif',
         'image/svg+xml' => 'svg',
+        'image/x-icon' => 'ico',
+        'image/vnd.microsoft.icon' => 'ico',
     ];
 
     public function __construct(private Database $db, private array $config) {}
@@ -36,7 +39,7 @@ final class MediaService
 
         $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($temporary) ?: '';
         if (!isset(self::EXTENSIONS[$mime])) {
-            throw new \InvalidArgumentException('Only JPEG, PNG, WebP, AVIF and SVG images are allowed.');
+            throw new \InvalidArgumentException('Only JPG, PNG, GIF, WebP, AVIF, SVG and ICO images are allowed.');
         }
 
         if ($mime === 'image/svg+xml') {

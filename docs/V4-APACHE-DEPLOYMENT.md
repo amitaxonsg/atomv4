@@ -6,7 +6,7 @@ storage, release directory, cron file or Apache virtual host.
 | Item | V4 value |
 |---|---|
 | Domain | `v4.atomglobal.com` |
-| Git branch | `sunil-v4-growth-alignment-frozen` |
+| Git branch | `sunil-v4-smooth-checkout-crm-blueprint` |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
 | Web releases | `/var/www/v4.atomglobal.com` |
 | Environment file | `/etc/growth-alignment/v4.env` |

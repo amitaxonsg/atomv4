@@ -390,3 +390,11 @@
     flex-basis: 90px;
   }
 }
+/* Hold the public UI on a neutral canvas until CMS branding and questionnaire
+   content have loaded. This prevents hard-refresh flashes of retired assets or
+   fallback wording before the published Admin configuration is available. */
+.brand-bootstrap,
+.experience-bootstrap {
+  min-height: 100vh;
+  background: var(--paper, #f7f4ef);
+}
