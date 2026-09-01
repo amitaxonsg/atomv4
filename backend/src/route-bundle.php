@@ -17,7 +17,8 @@ $router->add('POST', '/api/admin/password-reset/request', function (Request $req
     if (!(new RateLimiter($db))->hit($key, 5, 3600)) {
         return Response::json(['accepted' => true]);
     }
-    $container['passwordReset']->request($email);
+    $queueId = $container['passwordReset']->request($email);
+    if ($queueId !== null) $container['mailQueueProcessor']->processIds([$queueId]);
     return Response::json(['accepted' => true]);
 });
 
