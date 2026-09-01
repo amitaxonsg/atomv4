@@ -12,11 +12,16 @@ const survey = readFileSync(new URL("../../backend/src/Services/SurveyService.ph
 const main = readFileSync(new URL("../../src/main.jsx", import.meta.url), "utf8");
 const branding = readFileSync(new URL("../../src/branding/BrandContext.jsx", import.meta.url), "utf8");
 const questionnaireStyles = readFileSync(new URL("../../src/questionnaire-latest.css", import.meta.url), "utf8");
+const mockData = readFileSync(new URL("../../src/api/mockData.js", import.meta.url), "utf8");
+const v4LandingImageMigration = readFileSync(new URL("../../database/migrations/017_v4_restore_supplied_landing_image.sql", import.meta.url), "utf8");
 
 test("public questionnaire keeps the latest process inside the approved split branding", () => {
   assert.match(layout, /latest-questionnaire-shell/);
   assert.match(layout, /latest-visual-panel/);
   assert.match(layout, /reflection-portrait\.png/);
+  assert.match(mockData, /version: \{ image: "\/media\/stages\/reflection-portrait\.png"/);
+  assert.match(v4LandingImageMigration, /stage_key = 'version'/);
+  assert.match(v4LandingImageMigration, /\/media\/stages\/reflection-portrait\.png/);
   assert.match(experience, /Every choice you make is cast by two votes/);
   assert.match(layout, /latest-track-card/);
   assert.match(layout, /Personal Assessment/);
@@ -34,6 +39,7 @@ test("CMS stage image remains visible on mobile and the logo sits in the right c
   assert.match(questionnaireStyles, /@media \(max-width: 900px\)[\s\S]*\.latest-visual-panel \{[\s\S]*display: block;/);
   assert.match(questionnaireStyles, /height: clamp\(210px, 56\.25vw, 330px\)/);
   assert.doesNotMatch(layout, /latest-visual-panel__logo/);
+  assert.match(questionnaireStyles, /\.latest-visual-panel__copy \{[\s\S]*margin-top: auto;/);
   assert.match(questionnaireStyles, /\.latest-public-brand \{[\s\S]*display: flex;[\s\S]*justify-content: flex-end;/);
   assert.match(questionnaireStyles, /object-position: right center/);
   assert.doesNotMatch(questionnaireStyles, /@media \(max-width: 900px\)[\s\S]*?\.latest-visual-panel \{ display: none; \}/);
