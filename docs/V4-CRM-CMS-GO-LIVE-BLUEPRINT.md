@@ -6,6 +6,26 @@ Provide one clean, modern administration workspace for Growth Alignment V4 witho
 
 The V4 repository already contains the required secure foundations: participant records, versioned assessments, reports, payments, email templates and queue, affiliates, roles, audit history, branding, and integration settings. The implementation should simplify and complete this foundation instead of creating a second backend.
 
+## UAT release memory — 1 September 2026
+
+- Treat V4 as an isolated UAT candidate; never clean or deploy V3 resources.
+- The existing V4 Admin workspace and its 16 modules remain the control surface;
+  V3 is a functional reference only.
+- Preserve Admin users, assessment/CMS/configuration, email templates and
+  affiliate definitions when preparing the clean UAT baseline.
+- Remove historical participant, assessment run, answer, report/PDF, payment,
+  webhook, email, affiliate activity, analytics, feedback and test/audit data
+  only through the guarded `backend/bin/reset-v4-uat-data.php` command.
+- Both card and temporary UAT checkout open separately. Successful processing
+  must end on the professional private Full Report, whose fallback action is
+  **Show the Report** and whose delivery controls include PDF download and email.
+- Payment success and Full Report email delivery are attempted immediately;
+  retry-safe background processing remains mandatory.
+- Deploy, complete burn-in, then run the final clean-baseline reset and health
+  verification before handing UAT to Spencer with Sunil copied.
+- No real card transaction is included in Spencer's normal UAT unless Amit
+  explicitly authorises it.
+
 ## Go-live priorities
 
 1. The participant completes an assessment and sees the Lite Report.
