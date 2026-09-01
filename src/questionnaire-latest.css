@@ -36,6 +36,7 @@
 
 .latest-visual-panel__copy {
   max-width: 520px;
+  margin-top: auto;
 }
 
 .latest-visual-panel__copy h2 {
