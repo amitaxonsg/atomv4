@@ -70,6 +70,10 @@ database for the following CMS phase. Apache deployment details are in
 `docs/V4-APACHE-DEPLOYMENT.md`. V4 must use its own source directory, release
 root, database, storage, cron file and virtual host; it must not modify V3.
 
+The existing protected V4 administration portal is available at
+`https://v4.atomglobal.com/admin`. The separate clean V4 CRM/CMS described in
+the blueprint remains a proposed next phase and is not included in this release.
+
 ### V4 checkout and report-delivery update — 1 September 2026
 
 The production candidate for the smoother checkout and Full Report journey is
