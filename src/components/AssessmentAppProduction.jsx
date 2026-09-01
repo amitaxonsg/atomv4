@@ -55,7 +55,7 @@ function PaymentStatus({ cancelled = false }) {
           : "UAT Test — No Payment is enabled for client testing. No Stripe charge was made. Your Full Report has been unlocked, but email delivery is retrying in the background."
         : status.error || "Payment received. We are securely unlocking your Full Development Report and will open it here automatically. Your PDF is also being emailed to you."}</p>
     {uatNoPayment && reportUrl
-      ? <a className="button button--primary" href={reportUrl}>Open Full Report</a>
+      ? <a className="button button--primary" href={reportUrl}>Show the Report</a>
       : cancelled || !checkoutId || !status.checking
         ? <a className="button button--primary" href="/">Return to assessment</a>
         : <p className="payment-preparing" role="status">Securely preparing your report…</p>}
