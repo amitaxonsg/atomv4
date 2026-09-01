@@ -106,6 +106,11 @@ overlay copy is anchored at the bottom of the desktop visual; the public Atom
 Global logo is rendered in the top-right of the content panel. Do not
 regenerate, redraw or replace Sunil's supplied image.
 
+The retired V3-style asset `/media/stages/sunil-head-heart-v3.webp` is not part
+of the V4 public build. Migration `019_v4_remove_retired_head_heart_image.sql`
+also removes its stale record from the isolated V4 media catalogue, preventing
+the old public URL from being served after deployment.
+
 #### Spencer UAT handoff
 
 Use a fresh mailbox or a plus-address for each new submission. Test desktop and
