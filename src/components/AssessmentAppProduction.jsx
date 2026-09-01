@@ -9,23 +9,56 @@ import ReportView from "./assessment/ReportView";
 function PaymentStatus({ cancelled = false }) {
   const params = new URLSearchParams(window.location.search);
   const method = params.get("method") || "";
+  const checkoutId = params.get("checkout") || "";
   const reportUrl = params.get("report") || "";
   const emailDelivery = params.get("email") || "queued";
   const uatNoPayment = method === "cash-on-delivery";
+  const [status, setStatus] = React.useState({ checking: Boolean(checkoutId) && !cancelled, error: "" });
+
+  React.useEffect(() => {
+    if (!checkoutId || cancelled || uatNoPayment) return undefined;
+    let active = true;
+    let timer;
+    let attempts = 0;
+    const check = async () => {
+      attempts += 1;
+      try {
+        const result = await api.checkoutStatus(checkoutId);
+        if (!active) return;
+        if (result.reportReady && result.reportUrl) {
+          window.location.replace(result.reportUrl);
+          return;
+        }
+        if (attempts >= 50) {
+          setStatus({ checking: false, error: "Your payment is confirmed, but the private report is taking longer than expected. The PDF and report link will also be sent to your email." });
+          return;
+        }
+        timer = window.setTimeout(check, 1200);
+      } catch (error) {
+        if (!active) return;
+        if (attempts >= 50) setStatus({ checking: false, error: error.message });
+        else timer = window.setTimeout(check, 1200);
+      }
+    };
+    check();
+    return () => { active = false; window.clearTimeout(timer); };
+  }, [checkoutId, cancelled, uatNoPayment]);
 
   return <StageShell>
     <p className="eyebrow">Secure checkout</p>
-    <h1>{cancelled ? "Payment not completed" : uatNoPayment ? "UAT Test — No Payment selected" : "Payment received"}</h1>
+    <h1>{cancelled ? "Payment not completed" : uatNoPayment ? "UAT Test — No Payment selected" : "Preparing your Full Report"}</h1>
     <p className="lead">{cancelled
       ? "Nothing was charged. Return to your private report link when you are ready to try again."
       : uatNoPayment
         ? emailDelivery === "sent"
           ? "UAT Test — No Payment is enabled for client testing. No Stripe charge was made. Your Full Report has been unlocked, and the confirmation and PDF report emails were accepted by the email provider."
           : "UAT Test — No Payment is enabled for client testing. No Stripe charge was made. Your Full Report has been unlocked, but email delivery is retrying in the background."
-        : "Stripe is confirming your payment. After the signed webhook is verified, a fresh private Full Report link and PDF report email are sent."}</p>
+        : status.error || "Payment received. We are securely unlocking your Full Development Report and will open it here automatically. Your PDF is also being emailed to you."}</p>
     {uatNoPayment && reportUrl
       ? <a className="button button--primary" href={reportUrl}>Open Full Report</a>
-      : <a className="button button--primary" href="/">Return to assessment</a>}
+      : cancelled || !checkoutId || !status.checking
+        ? <a className="button button--primary" href="/">Return to assessment</a>
+        : <p className="payment-preparing" role="status">Securely preparing your report…</p>}
   </StageShell>;
 }
 
