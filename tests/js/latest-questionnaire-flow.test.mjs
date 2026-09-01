@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const layout = readFileSync(new URL("../../src/components/assessment/AssessmentLayout.jsx", import.meta.url), "utf8");
 const experience = readFileSync(new URL("../../src/data/assessmentExperience.js", import.meta.url), "utf8");
@@ -15,6 +15,7 @@ const questionnaireStyles = readFileSync(new URL("../../src/questionnaire-latest
 const mockData = readFileSync(new URL("../../src/api/mockData.js", import.meta.url), "utf8");
 const v4LandingImageMigration = readFileSync(new URL("../../database/migrations/017_v4_restore_supplied_landing_image.sql", import.meta.url), "utf8");
 const v4AllStageImageMigration = readFileSync(new URL("../../database/migrations/018_v4_use_supplied_image_all_stages.sql", import.meta.url), "utf8");
+const v4RetiredImageMigration = readFileSync(new URL("../../database/migrations/019_v4_remove_retired_head_heart_image.sql", import.meta.url), "utf8");
 
 test("public questionnaire keeps the latest process inside the approved split branding", () => {
   assert.match(layout, /latest-questionnaire-shell/);
@@ -29,6 +30,9 @@ test("public questionnaire keeps the latest process inside the approved split br
   assert.match(v4AllStageImageMigration, /UPDATE content_stages AS stage/);
   assert.match(v4AllStageImageMigration, /stage\.mobile_media_id = NULL/);
   assert.doesNotMatch(v4AllStageImageMigration, /WHERE stage\.stage_key/);
+  assert.equal(existsSync(new URL("../../public/media/stages/sunil-head-heart-v3.webp", import.meta.url)), false);
+  assert.match(v4RetiredImageMigration, /DELETE FROM media_library/);
+  assert.match(v4RetiredImageMigration, /\/media\/stages\/sunil-head-heart-v3\.webp/);
   assert.match(experience, /Every choice you make is cast by two votes/);
   assert.match(layout, /latest-track-card/);
   assert.match(layout, /Personal Assessment/);
