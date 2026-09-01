@@ -64,6 +64,14 @@ $router->add('POST', '/api/payments/checkout', function (Request $request) use (
     $stripe = new StripeService($container['db'], $container['settings'], $container['reports'], $config);
     return Response::json($stripe->checkout((int) ($request->body['sessionId'] ?? 0), (string) ($request->body['track'] ?? ''), $request->body['affiliateCode'] ?? null));
 });
+$router->add('GET', '/api/payments/checkout-status', function (Request $request) use ($container, $config, $db) {
+    $checkout = (string) $request->query('checkout', '');
+    if (!(new RateLimiter($db))->hit('checkout-status:' . hash('sha256', $checkout . ':' . ($_SERVER['REMOTE_ADDR'] ?? '')), 60, 300)) {
+        return Response::error('Please wait before checking payment status again.', 429);
+    }
+    $stripe = new StripeService($container['db'], $container['settings'], $container['reports'], $config);
+    return Response::json($stripe->checkoutStatus($checkout));
+});
 $router->add('POST', '/api/payments/cash-on-delivery', function (Request $request) use ($container, $config) {
     $cash = new CashOnDeliveryService($container['db'], $container['settings'], $container['reports'], $config);
     $result = $cash->checkout((int) ($request->body['sessionId'] ?? 0), (string) ($request->body['track'] ?? ''));
@@ -76,8 +84,10 @@ $router->add('POST', '/api/payments/cash-on-delivery', function (Request $reques
 });
 $router->add('POST', '/api/stripe/webhook', function (Request $request) use ($container, $config) {
     $stripe = new StripeService($container['db'], $container['settings'], $container['reports'], $config);
-    $stripe->webhook($request->rawBody, $request->header('stripe-signature') ?? '');
-    return Response::json(['received' => true]);
+    $emailQueueIds = $stripe->webhook($request->rawBody, $request->header('stripe-signature') ?? '');
+    $delivery = $container['mailQueueProcessor']->processIds($emailQueueIds);
+    $sent = count(array_filter($delivery, static fn(array $item): bool => $item['status'] === 'sent'));
+    return Response::json(['received' => true, 'emailDelivery' => $emailQueueIds && $sent === count($emailQueueIds) ? 'sent' : ($emailQueueIds ? 'retrying' : 'not_required')]);
 });
 
 // Secure administration session.
