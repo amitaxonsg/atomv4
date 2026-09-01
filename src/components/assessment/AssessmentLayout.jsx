@@ -37,7 +37,6 @@ function VisualPanel({ stageKey = "version" }) {
       backgroundPosition: stage.focalPoint || "52% 50%",
     }}
   >
-    <a className="latest-visual-panel__logo" href="https://www.atomglobal.com" target="_blank" rel="noreferrer"><BrandLogo /></a>
     <div className="latest-visual-panel__copy">
       {stage.headline && <h2>{stage.headline}</h2>}
       {stage.supporting && <p>{stage.supporting}</p>}
