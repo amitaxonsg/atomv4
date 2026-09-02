@@ -14,8 +14,8 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Live deployed application commit** | `d73684abf095063894b1dd90870a8ce3d2d37dc5` |
-| Current live backup branch | `v4-live-backup-20260902-d73684a` |
+| **Live deployed application commit** | `3c21f046134e19dcbd1df656ac199c650c86fe62` |
+| Current live backup branch | `v4-live-backup-20260902-3c21f04` |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
 | Releases | `/var/www/v4.atomglobal.com/releases` |
 | Active release | `/var/www/v4.atomglobal.com/current` |
@@ -99,7 +99,30 @@ A regression test covering autosave serialization and stale-error clearing was a
 
 `d73684abf095063894b1dd90870a8ce3d2d37dc5`
 
-This is the current live deployed application commit.
+### 4. Halfway and completion milestone presentation
+
+The halfway and completion messages were visually improved without changing CMS-controlled wording or assessment logic.
+
+Current treatment includes:
+
+- stronger gold-accent card;
+- milestone label/badge;
+- subtle gradient/glow;
+- stronger spacing and typography;
+- richer completion-state accent;
+- gentle entrance animation;
+- reduced-motion support;
+- mobile-specific sizing and spacing.
+
+The first milestone markup attempt changed too much of `AssessmentLayout.jsx` and was correctly blocked by the automated deployment gate. The approved V4 questionnaire layout was restored and only the intended milestone markup was reapplied in commit:
+
+`4a31759fdc7b2aa28bef636167699991c152f1f4`
+
+The README regression expectation was then restored and the complete deployment passed at:
+
+`3c21f046134e19dcbd1df656ac199c650c86fe62`
+
+This is the current live deployed V4 application baseline.
 
 ## Approved visual state
 
@@ -260,7 +283,7 @@ curl -fsS https://v4.atomglobal.com/api/health
 The live deployed marker for the current application baseline is:
 
 ```text
-d73684abf095063894b1dd90870a8ce3d2d37dc5
+3c21f046134e19dcbd1df656ac199c650c86fe62
 ```
 
 ## Approved V4 backup procedure
@@ -268,7 +291,7 @@ d73684abf095063894b1dd90870a8ce3d2d37dc5
 Current Git safety branch for the live application baseline:
 
 ```text
-v4-live-backup-20260902-d73684a
+v4-live-backup-20260902-3c21f04
 ```
 
 A full operational backup should also include:
@@ -287,6 +310,8 @@ Retest at minimum:
 
 - Personal/New Joiner/Manager/Executive starts;
 - 40 questions / 10 sections;
+- halfway milestone after question 20;
+- completion milestone after question 40;
 - rapid mobile answering/autosave;
 - stale `Load failed` clearing after successful save;
 - resume persistence;
