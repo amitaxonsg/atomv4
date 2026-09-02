@@ -2,20 +2,20 @@
 
 > **V4 ONLY — CURRENT SOURCE OF TRUTH**
 >
-> This repository and this README describe the approved V4 deployment at `https://v4.atomglobal.com/`. Do not use another project/version as a visual, deployment, database or CMS reference for V4 work.
+> This README describes the approved V4 production deployment at `https://v4.atomglobal.com/`. Do not use another version/repository as a visual, deployment, database, CMS or feature reference for V4 work.
 
-Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Global Consulting, including questionnaire, CMS/Admin, Lite/Full reports, payments, email, analytics, affiliates and audit history.
+Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Global Consulting, including questionnaire, CMS/Admin, Lite/Full reports, Stripe payments, UAT no-payment control, PDF/email delivery, analytics, affiliates and audit history.
 
-## Approved live baseline — 2 September 2026
+## Current production baseline — 2 September 2026
 
-| Item | Approved V4 value |
+| Item | Current V4 value |
 |---|---|
 | Public URL | `https://v4.atomglobal.com/` |
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| Approved code commit | `02ffc7b60d49841ea8779c22ee6dcae299f4dd8d` |
-| Approved Git backup branch | `v4-live-approved-backup-20260902` |
+| **Live deployed application commit** | `d73684abf095063894b1dd90870a8ce3d2d37dc5` |
+| Current live backup branch | `v4-live-backup-20260902-d73684a` |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
 | Releases | `/var/www/v4.atomglobal.com/releases` |
 | Active release | `/var/www/v4.atomglobal.com/current` |
@@ -26,25 +26,94 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Cron | `/etc/cron.d/growth-alignment-v4` |
 | Web server | Apache + PHP 8.3-FPM |
 
-The approved V4 baseline passed the complete automated readiness gate: **73/73 frontend tests**, Vite production build, PHP lint/tests and the full MariaDB integration/acceptance suite.
+> The README/documentation commit may be newer than the deployed application commit because README-only changes do not require a production redeploy. The authoritative live runtime marker is `/var/www/v4.atomglobal.com/deployed-commit.txt`.
 
-Production health after deployment returned `status: ok` with database, migrations, storage, Stripe, Stripe webhook, email and cron healthy. `feedbackGitHub` is optional and is not a launch blocker.
+The current V4 production build passed **73/73 frontend tests**, Vite production build, PHP syntax/tests and deployment health checks.
+
+Latest health confirmed `status: ok` with database, migrations, storage, Stripe, Stripe webhook, email and cron healthy. `feedbackGitHub:false` is optional and not a launch blocker.
+
+## What was updated on 2 September 2026
+
+### 1. Admin UAT No-Payment visibility fix
+
+Problem observed: Admin had **Client UAT payment bypass / Cash on Delivery** disabled, but the Lite Report checkout still showed:
+
+- `UAT Test — No Payment`
+- the UAT explanatory paragraph.
+
+Root cause: the report payload was still reading `payments.cash_on_delivery_enabled` directly instead of honoring the system-level Admin override.
+
+Fixed in commit:
+
+`183027dc9ceefb156d0cad53b52664eb4b5d43b4`
+
+`ReportService::cashOnDeliveryAvailable()` now checks:
+
+1. `system.cash_on_delivery_enabled`
+2. falls back to `payments.cash_on_delivery_enabled` only when the system override is not set.
+
+Therefore, when Admin saves:
+
+```text
+system.cash_on_delivery_enabled = false
+```
+
+both the UAT button and UAT explanatory message are hidden after a fresh report load, and the backend UAT route remains unavailable.
+
+### 2. Personal checkout supporting message emphasis
+
+The Personal-only line:
+
+`For less than a cup of coffee, find out more about yourself.`
+
+was made easier to notice while remaining scoped only to the Personal assessment.
+
+Updated styling:
+
+- slightly larger text;
+- stronger font weight;
+- warm accent color rather than white;
+- improved spacing beneath the payment wording.
+
+Implemented in commit:
+
+`4c784a6cc5ffebb025f4ab27443fa03a94f2661b`
+
+### 3. Mobile autosave race-condition fix
+
+Problem observed on mobile: when participants answered quickly while the previous answer was still saving, overlapping save requests could occur. An earlier failed request could leave a stale red `Load failed` message on screen even after a later save completed successfully and the header showed `Saved`.
+
+Fixed in commit:
+
+`03d3e998e4ee9f97ef734de06e290d934e5ddbb4`
+
+The V4 questionnaire now:
+
+- serializes autosave requests;
+- avoids overlapping in-flight save writes;
+- allows only the latest save result to control visible save/error status;
+- explicitly clears the stale error after the latest save succeeds;
+- keeps the participant answer/session persistence behavior unchanged.
+
+A regression test covering autosave serialization and stale-error clearing was added in commit:
+
+`d73684abf095063894b1dd90870a8ce3d2d37dc5`
+
+This is the current live deployed application commit.
 
 ## Approved visual state
 
-The visual state currently accepted in production is part of the V4 baseline and must not be replaced by an older design.
+The approved production presentation must remain unchanged unless specifically requested:
 
-- Desktop uses the V4 split layout: visual panel on the left and application content on the right.
-- The approved Atom Global public logo is shown in the **right/content panel**.
-- Left-panel headline/supporting copy is pinned to the **bottom-left** on desktop.
-- The V4 landing (`version`) stage intentionally has no CMS desktop/mobile media assignment so it resolves to the deployed approved V4 hero asset at `/media/stages/reflection-portrait.png`.
-- Inner stages use the approved V4 CMS/content-stage image assignments. Do not introduce obsolete image assets or hard-coded visual fallbacks.
-- Mobile keeps the approved responsive V4 treatment and iOS-safe form controls.
-- CMS logo and stage-image values are authoritative where configured.
+- desktop split layout: image/visual panel left, application content right;
+- Atom Global public logo in the right/content panel;
+- left visual headline/support copy positioned bottom-left on desktop;
+- landing stage (`version`) intentionally uses the deployed approved `/media/stages/reflection-portrait.png` when no CMS media assignment is present;
+- inner-stage CMS/content images remain authoritative;
+- mobile keeps the approved responsive presentation and iOS-safe controls;
+- no obsolete hard-coded image fallback should override valid CMS settings.
 
-### Critical landing-stage rule
-
-The approved landing state is:
+### Critical landing-stage state
 
 ```text
 stage_key: version
@@ -54,122 +123,78 @@ focal_x: 52.00
 focal_y: 50.00
 ```
 
-This is intentional. Do not assign a different CMS image to `version` unless Amit explicitly approves a new V4 landing image.
+This is intentional V4 configuration.
 
-## Changes applied in the 2 September V4 burn-in
+## Current participant journey
 
-The following work is included in the approved V4 baseline or its live CMS/database state:
-
-- mobile dropdown/viewport-width hardening;
-- full-width mobile report/payment controls;
-- iPhone/iOS 16px form-control reflow/focus protection;
-- checkout-return recovery when Stripe is cancelled/closed and the page retains a stale `Opening checkout…` state;
-- V4 service-worker hostname corrected to `v4.atomglobal.com`;
-- correct public logo/CMS asset handling;
-- approved right-side public-logo placement restored;
-- approved bottom-left visual-panel copy positioning restored;
-- obsolete visual fallback behavior removed from the participant/Admin runtime;
-- 40-question, 10-section live questionnaire retained;
-- registration, consent, autosave, resume/session restoration and database persistence retained;
-- Lite Report locking and report security retained;
-- Personal-only `For less than a cup of coffee, find out more about yourself.` payment supporting copy;
-- stronger halfway/completion presentation;
-- server-controlled UAT No-Payment availability retained;
-- report/PDF/email/payment backend acceptance retained;
-- CMS/Admin modules remain wired to the production API/database.
-
-## Questionnaire and participant journey
-
-V4 exposes four public tracks:
+V4 exposes four public assessment tracks:
 
 - Personal
 - New Joiner
 - Manager
 - Executive
 
-New participant sessions use 40 live questions across 10 sections. The approved source/version bank and historical snapshots remain protected for reporting/version integrity.
+The live questionnaire uses **40 questions across 10 sections**.
 
-The participant flow covers:
+Journey:
 
 1. track selection;
-2. track introduction;
-3. registration/intake and consent;
+2. introduction;
+3. participant details and consent;
 4. secure survey session creation;
-5. 40 questions / 10 sections;
+5. 40-question assessment;
 6. autosave and resume;
 7. completion/scoring;
 8. Lite Report;
-9. Stripe or authorised UAT route for Full Report;
-10. secure report link, PDF and email delivery.
+9. Stripe checkout or explicitly enabled UAT no-payment route;
+10. Full Report, secure link, PDF and email delivery.
 
-## Admin / CMS coverage
+## Admin / CMS wiring
 
-The V4 Admin is wired to the production API/database for:
+V4 Admin is connected to the production API/database for:
 
 - Dashboard and insights
-- Participants and participant history
-- Questionnaire content/experience
+- Participants/history
+- Questionnaire experience/content
 - Assessments and protected question corrections
-- Content stages and media
+- Content stages/media
 - Branding and public/report/email assets
-- Reports and PDF actions
-- Payments
+- Reports/PDF actions
+- Payments and UAT control
 - Email templates and delivery queue
-- Affiliates and attribution
+- Affiliates/attribution
 - Analytics/funnel
 - SEO/AEO/GEO
-- Settings and integrations
+- Settings/integrations
 - Admin users/permissions
 - Audit logs
 - Feedback/help
 
-Do not make a CMS visual change and then compensate for it with a hard-coded frontend fallback. V4 should render the approved CMS/database state directly.
+CMS/database state is authoritative. Do not compensate for an Admin/CMS setting with an unrelated hard-coded frontend override.
 
 ## UAT No-Payment control
 
-The client UAT bypass is controlled from:
+Admin location:
 
 **Admin → Payments → Client UAT payment bypass**
 
-The Admin writes the system-level `system.cash_on_delivery_enabled` setting. The backend checks the same setting before allowing the route, and the participant report uses the server-provided `cashOnDeliveryAvailable` value to decide whether the UAT controls are rendered.
-
-### Confirmed Admin behavior — 2 September 2026
-
-The Admin save path was manually verified against the live V4 database.
-
-When the Admin option is **enabled and saved**:
+Effective system setting:
 
 ```text
-system.cash_on_delivery_enabled = true
+system.cash_on_delivery_enabled
 ```
 
-After reopening or hard-refreshing the Lite Report checkout:
+When `true`, the controlled UAT no-charge test route may appear.
 
-- the **UAT Test — No Payment** button may be shown;
-- the UAT explanatory text may be shown;
-- the backend may accept the controlled no-charge UAT unlock flow.
+When `false`:
 
-When the Admin option is **unticked and saved**:
+- `UAT Test — No Payment` must not appear;
+- its explanatory paragraph must not appear;
+- the backend must reject the no-payment UAT route.
 
-```text
-system.cash_on_delivery_enabled = false
-```
+For public/normal operation this setting should remain disabled unless Amit explicitly enables it for a controlled UAT test.
 
-After reopening or hard-refreshing the Lite Report checkout:
-
-- the **UAT Test — No Payment** button must not be shown;
-- the UAT explanatory text must not be shown;
-- the UAT no-charge route must not be available.
-
-The live database was verified after Admin save and returned:
-
-```text
-UAT enabled: false
-```
-
-This confirms the Admin checkbox/save operation is persisting the system override correctly. If the participant checkout still shows the UAT button or UAT explanatory text after a fresh report reload while the server value is `false`, record it as a V4 frontend/report-state bug rather than changing the database manually.
-
-### Server verification command
+Server verification:
 
 ```bash
 cd /srv/v4.atomglobal.com/source
@@ -182,28 +207,30 @@ echo PHP_EOL;
 '
 ```
 
-For public launch, the effective UAT No-Payment state must remain **disabled** unless Amit explicitly enables it for a controlled test.
+## Mobile autosave behavior
 
-Do not use a real card during UAT unless Amit explicitly authorises a controlled payment test.
+The question screen displays the save state near the progress indicator.
 
-## Database integrity verified on 2 September
+Expected behavior:
 
-The live production review confirmed:
+- answer change → `Saving…`;
+- latest save succeeds → `Saved`;
+- temporary failed save → error may be shown;
+- a subsequent successful latest save must clear the stale error automatically.
 
-- four assessment tracks;
-- four assessment versions;
-- completed sessions without report: `0`;
-- orphan reports: `0`;
-- orphan payments: `0`;
-- existing email queue records checked with all observed queue items in `sent` state at the time of audit;
-- manual UAT payments and unlocked reports reconciled;
-- observed Stripe test/UAT records were `checkout_started`, not successful charged payments.
+Rapid tapping must not cause concurrent save requests to overwrite each other's UI state.
 
-Do not delete participant/session/payment/report data during normal UAT cleanup without first reviewing relationships and taking a V4 database backup.
+During UAT, specifically test:
+
+- fast consecutive answer changes;
+- section changes while saving;
+- temporary network slowdown/interruption;
+- recovery back to `Saved` without a persistent `Load failed` banner;
+- browser refresh/resume confirming persisted answers.
 
 ## Standard V4 deployment
 
-Use Apache only for this V4 deployment.
+Apache only:
 
 ```bash
 cd /srv/v4.atomglobal.com/source
@@ -216,90 +243,75 @@ sudo BRANCH=production-readiness-v4-mobile-final-20260902 \
   bash deploy/update-v4-apache.sh
 ```
 
-The deployer must:
-
-- back up the V4 database;
-- validate the V4 environment;
-- run PHP lint/tests;
-- run migrations/seed validation;
-- run frontend tests/build;
-- build an immutable release;
-- atomically switch only the V4 release symlink;
-- reload PHP-FPM/Apache;
-- verify the V4 cron and health endpoint;
-- roll back the V4 release automatically if a post-switch check fails.
+The deployer performs database backup, environment validation, migrations/seed validation, PHP tests, frontend tests/build, immutable release creation, atomic symlink switch, PHP-FPM/Apache reload, cron verification and health checking.
 
 ### Post-deployment verification
 
 ```bash
+echo "SOURCE:"
+git rev-parse HEAD
+
+echo "LIVE:"
 cat /var/www/v4.atomglobal.com/deployed-commit.txt
+
 curl -fsS https://v4.atomglobal.com/api/health
-git status --short
 ```
 
-Then perform a real browser hard refresh and manually verify desktop/mobile visuals before declaring the deployment accepted.
-
-## Approved V4 backup procedure
-
-Git is only part of the live state. V4 visual settings, UAT state and other operational configuration also live in MariaDB/CMS settings.
-
-Before major changes, create a snapshot under `/var/backups/growth-alignment-v4/` containing at minimum:
-
-- current Git commit and status;
-- MariaDB backup of `growth_alignment_v4`;
-- `/etc/growth-alignment/v4.env` with root-only protection;
-- `content_stages` state;
-- `media_library` state;
-- effective UAT setting;
-- current active release path/commit marker.
-
-The approved Git safety branch is:
+The live deployed marker for the current application baseline is:
 
 ```text
-v4-live-approved-backup-20260902
+d73684abf095063894b1dd90870a8ce3d2d37dc5
 ```
 
-Do not move or overwrite this backup branch casually. Create a new dated backup branch for a future approved baseline.
+## Backup / recovery
 
-## Spencer UAT continuation
+Current Git safety branch for the live application baseline:
 
-Spencer should continue UAT against **only** `https://v4.atomglobal.com/` and record findings under the V4 Sunil folder in `amitaxonsg/Spencer-Project`.
+```text
+v4-live-backup-20260902-d73684a
+```
 
-Retest coverage should include:
+A full operational backup should also include:
 
-- desktop landing and all inner pages;
-- right-side public logo;
-- approved left-panel image and bottom-left copy;
-- mobile/iPhone/Android layout and no horizontal overflow;
-- registration/intake validation;
-- Personal, New Joiner, Manager and Executive starts;
+- MariaDB `growth_alignment_v4` dump;
+- `/etc/growth-alignment/v4.env` with protected permissions;
+- content-stage/media state;
+- effective UAT setting;
+- current active release/deployed commit marker.
+
+Git alone does not contain all live CMS/database configuration.
+
+## UAT focus after current fixes
+
+Retest at minimum:
+
+- Personal/New Joiner/Manager/Executive starts;
 - 40 questions / 10 sections;
-- answer isolation, N/A, notes and section navigation;
-- autosave/resume persistence;
-- Lite Report and locked Full Report;
-- Stripe checkout open/cancel/return/retry without a real charge unless authorised;
-- Admin UAT toggle: enable/save/reload shows the UAT controls; disable/save/reload hides both the UAT button and explanation;
-- controlled UAT No-Payment only when explicitly enabled for testing;
-- Full Report, secure token, PDF and email;
-- Admin Participants, Questionnaire, Assessments, Content, Branding, Reports, Payments, Email, Settings, Analytics, Affiliates, Audit and SEO;
-- CMS edits reflected correctly on the frontend without fallback content reappearing.
-
-Record PASS/FAIL, device/browser, exact page/track, reproduction steps and screenshots for every failure.
+- rapid mobile answering/autosave;
+- stale `Load failed` clearing after successful save;
+- resume persistence;
+- Lite Report/Full Report lock;
+- Personal checkout coffee supporting line styling;
+- Admin UAT enabled → button/explanation visible;
+- Admin UAT disabled → button/explanation absent;
+- Stripe checkout open/cancel/return/retry;
+- secure Full Report/PDF/email delivery;
+- CMS image/logo/content edits reflected correctly without obsolete fallback behavior.
 
 ## Change-control rule
 
-**Do not mix V4 with any other version or repository.**
+**Do not mix V4 with another version or repository.**
 
-Before changing production V4:
+Before any V4 production change:
 
-1. start from the approved V4 branch/baseline;
+1. start from the current V4 branch;
 2. back up Git + database/CMS state;
-3. record the requested change;
-4. make the smallest V4-only change;
-5. run the complete automated gate;
-6. review the diff;
-7. deploy with the V4 Apache deployer;
-8. verify health and real desktop/mobile visuals;
-9. update the V4 UAT record/README when the baseline changes.
+3. make the smallest V4-only change;
+4. run the complete automated gate;
+5. review the diff;
+6. deploy with the V4 Apache deployer;
+7. verify the deployed commit and `/api/health`;
+8. perform browser/mobile UAT;
+9. update this README when the accepted baseline changes.
 
-Never infer that a similarly named image, CSS rule, migration or historical commit represents the approved V4 visual state. The current live V4 baseline and this README are authoritative.
+The current live V4 runtime and this README are the authoritative operational reference.
