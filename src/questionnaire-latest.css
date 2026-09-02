@@ -1,7 +1,7 @@
 .latest-questionnaire-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(430px, 43vw) minmax(0, 1fr);
+  grid-template-columns: minmax(420px, 46%) minmax(0, 54%);
   background: var(--paper, #f7f4ef);
   color: var(--ink, #211c16);
 }
@@ -51,6 +51,7 @@
 
 .latest-visual-panel__copy {
   max-width: 520px;
+  margin-top: auto;
 }
 
 .latest-visual-panel__copy h2 {
@@ -114,8 +115,9 @@
 }
 
 .latest-public-brand {
-  display: none;
+  display: flex;
   align-items: center;
+  justify-content: flex-end;
   margin-bottom: 34px;
   text-decoration: none;
 }
@@ -125,7 +127,7 @@
   width: min(250px, 68vw);
   max-height: 58px;
   object-fit: contain;
-  object-position: left center;
+  object-position: right center;
 }
 
 .latest-questionnaire-page h1 {
