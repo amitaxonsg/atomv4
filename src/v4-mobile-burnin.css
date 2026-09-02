@@ -53,6 +53,37 @@ body,
   line-height: 1.45;
 }
 
+
+/* V4 checkout readability and spacing — scoped only to the locked Full Report checkout. */
+.paid-report.locked .upgrade-box {
+  padding: 24px 26px 28px;
+  gap: 18px;
+}
+
+.paid-report.locked .upgrade-box small,
+.v4-report--personal .upgrade-box > div:first-child::after {
+  color: rgba(255, 255, 255, .88);
+}
+
+.paid-report.locked .upgrade-box__actions .button--ghost {
+  color: #fff;
+  border-color: rgba(255, 255, 255, .68);
+}
+
+.paid-report.locked .upgrade-box__actions .button--ghost:disabled {
+  color: rgba(255, 255, 255, .78);
+  border-color: rgba(255, 255, 255, .38);
+  opacity: 1;
+}
+
+.paid-report.locked > .preview-note {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  padding: 0 4px;
+  color: rgba(255, 255, 255, .86);
+  line-height: 1.55;
+}
+
 /* Make the halfway/completion feedback more visible without changing assessment logic. */
 .latest-progress-message {
   margin: 22px 0;
