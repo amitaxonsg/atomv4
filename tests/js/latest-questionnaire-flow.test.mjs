@@ -56,6 +56,14 @@ test("latest participant and question process remains wired to the real backend"
   assert.match(layout, /requestAnimationFrame\(\(\) => window\.scrollTo\(\{ top: 0, left: 0, behavior: "auto" \}\)\)/);
 });
 
+test("V4 autosave serializes requests and clears stale mobile save errors", () => {
+  assert.match(app, /saveQueueRef = React\.useRef\(Promise\.resolve\(\)\)/);
+  assert.match(app, /saveRevisionRef = React\.useRef\(0\)/);
+  assert.match(app, /saveQueueRef\.current = saveQueueRef\.current/);
+  assert.match(app, /revision !== saveRevisionRef\.current/);
+  assert.match(app, /setSaveState\("saved"\);\s*setError\(""\);/);
+});
+
 test("landing, track cards and intake are editable from the admin CMS", () => {
   assert.match(admin, /Public landing and progress content/);
   assert.match(admin, /Track-card description/);
