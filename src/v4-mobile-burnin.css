@@ -85,31 +85,115 @@ body,
   line-height: 1.55;
 }
 
-/* Make the halfway/completion feedback more visible without changing assessment logic. */
+/* V4 milestone feedback — more celebratory while keeping assessment copy and logic unchanged. */
 .latest-progress-message {
-  margin: 22px 0;
-  padding: 18px 20px;
-  border: 1px solid color-mix(in srgb, var(--gold, #c9a15a) 45%, var(--line, #e4ddcf));
-  border-radius: var(--card-radius, 8px);
-  background: color-mix(in srgb, var(--gold, #c9a15a) 10%, var(--cream, #fff));
-  box-shadow: 0 10px 28px rgba(47, 37, 22, .06);
+  position: relative;
+  overflow: hidden;
+  margin: 26px 0;
+  padding: 24px 26px 24px 30px;
+  border: 1px solid rgba(201, 161, 90, .58);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(201, 161, 90, .18), transparent 34%),
+    linear-gradient(135deg, rgba(255, 251, 242, .98), rgba(247, 239, 220, .82));
+  box-shadow: 0 14px 34px rgba(47, 37, 22, .10);
+  animation: v4MilestoneIn .38s ease-out both;
+}
+
+.latest-progress-message::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+  background: linear-gradient(180deg, #d7aa50, #b9872f);
+}
+
+.latest-progress-message::after {
+  content: "";
+  position: absolute;
+  width: 110px;
+  height: 110px;
+  right: -42px;
+  top: -48px;
+  border-radius: 50%;
+  border: 18px solid rgba(201, 161, 90, .08);
+  pointer-events: none;
+}
+
+.latest-progress-message em {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 9px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(201, 161, 90, .16);
+  color: #8a6423;
+  font-size: 11px;
+  line-height: 1;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: .11em;
+  text-transform: uppercase;
 }
 
 .latest-progress-message strong {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
   font-family: var(--heading-font, Georgia, "Times New Roman", serif);
-  font-size: clamp(22px, 4vw, 30px);
-  line-height: 1.12;
+  font-size: clamp(24px, 4vw, 32px);
+  line-height: 1.1;
   font-weight: 600;
   color: var(--ink, #211c16);
 }
 
 .latest-progress-message span {
   display: block;
-  color: var(--muted, #726a5b);
-  font-size: 14px;
-  line-height: 1.5;
+  max-width: 58ch;
+  color: #655842;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.latest-progress-message--halfway {
+  border-color: rgba(201, 161, 90, .66);
+}
+
+.latest-progress-message--halfway strong::first-letter {
+  color: #9a6f24;
+}
+
+.latest-progress-message--complete {
+  border-color: rgba(177, 120, 48, .72);
+  background:
+    radial-gradient(circle at 90% 10%, rgba(196, 72, 63, .10), transparent 34%),
+    linear-gradient(135deg, rgba(255, 250, 239, .99), rgba(245, 231, 199, .9));
+  box-shadow: 0 16px 38px rgba(82, 54, 24, .13);
+}
+
+.latest-progress-message--complete::before {
+  background: linear-gradient(180deg, #c9a15a, #c44f45);
+}
+
+.latest-progress-message--complete em {
+  background: rgba(196, 79, 69, .10);
+  color: #9d443c;
+}
+
+@keyframes v4MilestoneIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(.992);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .latest-progress-message {
+    animation: none;
+  }
 }
 
 @media (max-width: 680px) {
@@ -171,5 +255,18 @@ body,
   .v4-coach__actions {
     min-width: 0;
     max-width: 100%;
+  }
+
+  .latest-progress-message {
+    padding: 21px 20px 21px 24px;
+    border-radius: 12px;
+  }
+
+  .latest-progress-message strong {
+    font-size: clamp(23px, 7vw, 29px);
+  }
+
+  .latest-progress-message span {
+    font-size: 14px;
   }
 }
