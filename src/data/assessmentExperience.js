@@ -26,15 +26,15 @@ const levelOptions = [
 ];
 
 export const landingDefaults = {
-  title: "Growth Alignment",
+  title: "Head–Heart Alignment",
   primaryCopy: "Every choice you make is cast by two votes: what you feel and what you reason. This assessment maps which one you actually hand the deciding vote to — not which one you wish you did.",
   secondaryCopy: "You'll answer 40 statements across 10 areas of life, get an instant free result, and can unlock a full in-depth report. Choose the version that fits you:",
-  cardTitlePrefix: "Growth Alignment:",
+  cardTitlePrefix: "Head–Heart Alignment:",
   showBrandName: true,
   hideSectionTitles: true,
-  halfwayTitle: "Halfway there — 20 of 40 complete.",
-  halfwayBody: "Keep answering honestly; the value comes from the pattern, not any single response.",
-  completeTitle: "All 40 questions complete — well done.",
+  halfwayTitle: "Hey, you’re halfway there!",
+  halfwayBody: "20 of 40 complete. Keep answering honestly; the value comes from the pattern, not any single response.",
+  completeTitle: "Well done — you’ve completed all 40 questions!",
   completeBody: "Your responses are ready. You can review this section or continue to your result.",
 };
 
