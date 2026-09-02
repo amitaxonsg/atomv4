@@ -16,7 +16,7 @@ const questionnaireStyles = readFileSync(new URL("../../src/questionnaire-latest
 test("public questionnaire keeps the latest process inside the approved split branding", () => {
   assert.match(layout, /latest-questionnaire-shell/);
   assert.match(layout, /latest-visual-panel/);
-  assert.match(layout, /reflection-portrait\.png/);
+  assert.doesNotMatch(layout, /reflection-portrait\.png/);
   assert.match(experience, /Every choice you make is cast by two votes/);
   assert.match(layout, /latest-track-card/);
   assert.match(layout, /Personal Assessment/);

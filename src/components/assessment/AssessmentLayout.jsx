@@ -28,12 +28,14 @@ function VisualPanel({ stageKey = "version" }) {
   const { stages } = useBranding();
   const stage = stages?.[stageKey] || stages?.version || {};
   const overlay = Math.max(0, Math.min(90, Number(stage.overlay ?? 40))) / 100;
-  const image = stage.image || "/media/stages/reflection-portrait.png";
+  const image = String(stage.image || "").trim();
   return <aside
     className="latest-visual-panel"
     aria-label={stage.alt || "A reflective professional moment"}
     style={{
-      backgroundImage: `linear-gradient(rgba(20,16,12,${overlay}),rgba(20,16,12,${overlay})),url("${image}")`,
+      backgroundImage: image
+        ? `linear-gradient(rgba(20,16,12,${overlay}),rgba(20,16,12,${overlay})),url("${image}")`
+        : `linear-gradient(rgba(20,16,12,${overlay}),rgba(20,16,12,${overlay}))`,
       backgroundPosition: stage.focalPoint || "52% 50%",
     }}
   >

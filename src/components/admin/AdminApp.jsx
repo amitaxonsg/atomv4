@@ -39,7 +39,7 @@ function AdminLogin({ onLogin }) {
   const [mode, setMode] = React.useState(resetToken ? "reset" : "login");
   const [form, setForm] = React.useState({ email: isMockMode ? "preview@atomglobal.com" : "", password: isMockMode ? "preview-only" : "", passwordConfirm: "" });
   const [state, setState] = React.useState({ busy: false, error: "", message: "" });
-  const storyImage = branding.bannerUrl || stages?.version?.image || "/media/stages/reflection-portrait.png";
+  const storyImage = String(branding.bannerUrl || stages?.version?.image || "").trim();
 
   const submitLogin = async event => {
     event.preventDefault();
