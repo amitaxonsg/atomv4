@@ -59,5 +59,5 @@ test("guarded smoke test verifies and cleans the complete submission chain", () 
   assert.match(smoke, /All 40 frontend answer payloads were persisted/);
   assert.match(smoke, /Admin participant detail shows the generated report/);
   assert.match(smoke, /Temporary participant, session, answers, score, report/);
-  assert.match(readme, /Full production audit and submission smoke test/);
+  assert.match(readme, /Approved V4 backup procedure/);
 });
