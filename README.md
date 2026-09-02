@@ -131,18 +131,58 @@ The client UAT bypass is controlled from:
 
 **Admin → Payments → Client UAT payment bypass**
 
-The Admin writes the system-level `cashOnDeliveryEnabled` setting. The backend checks the same setting before allowing the route.
+The Admin writes the system-level `system.cash_on_delivery_enabled` setting. The backend checks the same setting before allowing the route, and the participant report uses the server-provided `cashOnDeliveryAvailable` value to decide whether the UAT controls are rendered.
 
-When enabled, V4 can:
+### Confirmed Admin behavior — 2 September 2026
 
-- create a clearly marked manual/UAT payment;
-- unlock the Full Report;
-- rotate the private report token;
-- queue the normal payment-success and paid-report email/PDF flow;
-- write an audit record;
-- avoid a Stripe charge.
+The Admin save path was manually verified against the live V4 database.
 
-For public launch, the effective UAT No-Payment state must be **disabled**. The approved state on 2 September was explicitly set to false at the system override level.
+When the Admin option is **enabled and saved**:
+
+```text
+system.cash_on_delivery_enabled = true
+```
+
+After reopening or hard-refreshing the Lite Report checkout:
+
+- the **UAT Test — No Payment** button may be shown;
+- the UAT explanatory text may be shown;
+- the backend may accept the controlled no-charge UAT unlock flow.
+
+When the Admin option is **unticked and saved**:
+
+```text
+system.cash_on_delivery_enabled = false
+```
+
+After reopening or hard-refreshing the Lite Report checkout:
+
+- the **UAT Test — No Payment** button must not be shown;
+- the UAT explanatory text must not be shown;
+- the UAT no-charge route must not be available.
+
+The live database was verified after Admin save and returned:
+
+```text
+UAT enabled: false
+```
+
+This confirms the Admin checkbox/save operation is persisting the system override correctly. If the participant checkout still shows the UAT button or UAT explanatory text after a fresh report reload while the server value is `false`, record it as a V4 frontend/report-state bug rather than changing the database manually.
+
+### Server verification command
+
+```bash
+cd /srv/v4.atomglobal.com/source
+php -r '
+$c=require "backend/src/bootstrap.php";
+$s=$c["settings"];
+echo "UAT enabled: ";
+var_export($s->get("system.cash_on_delivery_enabled", null));
+echo PHP_EOL;
+'
+```
+
+For public launch, the effective UAT No-Payment state must remain **disabled** unless Amit explicitly enables it for a controlled test.
 
 Do not use a real card during UAT unless Amit explicitly authorises a controlled payment test.
 
@@ -238,6 +278,7 @@ Retest coverage should include:
 - autosave/resume persistence;
 - Lite Report and locked Full Report;
 - Stripe checkout open/cancel/return/retry without a real charge unless authorised;
+- Admin UAT toggle: enable/save/reload shows the UAT controls; disable/save/reload hides both the UAT button and explanation;
 - controlled UAT No-Payment only when explicitly enabled for testing;
 - Full Report, secure token, PDF and email;
 - Admin Participants, Questionnaire, Assessments, Content, Branding, Reports, Payments, Email, Settings, Analytics, Affiliates, Audit and SEO;
