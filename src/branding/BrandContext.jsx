@@ -19,7 +19,7 @@ const defaults = {
     fieldLabelSize: "12", fieldTextSize: "14", metaTextSize: "12",
     visualTitleSize: "72", visualBodySize: "22", contentMaxWidth: "720", intakeMaxWidth: "840",
     questionMaxWidth: "880", contentGutter: "72",
-    logoUrl: legacyLogoUrl, emailLogoUrl: legacyLogoUrl,
+    logoUrl: transparentLogoUrl, emailLogoUrl: legacyLogoUrl,
     reportLogoUrl: legacyLogoUrl, faviconUrl: "/icon-192.png", bannerUrl: "",
   },
   stages: stageContent,
@@ -29,7 +29,19 @@ const defaults = {
 const BrandContext = React.createContext(defaults);
 
 function normalisePublicLogoUrl(value) {
-  return !value || value === transparentLogoUrl || String(value).startsWith("/media-uploads/") ? legacyLogoUrl : value;
+  const url = String(value || "").trim();
+  return url || transparentLogoUrl;
+}
+
+function applyBannerFallback(stages, bannerUrl) {
+  const banner = String(bannerUrl || "").trim();
+  if (!banner) return stages;
+  return Object.fromEntries(Object.entries(stages).map(([key, value]) => {
+    const stage = { ...(value || {}) };
+    const image = String(stage.image || "").trim();
+    if (!image || image === "/media/stages/reflection-portrait.png") stage.image = banner;
+    return [key, stage];
+  }));
 }
 
 function applyBranding(branding) {
@@ -93,9 +105,10 @@ export function BrandProvider({ children }) {
           ...remoteBranding,
           logoUrl: normalisePublicLogoUrl(remoteBranding.logoUrl),
         };
+        const mergedStages = { ...defaults.stages, ...(remote.stages || {}) };
         const next = {
           branding: nextBranding,
-          stages: { ...defaults.stages, ...(remote.stages || {}) },
+          stages: applyBannerFallback(mergedStages, nextBranding.bannerUrl),
           tracks: remote.tracks || {},
         };
         applyBranding(next.branding);
