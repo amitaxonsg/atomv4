@@ -263,7 +263,7 @@ The live deployed marker for the current application baseline is:
 d73684abf095063894b1dd90870a8ce3d2d37dc5
 ```
 
-## Backup / recovery
+## Approved V4 backup procedure
 
 Current Git safety branch for the live application baseline:
 
