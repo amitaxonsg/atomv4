@@ -18,6 +18,11 @@ body,
   box-sizing: border-box;
 }
 
+/* Preserve the approved V4 visual layout: branding lives in the right/content panel, not over the left image. */
+.latest-visual-panel__logo {
+  display: none !important;
+}
+
 .latest-field input,
 .latest-field select,
 .latest-answer-note,
