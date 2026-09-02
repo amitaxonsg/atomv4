@@ -33,17 +33,6 @@ function normalisePublicLogoUrl(value) {
   return url || transparentLogoUrl;
 }
 
-function applyBannerFallback(stages, bannerUrl) {
-  const banner = String(bannerUrl || "").trim();
-  if (!banner) return stages;
-  return Object.fromEntries(Object.entries(stages).map(([key, value]) => {
-    const stage = { ...(value || {}) };
-    const image = String(stage.image || "").trim();
-    if (!image || image === "/media/stages/reflection-portrait.png") stage.image = banner;
-    return [key, stage];
-  }));
-}
-
 function applyBranding(branding) {
   const root = document.documentElement;
   const tokens = {
@@ -105,10 +94,9 @@ export function BrandProvider({ children }) {
           ...remoteBranding,
           logoUrl: normalisePublicLogoUrl(remoteBranding.logoUrl),
         };
-        const mergedStages = { ...defaults.stages, ...(remote.stages || {}) };
         const next = {
           branding: nextBranding,
-          stages: applyBannerFallback(mergedStages, nextBranding.bannerUrl),
+          stages: { ...defaults.stages, ...(remote.stages || {}) },
           tracks: remote.tracks || {},
         };
         applyBranding(next.branding);
