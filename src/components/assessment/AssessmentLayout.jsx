@@ -1,110 +1,193 @@
 import React from "react";
-import { useBrand } from "../../branding/BrandContext";
-import { answerChoices } from "../../data/assessmentData";
-import { trackExperience, landingExperience } from "../../data/assessmentExperience";
+import { answerChoices, assessmentTracks } from "../../data/assessmentData";
+import { landingExperience, participantBaseOptions, trackExperience } from "../../data/assessmentExperience";
+import { BrandLogo, useBranding } from "../../branding/BrandContext";
 
-function stageCopy(stages, key, fallbackTitle, fallbackSubtitle = "") {
-  const stage = stages?.[key] || {};
-  return {
-    title: stage.title || fallbackTitle,
-    subtitle: stage.subtitle || fallbackSubtitle,
-  };
+export const blankParticipant = {
+  name: "", email: "", ageRange: "", gender: "", role: "", industry: "", region: "", purpose: "", tenure: "",
+  department: "", level: "", privacyConsent: false, transactionalConsent: false, marketingConsent: false,
+};
+
+const fallbackMeta = {
+  personal: { durationMin: 12, durationMax: 15, questionCount: 40, sectionCount: 10, freeReportLabel: "Lite Report Free" },
+  newjoiner: { durationMin: 12, durationMax: 15, questionCount: 40, sectionCount: 10, freeReportLabel: "Lite Report Free" },
+  manager: { durationMin: 12, durationMax: 16, questionCount: 40, sectionCount: 10, freeReportLabel: "Lite Report Free" },
+  executive: { durationMin: 15, durationMax: 18, questionCount: 40, sectionCount: 10, freeReportLabel: "Lite Report Free" },
+};
+
+function durationLabel(meta) {
+  return meta.durationMin === meta.durationMax ? `~${meta.durationMin} minutes` : `~${meta.durationMin}–${meta.durationMax} minutes`;
 }
 
-export function StageShell({ children, width = "720", stageKey = "version", className = "" }) {
-  const brand = useBrand();
-  const stage = brand.stages?.[stageKey] || {};
-  const style = stage.desktopUrl ? {
-    backgroundImage: `linear-gradient(rgba(20, 16, 12, ${stage.overlayOpacity ?? 0}), rgba(20, 16, 12, ${stage.overlayOpacity ?? 0})), url("${stage.desktopUrl}")`,
-    backgroundPosition: `${stage.focalX ?? 50}% ${stage.focalY ?? 50}%`,
-  } : undefined;
-  return <div className={`latest-questionnaire-shell ${className}`}>
-    <aside className="latest-visual-panel" style={style}>
-      <div className="latest-visual-panel__logo"><img src={brand.logoUrl} alt="Atom Global Consulting" /></div>
-      <div className="latest-visual-panel__copy">
-        {stage.title && <strong>{stage.title}</strong>}
-        {stage.subtitle && <span>{stage.subtitle}</span>}
-      </div>
-    </aside>
-    <main className="latest-questionnaire-content">
-      <div className="latest-questionnaire-brand"><img src={brand.logoUrl} alt="Atom Global Consulting" /></div>
-      <section className="latest-questionnaire-page" style={{ "--page-width": `${width}px` }}>{children}</section>
-    </main>
+function PublicBrand({ visible = true }) {
+  if (!visible) return null;
+  return <a className="latest-public-brand" href="https://www.atomglobal.com" target="_blank" rel="noreferrer"><BrandLogo /></a>;
+}
+
+function VisualPanel({ stageKey = "version" }) {
+  const { stages } = useBranding();
+  const stage = stages?.[stageKey] || stages?.version || {};
+  const overlay = Math.max(0, Math.min(90, Number(stage.overlay ?? 40))) / 100;
+  const image = String(stage.image || "").trim();
+  return <aside
+    className="latest-visual-panel"
+    aria-label={stage.alt || "A reflective professional moment"}
+    style={{
+      backgroundImage: image
+        ? `linear-gradient(rgba(20,16,12,${overlay}),rgba(20,16,12,${overlay})),url("${image}")`
+        : `linear-gradient(rgba(20,16,12,${overlay}),rgba(20,16,12,${overlay}))`,
+      backgroundPosition: stage.focalPoint || "52% 50%",
+    }}
+  >
+    <a className="latest-visual-panel__logo" href="https://www.atomglobal.com" target="_blank" rel="noreferrer"><BrandLogo /></a>
+    <div className="latest-visual-panel__copy">
+      {stage.headline && <h2>{stage.headline}</h2>}
+      {stage.supporting && <p>{stage.supporting}</p>}
+    </div>
+  </aside>;
+}
+
+function LatestPage({ children, width = "720", className = "", brandVisible = true, actions = null, stageKey = "version" }) {
+  return <div className="latest-questionnaire-shell">
+    <VisualPanel stageKey={stageKey} />
+    <div className="latest-questionnaire-content">
+      <main className={`latest-questionnaire-page ${className}`} style={{ "--latest-default-page-width": `${width}px` }}>
+        <PublicBrand visible={brandVisible} />
+        {children}
+        {actions && <footer className="latest-page-actions">{actions}</footer>}
+      </main>
+    </div>
   </div>;
 }
 
-export function LatestPage({ children, width = "720", stageKey = "version", className = "" }) {
-  return <StageShell width={width} stageKey={stageKey} className={className}>{children}</StageShell>;
+export function AssessmentMeta({ trackKey }) {
+  const { tracks } = useBranding();
+  const track = assessmentTracks[trackKey];
+  const meta = { ...fallbackMeta[trackKey], ...(tracks[trackKey] || {}) };
+  return <div className="latest-assessment-meta">
+    <i className="latest-dot latest-dot--heart" />
+    <span>Growth Alignment: {track.label} · {meta.freeReportLabel} · {durationLabel(meta)}</span>
+    <i className="latest-dot latest-dot--head" />
+  </div>;
+}
+
+export function StageShell({ children, actions, brandVisible = true, stageKey = "report" }) {
+  return <LatestPage width="880" brandVisible={brandVisible} actions={actions} stageKey={stageKey}>{children}</LatestPage>;
+}
+
+function VoteCopy({ text }) {
+  const value = String(text || "");
+  const feel = value.indexOf("feel");
+  const reason = value.indexOf("reason");
+  if (feel < 0 || reason < 0 || reason <= feel) return value;
+  return <>{value.slice(0, feel)}<em>feel</em>{value.slice(feel + 4, reason)}<em>reason</em>{value.slice(reason + 6)}</>;
 }
 
 export function SelectVersion({ experience, onSelect }) {
-  const landing = landingExperience(experience?.landing);
   const [category, setCategory] = React.useState(null);
+  const landing = landingExperience(experience?.landing);
   const trackOrder = ["personal", "newjoiner", "manager", "executive"];
-  const allTracks = trackOrder.map(key => experience?.tracks?.[key]).filter(Boolean);
-  const personalTracks = allTracks.filter(track => track.trackKey === "personal");
-  const corporateTracks = allTracks.filter(track => track.trackKey !== "personal");
-  const visibleTracks = category === "personal" ? personalTracks : corporateTracks;
-
-  return <LatestPage width="820" stageKey="version" className="latest-landing-page">
-    <p className="latest-section-code">Growth Alignment</p>
+  const tracks = trackOrder.map(key => assessmentTracks[key]).filter(Boolean);
+  const personalTracks = tracks.filter(track => track.key === "personal");
+  const corporateTracks = tracks.filter(track => track.key !== "personal");
+  const renderTrackCard = track => {
+    const remote = experience?.tracks?.[track.key] || {};
+    const details = trackExperience(track.key, remote, remote.priceLabel || track.priceLabel);
+    const meta = { ...fallbackMeta[track.key], ...remote };
+    return <button className="latest-track-card" key={track.key} onClick={() => onSelect(track.key)}>
+      <strong>{landing.cardTitlePrefix} {track.label}</strong>
+      <span>{details.tagline}</span>
+      <small>{meta.questionCount} questions · {meta.sectionCount} sections · {durationLabel(meta)}</small>
+    </button>;
+  };
+  if (!category) return <LatestPage width="640" className="latest-track-selection" brandVisible={landing.showBrandName} stageKey="version">
     <h1>{landing.title}</h1>
-    <p className="latest-copy">{landing.body}</p>
-    {!category ? <>
-      <p className="latest-copy latest-copy--last">Choose Personal or Corporate to begin.</p>
-      <div className="latest-category-grid">
-        <button className="latest-track-card" onClick={() => setCategory("personal")}>
-          <strong>Personal Assessment</strong><span>Understand your own Head–Heart patterns and development priorities.</span>
-        </button>
-        <button className="latest-track-card" onClick={() => setCategory("corporate")}>
-          <strong>Corporate Assessments</strong><span>Choose New Joiner, Manager or Executive for role-relevant reflection.</span>
-        </button>
-      </div>
-    </> : <>
-      <button className="latest-text-button" onClick={() => setCategory(null)}>← Choose Personal or Corporate</button>
-      <div className="latest-track-grid">{visibleTracks.map(track => <button className="latest-track-card" onClick={() => onSelect(track.trackKey)} key={track.trackKey}>
-        <strong>{track.trackName}</strong><span>{track.description}</span>
-      </button>)}</div>
-    </>}
+    <p className="latest-copy"><VoteCopy text={landing.primaryCopy} /></p>
+    <p className="latest-copy latest-copy--last">{landing.secondaryCopy}</p>
+    <div className="latest-assessment-category-grid" aria-label="Choose assessment type">
+      <button className="latest-assessment-category latest-assessment-category--personal" onClick={() => setCategory("personal")}>
+        <strong>Personal Assessment</strong>
+        <span>For individuals who want to understand how they make decisions and lead their own life.</span>
+        <small>Continue to Personal →</small>
+      </button>
+      <button className="latest-assessment-category latest-assessment-category--corporate" onClick={() => setCategory("corporate")}>
+        <strong>Corporate Assessments</strong>
+        <span>For New Joiners, Managers and Executives in a workplace setting.</span>
+        <small>View Corporate options →</small>
+      </button>
+    </div>
+  </LatestPage>;
+
+  const isPersonal = category === "personal";
+  return <LatestPage width="640" className="latest-track-selection" brandVisible={landing.showBrandName} stageKey="version">
+    <button className="latest-text-back" onClick={() => setCategory(null)}>← Choose Personal or Corporate</button>
+    <p className="latest-section-code">{isPersonal ? "For individuals" : "For organisations and workplace roles"}</p>
+    <h1>{isPersonal ? "Personal Assessment" : "Corporate Assessments"}</h1>
+    <p className="latest-copy latest-copy--last">{isPersonal
+      ? "Choose the Personal assessment to explore how you make decisions and lead your own life."
+      : "Choose the Corporate assessment that best matches your current workplace role."}</p>
+    <div className={`latest-track-cards${isPersonal ? " latest-track-cards--single" : ""}`}>
+      {(isPersonal ? personalTracks : corporateTracks).map(renderTrackCard)}
+    </div>
   </LatestPage>;
 }
 
 export function TrackIntroduction({ track, remoteExperience, onBack, onContinue }) {
   const experience = trackExperience(track.key, remoteExperience, remoteExperience?.priceLabel || track.priceLabel);
-  return <LatestPage width="720" stageKey={track.key}>
-    <p className="latest-section-code">{experience.eyebrow}</p>
-    <h1>{experience.title}</h1>
-    <p className="latest-copy">{experience.intro}</p>
-    <div className="latest-intro-meta"><span>{experience.duration}</span><span>{experience.questionCount} questions</span></div>
-    <div className="latest-question-navigation">
-      <button className="latest-secondary-button" onClick={onBack}>← Back</button>
-      <button className="latest-primary-button" onClick={onContinue}>Begin the free assessment →</button>
+  return <LatestPage width="720" className="latest-track-introduction" stageKey={track.key}>
+    <button className="latest-text-back" onClick={onBack}>← Back</button>
+    <AssessmentMeta trackKey={track.key} />
+    <h1>{experience.introHeadline}</h1>
+    <p className="latest-copy"><VoteCopy text={experience.introBody} /></p>
+    <p className="latest-copy latest-copy--last">{experience.introOffer}</p>
+    <div className="latest-head-heart-grid">
+      <article className="latest-heart-card"><strong>{experience.heartLabel}</strong><span>{experience.heartDescription}</span></article>
+      <article className="latest-head-card"><strong>{experience.headLabel}</strong><span>{experience.headDescription}</span></article>
     </div>
+    <button className="latest-primary-button" onClick={onContinue}>Begin the free assessment →</button>
   </LatestPage>;
 }
 
-export const blankParticipant = {
-  name: "", email: "", company: "", jobTitle: "", department: "", level: "",
-  privacyConsent: false, transactionalConsent: false, marketingConsent: false,
-};
+function SelectField({ label, options = [], value, onChange, required = true }) {
+  return <label className="latest-field"><span>{label}</span><select value={value} onChange={onChange} required={required}><option value="">Select…</option>{options.map(option => <option key={option} value={option}>{option}</option>)}</select></label>;
+}
 
 export function ParticipantDetails({ track, remoteExperience, participant, setParticipant, onBack, onContinue, error, busy }) {
   const experience = trackExperience(track.key, remoteExperience, remoteExperience?.priceLabel || track.priceLabel);
+  const config = experience.intake;
   const update = key => event => setParticipant(current => ({ ...current, [key]: event.target.type === "checkbox" ? event.target.checked : event.target.value }));
-  const valid = participant.name.trim() && participant.email.includes("@") && participant.privacyConsent && participant.transactionalConsent;
-  return <LatestPage width="720" stageKey={track.key}>
-    <p className="latest-section-code">A little more context</p>
-    <h1>Tell us about you</h1>
-    <p className="latest-copy">This helps us personalise the experience and send your private report securely.</p>
+  const companyTriggers = Array.isArray(config.companyRoleTriggers) ? config.companyRoleTriggers : [];
+  const showCompanyFields = Boolean(config.hasCompanyFields && companyTriggers.includes(participant.role));
+  const contextComplete = [participant.ageRange, participant.role, participant.industry, participant.region, participant.purpose, participant.tenure].every(Boolean);
+  const companyComplete = !showCompanyFields || Boolean(participant.department && participant.level);
+  const valid = participant.name.trim() && /.+@.+\..+/.test(participant.email) && contextComplete && companyComplete && participant.privacyConsent && participant.transactionalConsent;
+
+  return <LatestPage width="480" className="latest-intake-page" stageKey="participant">
+    <button className="latest-text-back" onClick={onBack}>← Back</button>
+    <h1>Before you begin</h1>
+    <p className="latest-copy latest-copy--last">A few details so your report can be sent to you and personalised correctly. Nothing here is identifying beyond your name and email — the rest is broad categories only.</p>
     {error && <p className="form-error" role="alert">{error}</p>}
-    <div className="latest-intake-grid">
-      <label className="latest-field"><span>Name *</span><input value={participant.name} onChange={update("name")} /></label>
-      <label className="latest-field"><span>Email *</span><input type="email" value={participant.email} onChange={update("email")} /></label>
-      <label className="latest-field"><span>Company</span><input value={participant.company} onChange={update("company")} /></label>
-      <label className="latest-field"><span>Job title</span><input value={participant.jobTitle} onChange={update("jobTitle")} /></label>
-      <label className="latest-field"><span>Department</span><select value={participant.department} onChange={update("department")}><option value="">Select</option>{experience.departmentOptions.map(item => <option key={item}>{item}</option>)}</select></label>
-      <label className="latest-field"><span>Level</span><select value={participant.level} onChange={update("level")}><option value="">Select</option>{experience.levelOptions.map(item => <option key={item}>{item}</option>)}</select></label>
+
+    <div className="latest-intake-grid latest-intake-grid--identity">
+      <label className="latest-field"><span>Name *</span><input autoComplete="name" value={participant.name} onChange={update("name")} placeholder="Your full name" required /></label>
+      <SelectField label="Age range *" options={participantBaseOptions.ageRanges} value={participant.ageRange} onChange={update("ageRange")} />
+      <SelectField label="Gender" options={participantBaseOptions.genderOptions} value={participant.gender} onChange={update("gender")} required={false} />
+      <label className="latest-field"><span>Email address *</span><input type="email" autoComplete="email" value={participant.email} onChange={update("email")} placeholder="you@example.com" required /></label>
     </div>
+
+    <div className="latest-context-divider">A little more context</div>
+    <div className="latest-intake-grid latest-intake-grid--context">
+      <SelectField label={config.whoLabel} options={config.whoOptions} value={participant.role} onChange={update("role")} />
+      <SelectField label={config.whatLabel} options={config.whatOptions} value={participant.industry} onChange={update("industry")} />
+      <SelectField label={config.whereLabel} options={config.whereOptions} value={participant.region} onChange={update("region")} />
+      <SelectField label={config.whyLabel} options={config.whyOptions} value={participant.purpose} onChange={update("purpose")} />
+      <SelectField label={config.howLabel} options={config.howOptions} value={participant.tenure} onChange={update("tenure")} />
+      {showCompanyFields && <>
+        <SelectField label={config.departmentLabel || "Department *"} options={config.departmentOptions || []} value={participant.department} onChange={update("department")} />
+        <SelectField label={config.levelLabel || "Level *"} options={config.levelOptions || []} value={participant.level} onChange={update("level")} />
+      </>}
+    </div>
+
     <p className="latest-intake-note">Used to send you a copy of your report, and to help us understand who this assessment actually helps.</p>
     <fieldset className="latest-consents"><legend>Privacy and communication</legend>
       <label><input type="checkbox" checked={participant.privacyConsent} onChange={update("privacyConsent")} /><span>I consent to my answers being processed for this assessment. *</span></label>
@@ -118,10 +201,18 @@ export function ParticipantDetails({ track, remoteExperience, participant, setPa
 function ProgressMessage({ completed, copy }) {
   const landing = landingExperience(copy);
   if (completed === 20) {
-    return <div className="latest-progress-message latest-progress-message--halfway" role="status"><em>Milestone reached</em><strong>{landing.halfwayTitle}</strong><span>{landing.halfwayBody}</span></div>;
+    return <div className="latest-progress-message latest-progress-message--halfway" role="status">
+      <em>Halfway milestone</em>
+      <strong>{landing.halfwayTitle}</strong>
+      <span>{landing.halfwayBody}</span>
+    </div>;
   }
   if (completed === 40) {
-    return <div className="latest-progress-message latest-progress-message--complete" role="status"><em>Assessment complete</em><strong>{landing.completeTitle}</strong><span>{landing.completeBody}</span></div>;
+    return <div className="latest-progress-message latest-progress-message--complete" role="status">
+      <em>Assessment complete</em>
+      <strong>{landing.completeTitle}</strong>
+      <span>{landing.completeBody}</span>
+    </div>;
   }
   return null;
 }
