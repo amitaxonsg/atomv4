@@ -114,6 +114,8 @@ export default function AssessmentAppProduction() {
   const [error, setError] = React.useState("");
   const [busy, setBusy] = React.useState(false);
   const [saveState, setSaveState] = React.useState("");
+  const saveQueueRef = React.useRef(Promise.resolve());
+  const saveRevisionRef = React.useRef(0);
 
   const fallbackTrack = trackKey ? assessmentTracks[trackKey] : null;
   const track = buildRuntimeTrack(fallbackTrack, session?.assessment);
@@ -152,14 +154,21 @@ export default function AssessmentAppProduction() {
 
   React.useEffect(() => {
     if (!session?.id || !session?.resumeToken || stage !== "questions") return undefined;
+    const revision = ++saveRevisionRef.current;
+    const payload = { id: session.id, resumeToken: session.resumeToken, participant, answers, section };
     setSaveState("saving");
     const timer = window.setTimeout(() => {
-      api.saveSession({ id: session.id, resumeToken: session.resumeToken, participant, answers, section })
+      saveQueueRef.current = saveQueueRef.current
+        .catch(() => {})
+        .then(() => api.saveSession(payload))
         .then(saved => {
+          if (revision !== saveRevisionRef.current) return;
           setSession(current => ({ ...current, ...saved }));
           setSaveState("saved");
+          setError("");
         })
         .catch(saveError => {
+          if (revision !== saveRevisionRef.current) return;
           setSaveState("error");
           setError(saveError.message);
         });
