@@ -47,10 +47,12 @@ body,
 .v4-report--personal .upgrade-box > div:first-child::after {
   content: "For less than a cup of coffee, find out more about yourself.";
   display: block;
-  margin-top: 8px;
-  color: var(--muted, #726a5b);
-  font-size: 12px;
-  line-height: 1.45;
+  margin-top: 9px;
+  color: #f0c66f;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 600;
+  letter-spacing: .01em;
 }
 
 
@@ -60,8 +62,7 @@ body,
   gap: 18px;
 }
 
-.paid-report.locked .upgrade-box small,
-.v4-report--personal .upgrade-box > div:first-child::after {
+.paid-report.locked .upgrade-box small {
   color: rgba(255, 255, 255, .88);
 }
 
