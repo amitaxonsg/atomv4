@@ -28,8 +28,8 @@ test("public questionnaire keeps the latest process inside the approved split br
   assert.doesNotMatch(layout, /Powered by/);
   assert.match(main, /questionnaire-latest\.css/);
   assert.match(branding, /return url \|\| transparentLogoUrl/);
-  assert.match(branding, /applyBannerFallback/);
-  assert.match(branding, /nextBranding\.bannerUrl/);
+  assert.match(branding, /stages: \{ \.\.\.defaults\.stages, \.\.\.\(remote\.stages \|\| \{\}\) \}/);
+  assert.doesNotMatch(branding, /applyBannerFallback/);
   assert.doesNotMatch(branding, /startsWith\("\/media-uploads\/"\).*legacyLogoUrl/);
 });
 
