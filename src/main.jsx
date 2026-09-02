@@ -15,7 +15,29 @@ import "./admin-support.css";
 import "./questionnaire-process.css";
 import "./questionnaire-latest.css";
 import "./uat-layout-fix.css";
+import "./v4-mobile-burnin.css";
 import "./report-flow.css";
+
+function CheckoutReturnRecovery() {
+  React.useEffect(() => {
+    const recover = () => {
+      if (!window.location.pathname.startsWith("/report/")) return;
+      const buttons = Array.from(document.querySelectorAll("button"));
+      const stale = buttons.some(button => /Opening (checkout|secure checkout)…/i.test(button.textContent || ""));
+      if (stale) window.location.reload();
+    };
+    const onVisibility = () => { if (document.visibilityState === "visible") recover(); };
+    window.addEventListener("pageshow", recover);
+    window.addEventListener("focus", recover);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pageshow", recover);
+      window.removeEventListener("focus", recover);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
+  return null;
+}
 
 function ServiceWorkerUpdate() {
   const [updateAvailable, setUpdateAvailable] = React.useState(false);
@@ -23,7 +45,7 @@ function ServiceWorkerUpdate() {
   React.useEffect(() => {
     const enabled = import.meta.env.VITE_ENABLE_SW === "true";
     const productionApi = import.meta.env.VITE_API_MODE === "production";
-    const correctHost = window.location.hostname === "head-heart.atomglobal.com";
+    const correctHost = window.location.hostname === "v4.atomglobal.com";
 
     if (!enabled || !productionApi || !correctHost || !("serviceWorker" in navigator)) {
       navigator.serviceWorker?.getRegistrations?.().then(registrations => {
@@ -70,6 +92,7 @@ createRoot(document.getElementById("root")).render(
     <AppErrorBoundary>
       <BrandProvider>
         <AssessmentAppProduction />
+        <CheckoutReturnRecovery />
         <ServiceWorkerUpdate />
       </BrandProvider>
     </AppErrorBoundary>
