@@ -183,7 +183,11 @@ final class ReportService
 
     private function cashOnDeliveryAvailable(): bool
     {
-        $value = $this->settings->get('payments.cash_on_delivery_enabled', false);
+        $override = $this->settings->get('system.cash_on_delivery_enabled', null);
+        $value = $override === null
+            ? $this->settings->get('payments.cash_on_delivery_enabled', false)
+            : $override;
+
         if (is_bool($value)) return $value;
         return in_array(strtolower(trim((string) $value)), ['1', 'true', 'yes', 'on'], true);
     }
