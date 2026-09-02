@@ -11,7 +11,7 @@ DOMAIN="${DOMAIN:-head-heart-staging.atomglobal.com}"
 BRANCH="${BRANCH:-sunil-v3-clean-40q-cms}"
 PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-php8.3-fpm}"
 EXPECTED_APP_ENV="${EXPECTED_APP_ENV:-staging}"
-CMS_APPLY_SCRIPT="${CMS_APPLY_SCRIPT:-bin/apply-v3-public-cms.php}"
+CMS_APPLY_SCRIPT="${CMS_APPLY_SCRIPT-bin/apply-v3-public-cms.php}"
 PREVIOUS_RELEASE=""
 SWITCHED=0
 

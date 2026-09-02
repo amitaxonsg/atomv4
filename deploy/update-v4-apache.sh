@@ -13,6 +13,6 @@ export DOMAIN="${DOMAIN:-v4.atomglobal.com}"
 export BRANCH="${BRANCH:-sunil-v4-growth-alignment-frozen}"
 export PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-php8.3-fpm}"
 export EXPECTED_APP_ENV="${EXPECTED_APP_ENV:-production}"
-export CMS_APPLY_SCRIPT="${CMS_APPLY_SCRIPT-__V4_NO_CMS_APPLY__}"
+export CMS_APPLY_SCRIPT=""
 
 exec /usr/bin/env bash "$(dirname "$0")/update-v3-apache-staging.sh"
