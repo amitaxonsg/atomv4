@@ -4,13 +4,14 @@ import fs from "node:fs";
 
 const read = path => fs.readFileSync(new URL(path, import.meta.url), "utf8");
 
-test("V4 uses Growth Alignment product branding while retaining Head and Heart dimensions", () => {
+test("V4 keeps Growth Alignment product identity while the public fallback matches the live CMS title", () => {
   const html = read("../../index.html");
   const manifest = read("../../public/manifest.json");
   const experience = read("../../src/data/assessmentExperience.js");
   assert.match(html, /Growth Alignment Assessment/);
   assert.match(manifest, /Growth Alignment/);
-  assert.match(experience, /title: "Growth Alignment"/);
+  assert.match(experience, /title: "Head–Heart Alignment"/);
+  assert.match(experience, /introHeadline: "Growth Alignment: Personal"/);
   assert.match(experience, /heartLabel: "Heart"/);
   assert.match(experience, /headLabel: "Head"/);
 });
