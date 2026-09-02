@@ -12,6 +12,13 @@ test("V4 mobile controls stay inside the viewport and use iOS-safe sizing", () =
   assert.match(css, /grid-template-columns:\s*minmax\(0,\s*1fr\)/);
 });
 
+test("V4 preserves approved logo placement in the right content panel", () => {
+  const css = read("src/v4-mobile-burnin.css");
+  const layout = read("src/components/assessment/AssessmentLayout.jsx");
+  assert.match(css, /\.latest-visual-panel__logo\s*\{[\s\S]*display:\s*none\s*!important/);
+  assert.match(layout, /latest-public-brand/);
+});
+
 test("V4 personal payment message is scoped to Personal only", () => {
   const css = read("src/v4-mobile-burnin.css");
   assert.match(css, /\.v4-report--personal[\s\S]*For less than a cup of coffee, find out more about yourself\./);
@@ -27,11 +34,11 @@ test("V4 checkout recovery reloads stale report state on browser return", () => 
   assert.match(source, /v4\.atomglobal\.com/);
 });
 
-test("V4 CMS public logo and banner values are honored", () => {
+test("V4 CMS public logo and stage image values are honored", () => {
   const source = read("src/branding/BrandContext.jsx");
   assert.match(source, /return url \|\| transparentLogoUrl/);
-  assert.match(source, /applyBannerFallback/);
-  assert.match(source, /nextBranding\.bannerUrl/);
+  assert.match(source, /stages:\s*\{ \.\.\.defaults\.stages, \.\.\.\(remote\.stages \|\| \{\}\) \}/);
+  assert.doesNotMatch(source, /applyBannerFallback/);
   assert.doesNotMatch(source, /startsWith\("\/media-uploads\/"\) \? legacyLogoUrl/);
 });
 
