@@ -14,8 +14,10 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Live deployed application commit** | `0e7966a88e9c03c93b75537534424de8979af235` |
-| Current live Git backup branch | `v4-live-backup-20260903-0e7966a` |
+| **Last server-verified live application commit** | `0e7966a88e9c03c93b75537534424de8979af235` |
+| **Latest accepted V4 code commit** | `d32aedf31f488374e023655bed2eba6e3e1b6fec` |
+| Latest accepted-code Git backup branch | `v4-live-backup-20260903-d32aedf` |
+| Current server-verified live Git backup branch | `v4-live-backup-20260903-0e7966a` |
 | Previous live Git backup branch | `v4-live-backup-20260903-ed30269` |
 | Earlier live Git backup branch | `v4-live-backup-20260903-ecf57b8` |
 | Pre-change Git backup branch | `v4-prechange-backup-20260903-3c21f04` |
@@ -30,11 +32,11 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Cron | `/etc/cron.d/growth-alignment-v4` |
 | Web server | Apache + PHP 8.3-FPM |
 
-> README/documentation commits may be newer than the deployed application commit because documentation-only changes do not require a production redeploy. The authoritative live runtime marker is `/var/www/v4.atomglobal.com/deployed-commit.txt`.
+> README/documentation commits may be newer than the deployed application commit because documentation-only changes do not require a production redeploy. The authoritative live runtime marker is `/var/www/v4.atomglobal.com/deployed-commit.txt`. The `d32aedf...` Executive Summary fix is the latest accepted V4 code baseline; mark it as server-verified live only after the runtime marker/deploy output confirms that exact commit.
 
-The current V4 production build passed **75/75 frontend tests**, Vite production build, PHP syntax/tests and deployment health checks.
+The current accepted V4 code baseline passes **75/75 frontend tests** and the Vite production build. The last server-verified V4 production release also passed PHP syntax/tests and deployment health checks.
 
-Latest production health confirmed `status: ok` with database, migrations, storage, Stripe, Stripe webhook, email and cron healthy. `feedbackGitHub:false` is optional and is not a launch blocker.
+Latest verified production health returned `status: ok` with database, migrations, storage, Stripe, Stripe webhook, email and cron healthy. `feedbackGitHub:false` is optional and is not a launch blocker.
 
 ## Approved changes — 2–3 September 2026
 
@@ -90,9 +92,9 @@ Approved layout correction:
 
 ### 10-area radar and graphical score breakdown
 
-The Full Development Report now uses a clean, readable A–J radar and matching graphical score cards in both the browser and generated PDF.
+The Full Development Report uses a clean, readable A–J radar and matching graphical score cards in both the browser and generated PDF.
 
-Approved live treatment:
+Approved treatment:
 
 - radar spokes use **A, B, C, D, E, F, G, H, I, J** instead of long labels or numbers;
 - each letter maps directly to one clearly named score card;
@@ -119,7 +121,28 @@ Change history for the approved radar/graphical report work:
 - use A–J markers in generated PDF: `c28393ccb522884519431e962577e7e65a9074a7`
 - final A–J browser/PDF parity regression test: `0e7966a88e9c03c93b75537534424de8979af235`
 
-The current release passed **75/75 tests**, built successfully, passed PHP syntax validation and deployed successfully through the V4 Apache release process. Production health returned `status: ok`.
+The A–J release passed **75/75 tests**, built successfully, passed PHP syntax validation and was server-verified through the V4 Apache release process with healthy production checks.
+
+### Executive Summary score-bar visibility
+
+The `Executive Summary` Highest 3 / Lowest 3 cards must always show their graphical score bars, not only the title, `x/25` value and 5/15/25 labels.
+
+Accepted V4 treatment:
+
+- Highest 3 and Lowest 3 each retain three assessment areas;
+- each item shows area name and `x/25` score;
+- **5 · Head-led / 15 · Balanced / 25 · Heart-led** labels remain visible;
+- a pale full-width score track remains visible under the labels;
+- the filled graphical bar is explicitly sized and displayed so it cannot collapse or disappear through inherited layout/CSS;
+- desktop and mobile retain the same score meaning;
+- no scoring, ranking or business logic changes were made.
+
+Implementation and regression commits:
+
+- restore visible Executive Summary score bars: `17eae9d80ceccd2625f29b402e837a87f24e42a0`
+- regression guard for visible Executive Summary score bars: `d32aedf31f488374e023655bed2eba6e3e1b6fec`
+
+`d32aedf31f488374e023655bed2eba6e3e1b6fec` is the latest accepted V4 code baseline and passed **75/75 tests** plus the Vite production build. Server-live status for this exact commit must be confirmed from `/var/www/v4.atomglobal.com/deployed-commit.txt` before this README calls it the verified live runtime.
 
 ## Approved visual state
 
@@ -134,7 +157,8 @@ The approved V4 presentation includes:
 - Personal green coffee value banner above checkout;
 - enlarged 10-area radar with **A–J** markers;
 - graphical score cards with clear 5–25 interpretation;
-- browser and PDF use the same A–J mapping and score normalization.
+- browser and PDF use the same A–J mapping and score normalization;
+- Executive Summary Highest 3 / Lowest 3 items show visible score tracks and filled bars.
 
 Do not introduce obsolete hard-coded image fallbacks or compensate for valid CMS state with unrelated frontend overrides.
 
@@ -215,15 +239,27 @@ cat /var/www/v4.atomglobal.com/deployed-commit.txt
 curl -fsS https://v4.atomglobal.com/api/health
 ```
 
-Current live application marker:
+Last server-verified live application marker:
 
 ```text
 0e7966a88e9c03c93b75537534424de8979af235
 ```
 
+Latest accepted V4 code commit awaiting explicit server-live marker verification in this record:
+
+```text
+d32aedf31f488374e023655bed2eba6e3e1b6fec
+```
+
 ## Approved V4 backup procedure
 
-Current Git safety branch for the approved live application baseline:
+Latest accepted-code Git safety branch:
+
+```text
+v4-live-backup-20260903-d32aedf
+```
+
+Current server-verified live Git safety branch:
 
 ```text
 v4-live-backup-20260903-0e7966a
@@ -278,6 +314,8 @@ Retest at minimum:
 - all 10 graphical score bars are readable and match their `x/25` values;
 - the 5 / 15 / 25 Head-led / Balanced / Heart-led interpretation is clear;
 - generated PDF uses the same A–J mapping and 5–25 scale as the browser;
+- Executive Summary Highest 3 and Lowest 3 each show three visible graphical score bars;
+- Executive Summary bar lengths match the displayed `x/25` values;
 - no large dead space remains in the radar/score section;
 - mobile radar and graphical score list stack without overflow;
 - CMS image/logo/content edits reflect correctly.
