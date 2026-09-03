@@ -38,15 +38,18 @@ test("participant report shows safe Stripe readiness and full CMS schema", () =>
   for (const field of richFields) assert.match(reportView, new RegExp(field));
 });
 
-test("V4 browser and PDF use the same readable 5-to-25 radar scale", () => {
+test("V4 browser and PDF use the same readable A-to-J 5-to-25 radar scale", () => {
   assert.match(reportView, /5 · Head-led/);
   assert.match(reportView, /15 · Balanced/);
   assert.match(reportView, /25 · Heart-led/);
-  assert.match(reportView, /String\(index \+ 1\)/);
   assert.match(reportView, /\(value - min\) \/ \(max - min\)/);
+  assert.match(charts, /String\.fromCharCode\(65 \+ index\)/);
   assert.match(charts, /\(Number\(value\) - 5\) \/ 20/);
-  assert.match(reportCss, /v4-score-index/);
+  assert.match(reportCss, /content: "A"/);
+  assert.match(reportCss, /content: "J"/);
   assert.match(pdfService, /radar-score-grid/);
+  assert.match(pdfService, /chr\(65 \+ \$index\)/);
+  assert.match(pdfService, /letters A–J/);
   assert.match(pdfService, /5 · Head-led/);
   assert.match(pdfService, /15 · Balanced/);
   assert.match(pdfService, /25 · Heart-led/);
