@@ -143,13 +143,14 @@ test("Full Development Report covers Sunil complete content and sharing scope", 
   const enhancer = read("../../backend/src/Services/V3ReportEnhancer.php");
   const pdf = read("../../backend/src/Services/PdfService.php");
 
-  for (const phrase of ["Top three strengths", "Sharpest Edge", "Growth Edge", "Your 10-area radar", "Your 10-area deep dive", "Development roadmap", "Understand the Head–Heart profile spectrum", "Your written reflections", "Methodology and sourcing", "Five practical everyday actions", "Copy as text", "Email to self"]) {
+  for (const phrase of ["Top three strengths", "Sharpest Edge", "Growth Edge", "Your 10-area score breakdown", "Your 10-area deep dive", "Development roadmap", "Understand the Head–Heart profile spectrum", "Your written reflections", "Methodology and sourcing", "Five practical everyday actions", "Copy as text", "Email to self"]) {
     assert.ok(report.includes(phrase), `web report missing ${phrase}`);
   }
   for (const key of ["sharpestEdge", "growthEdge", "radarLegend", "profileSpectrum", "writtenReflections", "methodology"]) assert.ok(enhancer.includes(key), `report enhancer missing ${key}`);
   assert.match(enhancer, /How You’re Coming Across/);
   assert.match(enhancer, /trackKey === 'personal'/);
-  assert.match(pdf, /radarSvg/);
+  assert.match(pdf, /scoreBreakdownSection/);
+  assert.doesNotMatch(pdf, /radarSvg/);
   assert.match(pdf, /Sharpest Edge/);
   assert.match(pdf, /Growth Edge/);
   assert.match(pdf, /profileSpectrum/);
