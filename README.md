@@ -14,9 +14,10 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Live deployed application commit** | `ed30269caf509642b773223cf61562f880ff513c` |
-| Current live Git backup branch | `v4-live-backup-20260903-ed30269` |
-| Previous live Git backup branch | `v4-live-backup-20260903-ecf57b8` |
+| **Live deployed application commit** | `0e7966a88e9c03c93b75537534424de8979af235` |
+| Current live Git backup branch | `v4-live-backup-20260903-0e7966a` |
+| Previous live Git backup branch | `v4-live-backup-20260903-ed30269` |
+| Earlier live Git backup branch | `v4-live-backup-20260903-ecf57b8` |
 | Pre-change Git backup branch | `v4-prechange-backup-20260903-3c21f04` |
 | Pre-change server backup | `/var/backups/growth-alignment-v4/prechange-20260903-042350` |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
@@ -31,7 +32,7 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 
 > README/documentation commits may be newer than the deployed application commit because documentation-only changes do not require a production redeploy. The authoritative live runtime marker is `/var/www/v4.atomglobal.com/deployed-commit.txt`.
 
-The current V4 production build passed **74/74 frontend tests**, Vite production build, PHP syntax/tests and deployment health checks.
+The current V4 production build passed **75/75 frontend tests**, Vite production build, PHP syntax/tests and deployment health checks.
 
 Latest production health confirmed `status: ok` with database, migrations, storage, Stripe, Stripe webhook, email and cron healthy. `feedbackGitHub:false` is optional and is not a launch blocker.
 
@@ -89,25 +90,36 @@ Approved layout correction:
 
 ### 10-area radar and graphical score breakdown
 
-The Full Development Report now maximizes the `Your 10-area radar and score breakdown` section instead of leaving a large unused area.
+The Full Development Report now uses a clean, readable A–J radar and matching graphical score cards in both the browser and generated PDF.
 
 Approved live treatment:
 
-- substantially larger radar chart;
-- desktop layout uses the report width more efficiently;
-- the 10 assessment areas are presented as clear graphical score bars/cards rather than relying on text alone;
-- score labels and `x/25` values remain visible for precision;
-- Low / Mid / High scale remains readable;
-- graphical bars make differences between areas easier to distinguish at a glance;
-- reduced dead/empty space around the chart;
-- mobile stacks the radar and score graphs cleanly;
-- report scoring, data values and business logic are unchanged.
+- radar spokes use **A, B, C, D, E, F, G, H, I, J** instead of long labels or numbers;
+- each letter maps directly to one clearly named score card;
+- the right-side score cards use stronger contrast, larger titles, visible score pills and thicker graphical bars;
+- every area uses the correct **5–25 scale**;
+- interpretation is explicit: **5 = more Head-led, 15 = balanced, 25 = more Heart-led**;
+- the browser radar geometry and score bars use the same 5–25 normalization;
+- the PDF radar and score cards use the same A–J mapping and 5–25 normalization;
+- browser and PDF visual meaning are kept in parity by an automated regression test;
+- the radar section uses available report width efficiently and avoids the earlier large empty area;
+- mobile stacks the radar and score cards cleanly without overflow;
+- assessment scoring/business logic is unchanged.
 
-Implemented, tested and deployed in:
+Change history for the approved radar/graphical report work:
 
-`ed30269caf509642b773223cf61562f880ff513c`
+- maximize radar and graphical score breakdown: `ed30269caf509642b773223cf61562f880ff513c`
+- clarify 5–25 scale and readable markers: `b7f03694f7057c6b090962937e26edd3be7a7abf`
+- polish score cards: `665bb7b4e3f19b4c3e37f176b0ee182123f8ad30`
+- align browser radar geometry to 5–25 scoring: `94908e6f292c41c08180d875782ef134c51090fb`
+- align PDF radar/score scale to browser: `c14c0d831543eb62f0b137e48c67892c472cd84e`
+- add browser/PDF scale consistency regression test: `70a76616196fcb21faeeb9e6ba62fb08379d3b0f`
+- use A–J markers on browser radar: `980102cbd7c869dd65745e2a1f48878c624cc1f7`
+- match approved A–J score-card visual: `47eac9e5a8fbaef19f10f3615fd2354efe93abe6`
+- use A–J markers in generated PDF: `c28393ccb522884519431e962577e7e65a9074a7`
+- final A–J browser/PDF parity regression test: `0e7966a88e9c03c93b75537534424de8979af235`
 
-This release passed **74/74 tests**, built successfully and deployed successfully through the V4 Apache release process. The post-deployment health endpoint returned `status: ok`. During the deployment background processing also successfully sent queued email item `287`.
+The current release passed **75/75 tests**, built successfully, passed PHP syntax validation and deployed successfully through the V4 Apache release process. Production health returned `status: ok`.
 
 ## Approved visual state
 
@@ -120,7 +132,9 @@ The approved V4 presentation includes:
 - inner-stage CMS/content images remain authoritative;
 - mobile responsive presentation and iOS-safe controls;
 - Personal green coffee value banner above checkout;
-- enlarged 10-area radar plus graphical score breakdown with efficient use of report width.
+- enlarged 10-area radar with **A–J** markers;
+- graphical score cards with clear 5–25 interpretation;
+- browser and PDF use the same A–J mapping and score normalization.
 
 Do not introduce obsolete hard-coded image fallbacks or compensate for valid CMS state with unrelated frontend overrides.
 
@@ -204,7 +218,7 @@ curl -fsS https://v4.atomglobal.com/api/health
 Current live application marker:
 
 ```text
-ed30269caf509642b773223cf61562f880ff513c
+0e7966a88e9c03c93b75537534424de8979af235
 ```
 
 ## Approved V4 backup procedure
@@ -212,10 +226,16 @@ ed30269caf509642b773223cf61562f880ff513c
 Current Git safety branch for the approved live application baseline:
 
 ```text
-v4-live-backup-20260903-ed30269
+v4-live-backup-20260903-0e7966a
 ```
 
 Previous live backup:
+
+```text
+v4-live-backup-20260903-ed30269
+```
+
+Earlier live backup:
 
 ```text
 v4-live-backup-20260903-ecf57b8
@@ -253,9 +273,11 @@ Retest at minimum:
 - Admin UAT enabled/disabled behavior;
 - Stripe open/cancel/return/retry;
 - secure Full Report/PDF/email delivery;
-- enlarged radar chart uses available space correctly;
+- browser radar uses A–J markers in the correct order;
+- each A–J marker matches its score card;
 - all 10 graphical score bars are readable and match their `x/25` values;
-- Low / Mid / High scales display correctly;
+- the 5 / 15 / 25 Head-led / Balanced / Heart-led interpretation is clear;
+- generated PDF uses the same A–J mapping and 5–25 scale as the browser;
 - no large dead space remains in the radar/score section;
 - mobile radar and graphical score list stack without overflow;
 - CMS image/logo/content edits reflect correctly.
@@ -273,7 +295,7 @@ Before any V4 production change:
 5. review the diff;
 6. deploy with the V4 Apache deployer;
 7. verify the deployed commit and `/api/health`;
-8. perform browser/mobile UAT;
+8. perform browser/mobile/PDF UAT;
 9. update this README when the accepted baseline changes.
 
 The current live V4 runtime and this README are the authoritative operational reference.
