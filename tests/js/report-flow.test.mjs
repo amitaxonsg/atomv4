@@ -3,6 +3,9 @@ import fs from "node:fs";
 import test from "node:test";
 
 const reportView = fs.readFileSync("src/components/assessment/ReportView.jsx", "utf8");
+const charts = fs.readFileSync("src/components/shared/Charts.jsx", "utf8");
+const reportCss = fs.readFileSync("src/report-flow.css", "utf8");
+const pdfService = fs.readFileSync("backend/src/Services/PdfService.php", "utf8");
 const reportService = fs.readFileSync("backend/src/Services/ReportService.php", "utf8");
 const reportAudit = fs.readFileSync("backend/bin/report-flow-audit.php", "utf8");
 const reportSmoke = fs.readFileSync("backend/bin/production-report-flow-smoke-test.php", "utf8");
@@ -33,6 +36,22 @@ test("participant report shows safe Stripe readiness and full CMS schema", () =>
   assert.match(reportView, /checkoutAvailable/);
   assert.match(reportView, /UpgradeReasons/);
   for (const field of richFields) assert.match(reportView, new RegExp(field));
+});
+
+test("V4 browser and PDF use the same readable 5-to-25 radar scale", () => {
+  assert.match(reportView, /5 · Head-led/);
+  assert.match(reportView, /15 · Balanced/);
+  assert.match(reportView, /25 · Heart-led/);
+  assert.match(reportView, /String\(index \+ 1\)/);
+  assert.match(reportView, /\(value - min\) \/ \(max - min\)/);
+  assert.match(charts, /\(Number\(value\) - 5\) \/ 20/);
+  assert.match(reportCss, /v4-score-index/);
+  assert.match(pdfService, /radar-score-grid/);
+  assert.match(pdfService, /5 · Head-led/);
+  assert.match(pdfService, /15 · Balanced/);
+  assert.match(pdfService, /25 · Heart-led/);
+  assert.match(pdfService, /\(\(\$value - 5\) \/ 20\)/);
+  assert.match(pdfService, /\(\$entry\['score'\] - 5\) \/ 20/);
 });
 
 test("database audit and smoke test cover locked unlock and PDF lifecycle", () => {
