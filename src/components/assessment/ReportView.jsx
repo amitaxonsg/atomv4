@@ -11,11 +11,11 @@ function textValue(value) {
   return "";
 }
 
-function ScaleBar({ score, max = 25 }) {
-  const value = Math.max(0, Math.min(max, Number(score) || 0));
-  const percent = (value / max) * 100;
+function ScaleBar({ score, min = 5, max = 25 }) {
+  const value = Math.max(min, Math.min(max, Number(score) || min));
+  const percent = ((value - min) / (max - min)) * 100;
   return <div className="v4-scale" aria-label={`${value} out of ${max}`}>
-    <div className="v4-scale__labels"><span>Low</span><span>Mid</span><span>High</span></div>
+    <div className="v4-scale__labels"><span>5 · Head-led</span><span>15 · Balanced</span><span>25 · Heart-led</span></div>
     <div className="v4-scale__track"><span style={{ width: `${percent}%` }} /><i style={{ left: `${percent}%` }} /></div>
   </div>;
 }
@@ -81,10 +81,11 @@ function SubscaleReads({ content, trackKey }) {
 function ScoreBreakdown({ subscales, trackKey, legend }) {
   const entries = Object.entries(subscales || {});
   if (entries.length < 3) return null;
-  const labels = entries.map(([label]) => v3AreaName(trackKey, label, label));
-  return <section className="report-card">
+  const labels = entries.map(([,], index) => String(index + 1));
+  return <section className="report-card v4-score-breakdown">
     <h3>Your 10-area radar and score breakdown</h3>
-    <div className="report-radar-wrap"><RadarChart values={entries.map(([, value]) => Number(value))} labels={labels} /><div className="report-score-list v4-score-list">{entries.map(([label, value]) => <div key={label}><span>{v3AreaName(trackKey, label, label)}</span><strong>{value}/25</strong><ScaleBar score={value} /></div>)}</div></div>
+    <p className="v4-score-intro">The radar uses numbers 1–10 to stay readable. Match each number to the score card beside it. Every area runs from <strong>5 (more Head-led)</strong> through <strong>15 (balanced)</strong> to <strong>25 (more Heart-led)</strong>.</p>
+    <div className="report-radar-wrap"><RadarChart values={entries.map(([, value]) => Number(value))} labels={labels} /><div className="report-score-list v4-score-list">{entries.map(([label, value], index) => <div key={label}><div className="v4-score-card__heading"><span className="v4-score-index">{index + 1}</span><span className="v4-score-name">{v3AreaName(trackKey, label, label)}</span><strong>{value}/25</strong></div><ScaleBar score={value} /></div>)}</div></div>
     {legend && <p className="preview-note"><strong>How to read this chart:</strong> {legend}</p>}
   </section>;
 }
