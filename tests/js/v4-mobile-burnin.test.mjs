@@ -21,7 +21,7 @@ test("V4 preserves approved logo placement in the right content panel", () => {
 
 test("V4 personal payment message is scoped to Personal only", () => {
   const css = read("src/v4-mobile-burnin.css");
-  assert.match(css, /\.v4-report--personal[\s\S]*For less than a cup of coffee, find out more about yourself\./);
+  assert.match(css, /\.v4-report--personal[\s\S]*For less than a cup of coffee, find out more about yourself! ✨/);
   assert.doesNotMatch(css, /\.v4-report--professional[^\n]*::after/);
 });
 
