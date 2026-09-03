@@ -43,16 +43,35 @@ body,
   word-break: normal;
 }
 
-/* Personal-only supporting message requested by Sunil. */
-.v4-report--personal .upgrade-box > div:first-child::after {
-  content: "For less than a cup of coffee, find out more about yourself.";
-  display: block;
-  margin-top: 9px;
-  color: #f0c66f;
-  font-size: 14px;
-  line-height: 1.5;
-  font-weight: 600;
+/* Personal-only checkout message — promoted above the payment box as a clear value banner. */
+.v4-report--personal .paid-report.locked .upgrade-box {
+  position: relative;
+  margin-top: 72px;
+  overflow: visible;
+}
+
+.v4-report--personal .paid-report.locked .upgrade-box::before {
+  content: "For less than a cup of coffee, find out more about yourself.  ✦";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -58px;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 16px;
+  box-sizing: border-box;
+  border: 2px solid #69c65d;
+  border-left-width: 6px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f6fff3 0%, #ecfbe8 100%);
+  box-shadow: 0 8px 20px rgba(71, 135, 62, .12);
+  color: #3f9638;
+  font-size: clamp(16px, 1.8vw, 20px);
+  line-height: 1.25;
+  font-weight: 700;
   letter-spacing: .01em;
+  text-transform: none;
 }
 
 
@@ -230,6 +249,20 @@ body,
     grid-template-columns: minmax(0, 1fr) !important;
     gap: 14px;
     width: 100%;
+  }
+
+  .v4-report--personal .paid-report.locked .upgrade-box {
+    margin-top: 104px;
+  }
+
+  .v4-report--personal .paid-report.locked .upgrade-box::before {
+    top: -90px;
+    min-height: 76px;
+    padding: 10px 13px;
+    border-left-width: 5px;
+    border-radius: 9px;
+    font-size: 16px;
+    line-height: 1.35;
   }
 
   .upgrade-box__actions {
