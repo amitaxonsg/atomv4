@@ -15,7 +15,7 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
 | **Live deployed application commit** | `3c21f046134e19dcbd1df656ac199c650c86fe62` |
-| Current live backup branch | `v4-live-backup-20260902-3c21f04` |
+| Current pre-change Git backup branch | `v4-prechange-backup-20260903-3c21f04` |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
 | Releases | `/var/www/v4.atomglobal.com/releases` |
 | Active release | `/var/www/v4.atomglobal.com/current` |
@@ -288,10 +288,10 @@ The live deployed marker for the current application baseline is:
 
 ## Approved V4 backup procedure
 
-Current Git safety branch for the live application baseline:
+Current Git safety branch for the current live pre-change baseline:
 
 ```text
-v4-live-backup-20260902-3c21f04
+v4-prechange-backup-20260903-3c21f04
 ```
 
 A full operational backup should also include:
