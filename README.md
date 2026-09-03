@@ -14,13 +14,15 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Last server-verified live application commit in this record** | `0e7966a88e9c03c93b75537534424de8979af235` |
+| **Server-verified live application commit** | `f529c5972b750ba9f94f5e1e3e41f1a46bc8babb` |
 | **Latest accepted V4 code commit** | `f529c5972b750ba9f94f5e1e3e41f1a46bc8babb` |
-| Latest accepted-code Git backup branch | `v4-accepted-backup-20260903-f529c59` |
+| Current live Git backup branch | `v4-live-backup-20260903-f529c59` |
+| Accepted-code Git backup branch | `v4-accepted-backup-20260903-f529c59` |
 | Previous accepted-code backup | `v4-live-backup-20260903-d32aedf` |
-| Server-verified live backup | `v4-live-backup-20260903-0e7966a` |
+| Earlier live backup | `v4-live-backup-20260903-0e7966a` |
 | Pre-change Git backup | `v4-prechange-backup-20260903-3c21f04` |
 | Confirmed pre-change server backup | `/var/backups/growth-alignment-v4/prechange-20260903-042350` |
+| Latest full server backup | pending final path/validation output |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
 | Releases | `/var/www/v4.atomglobal.com/releases` |
 | Active release | `/var/www/v4.atomglobal.com/current` |
@@ -31,9 +33,11 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Cron | `/etc/cron.d/growth-alignment-v4` |
 | Web server | Apache + PHP 8.3-FPM |
 
-> Documentation commits may be newer than the deployed application. The authoritative production runtime marker is `/var/www/v4.atomglobal.com/deployed-commit.txt`. Do not describe a newer commit as server-verified live until that marker or successful deploy output confirms the exact SHA.
+> Documentation commits may be newer than the deployed application. The authoritative production runtime marker is `/var/www/v4.atomglobal.com/deployed-commit.txt`.
 
-The current accepted V4 code gate is **75/75 frontend tests**, successful Vite production build and clean PHP syntax for the PDF renderer. The last server-verified production health returned `status: ok` with database, migrations, storage, Stripe, Stripe webhook, email and cron healthy. `feedbackGitHub:false` remains optional and is not a launch blocker.
+The current V4 release passed **75/75 frontend tests**, the Vite production build, and clean PHP syntax for `backend/src/Services/PdfService.php` before deployment.
+
+The deployment completed successfully through the V4 Apache release process. Production health returned `status: ok` with database, migrations, storage, Stripe, Stripe webhook, email and cron healthy. Background processing was verified healthy and email queue items **300, 301 and 302** were sent during the deploy cycle. `feedbackGitHub:false` remains optional and is not a launch blocker.
 
 ## Approved changes — 2–3 September 2026
 
@@ -132,9 +136,9 @@ Change history:
 - `e985a54aa0d040261393dd0179e2953fa20c4306` — style 10-area breakdown like Executive Summary
 - `cf62459ee4da5ad64b8d7473a111ce9afabf1679` — match generated PDF to bar-only breakdown
 - `8d043598de254b21ba543e800e4eb3840034a797` — browser/PDF bar-breakdown parity test
-- `f529c5972b750ba9f94f5e1e3e41f1a46bc8babb` — update legacy scope regression test to the approved bar-only design
+- `f529c5972b750ba9f94f5e1e3e41f1a46bc8babb` — update legacy scope regression test to approved bar-only design
 
-The accepted V4 bar-only report baseline is:
+The **approved and server-verified live V4 bar-only report baseline** is:
 
 `f529c5972b750ba9f94f5e1e3e41f1a46bc8babb`
 
@@ -228,13 +232,7 @@ cat /var/www/v4.atomglobal.com/deployed-commit.txt
 curl -fsS https://v4.atomglobal.com/api/health
 ```
 
-Last server-verified live marker currently recorded here:
-
-```text
-0e7966a88e9c03c93b75537534424de8979af235
-```
-
-Latest accepted V4 code baseline:
+Current server-verified live marker:
 
 ```text
 f529c5972b750ba9f94f5e1e3e41f1a46bc8babb
@@ -242,7 +240,13 @@ f529c5972b750ba9f94f5e1e3e41f1a46bc8babb
 
 ## Approved V4 backup procedure
 
-Latest accepted-code Git safety branch:
+Current live Git safety branch:
+
+```text
+v4-live-backup-20260903-f529c59
+```
+
+Accepted-code Git safety branch:
 
 ```text
 v4-accepted-backup-20260903-f529c59
@@ -254,7 +258,7 @@ Previous accepted-code backup:
 v4-live-backup-20260903-d32aedf
 ```
 
-Current server-verified live backup:
+Earlier live backup:
 
 ```text
 v4-live-backup-20260903-0e7966a
@@ -272,7 +276,7 @@ Confirmed full pre-change server backup:
 /var/backups/growth-alignment-v4/prechange-20260903-042350
 ```
 
-That server backup includes a validated compressed MariaDB dump for `growth_alignment_v4`, protected `v4.env`, deployed commit marker, source Git HEAD, active release reference and clean Git status snapshot.
+A new full server backup was initiated after the `f529c59...` deployment, but its final generated path and `gzip -t` validation output have not yet been captured in this record. Do not treat that new backup as confirmed until the shell prints its exact path and validation result.
 
 Git alone does not contain all live CMS/database configuration.
 
