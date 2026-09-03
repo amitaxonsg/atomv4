@@ -144,12 +144,13 @@ final class PdfService
         if (!$scores) return '';
         $chart = $this->radarSvg($scores, $trackKey, $heart, $head);
         $cards = [];
-        $index = 1;
+        $index = 0;
         foreach (array_slice($scores, 0, 10, true) as $code => $score) {
             $value = max(5, min(25, (int) $score));
             $width = max(0, min(100, (int) round((($value - 5) / 20) * 100)));
+            $marker = chr(65 + $index);
             $cards[] = '<div class="radar-score-card">'
-                . '<table class="radar-score-head"><tr><td style="width:8mm"><span class="radar-index">' . $index . '</span></td>'
+                . '<table class="radar-score-head"><tr><td style="width:8mm"><span class="radar-index">' . $marker . '</span></td>'
                 . '<td class="radar-area">' . $this->h($this->areaName($trackKey, (string) $code)) . '</td>'
                 . '<td class="radar-value">' . $value . '/25</td></tr></table>'
                 . '<table class="scale-labels"><tr><td>5 · Head-led</td><td>15 · Balanced</td><td>25 · Heart-led</td></tr></table>'
@@ -161,7 +162,7 @@ final class PdfService
             $rows .= '<tr><td>' . $cards[$i] . '</td><td>' . ($cards[$i + 1] ?? '') . '</td></tr>';
         }
         return '<div class="report-block"><h3>Your 10-area radar and score breakdown</h3>'
-            . '<p class="radar-intro">The radar uses numbers 1–10 to keep the chart readable. Match each number to the score card below. Every area runs from <strong>5 (more Head-led)</strong> through <strong>15 (balanced)</strong> to <strong>25 (more Heart-led)</strong>.</p>'
+            . '<p class="radar-intro">The radar uses letters A–J to keep the chart readable. Match each letter to the score card below. Every area runs from <strong>5 (more Head-led)</strong> through <strong>15 (balanced)</strong> to <strong>25 (more Heart-led)</strong>.</p>'
             . '<div class="radar">' . $chart . '</div><table class="radar-score-grid"><tbody>' . $rows . '</tbody></table>'
             . ($legend !== '' ? '<p class="radar-legend"><strong>How to read the chart:</strong> ' . $this->h($legend) . '</p>' : '') . '</div>';
     }
@@ -208,7 +209,7 @@ final class PdfService
             $x = $cx + cos($angle) * $radius; $y = $cy + sin($angle) * $radius;
             $axes .= '<line x1="' . $cx . '" y1="' . $cy . '" x2="' . round($x, 2) . '" y2="' . round($y, 2) . '" stroke="#D8D8D8" stroke-width="1" />';
             $labelX = $cx + cos($angle) * ($radius + 28); $labelY = $cy + sin($angle) * ($radius + 28);
-            $labels .= '<text x="' . round($labelX, 2) . '" y="' . round($labelY, 2) . '" text-anchor="middle" font-size="12" font-weight="normal" fill="#444">' . ($i + 1) . '</text>';
+            $labels .= '<text x="' . round($labelX, 2) . '" y="' . round($labelY, 2) . '" text-anchor="middle" font-size="12" font-weight="bold" fill="#444">' . chr(65 + $i) . '</text>';
             $normalised = max(0, min(1, ($entry['score'] - 5) / 20));
             $dataRadius = $radius * $normalised;
             $dataPoints[] = round($cx + cos($angle) * $dataRadius, 2) . ',' . round($cy + sin($angle) * $dataRadius, 2);
