@@ -3,7 +3,6 @@ import fs from "node:fs";
 import test from "node:test";
 
 const reportView = fs.readFileSync("src/components/assessment/ReportView.jsx", "utf8");
-const charts = fs.readFileSync("src/components/shared/Charts.jsx", "utf8");
 const reportCss = fs.readFileSync("src/report-flow.css", "utf8");
 const pdfService = fs.readFileSync("backend/src/Services/PdfService.php", "utf8");
 const reportService = fs.readFileSync("backend/src/Services/ReportService.php", "utf8");
@@ -38,25 +37,26 @@ test("participant report shows safe Stripe readiness and full CMS schema", () =>
   for (const field of richFields) assert.match(reportView, new RegExp(field));
 });
 
-test("V4 browser and PDF use the same readable A-to-J 5-to-25 radar scale", () => {
+test("V4 browser and PDF use the same 10-area progress-bar breakdown", () => {
+  assert.match(reportView, /Your 10-area score breakdown/);
+  assert.match(reportView, /v4-all-areas-grid/);
+  assert.doesNotMatch(reportView, /RadarChart/);
   assert.match(reportView, /5 · Head-led/);
   assert.match(reportView, /15 · Balanced/);
   assert.match(reportView, /25 · Heart-led/);
   assert.match(reportView, /\(value - min\) \/ \(max - min\)/);
-  assert.match(charts, /String\.fromCharCode\(65 \+ index\)/);
-  assert.match(charts, /\(Number\(value\) - 5\) \/ 20/);
-  assert.match(reportCss, /content: "A"/);
-  assert.match(reportCss, /content: "J"/);
+  assert.match(reportCss, /v4-score-breakdown[\s\S]*v4-all-areas-grid[\s\S]*v4-scale__track/);
+  assert.match(reportCss, /v4-score-breakdown[\s\S]*display:\s*block\s*!important/);
   assert.match(reportCss, /v4-executive-summary[\s\S]*v4-scale__track/);
-  assert.match(reportCss, /v4-executive-summary[\s\S]*display:\s*block\s*!important/);
-  assert.match(pdfService, /radar-score-grid/);
-  assert.match(pdfService, /chr\(65 \+ \$index\)/);
-  assert.match(pdfService, /letters A–J/);
+  assert.match(pdfService, /scoreBreakdownSection/);
+  assert.match(pdfService, /score-grid/);
+  assert.match(pdfService, /Your 10-area score breakdown/);
+  assert.doesNotMatch(pdfService, /radarSvg/);
+  assert.doesNotMatch(pdfService, /letters A–J/);
   assert.match(pdfService, /5 · Head-led/);
   assert.match(pdfService, /15 · Balanced/);
   assert.match(pdfService, /25 · Heart-led/);
   assert.match(pdfService, /\(\(\$value - 5\) \/ 20\)/);
-  assert.match(pdfService, /\(\$entry\['score'\] - 5\) \/ 20/);
 });
 
 test("database audit and smoke test cover locked unlock and PDF lifecycle", () => {
