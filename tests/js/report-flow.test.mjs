@@ -47,6 +47,8 @@ test("V4 browser and PDF use the same readable A-to-J 5-to-25 radar scale", () =
   assert.match(charts, /\(Number\(value\) - 5\) \/ 20/);
   assert.match(reportCss, /content: "A"/);
   assert.match(reportCss, /content: "J"/);
+  assert.match(reportCss, /v4-executive-summary[\s\S]*v4-scale__track/);
+  assert.match(reportCss, /v4-executive-summary[\s\S]*display:\s*block\s*!important/);
   assert.match(pdfService, /radar-score-grid/);
   assert.match(pdfService, /chr\(65 \+ \$index\)/);
   assert.match(pdfService, /letters A–J/);
