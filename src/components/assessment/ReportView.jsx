@@ -1,7 +1,7 @@
 import React from "react";
 import { api, isMockMode } from "../../api/client";
 import { parseReportPayload, reportSummary, v3AreaName } from "../../data/runtimeAssessment";
-import { AlignmentGauge, RadarChart } from "../shared/Charts";
+import { AlignmentGauge } from "../shared/Charts";
 import { ArrowRight, Check, Lock } from "../shared/Icons";
 import { StageShell } from "./AssessmentLayout";
 
@@ -79,14 +79,14 @@ function SubscaleReads({ content, trackKey }) {
 }
 
 function ScoreBreakdown({ subscales, trackKey, legend }) {
-  const entries = Object.entries(subscales || {});
+  const entries = Object.entries(subscales || {}).slice(0, 10);
   if (entries.length < 3) return null;
-  const labels = entries.map(([,], index) => String(index + 1));
+  const columns = [entries.slice(0, 5), entries.slice(5, 10)];
   return <section className="report-card v4-score-breakdown">
-    <h3>Your 10-area radar and score breakdown</h3>
-    <p className="v4-score-intro">The radar uses numbers 1–10 to stay readable. Match each number to the score card beside it. Every area runs from <strong>5 (more Head-led)</strong> through <strong>15 (balanced)</strong> to <strong>25 (more Heart-led)</strong>.</p>
-    <div className="report-radar-wrap"><RadarChart values={entries.map(([, value]) => Number(value))} labels={labels} /><div className="report-score-list v4-score-list">{entries.map(([label, value], index) => <div key={label}><div className="v4-score-card__heading"><span className="v4-score-index">{index + 1}</span><span className="v4-score-name">{v3AreaName(trackKey, label, label)}</span><strong>{value}/25</strong></div><ScaleBar score={value} /></div>)}</div></div>
-    {legend && <p className="preview-note"><strong>How to read this chart:</strong> {legend}</p>}
+    <h3>Your 10-area score breakdown</h3>
+    <p className="v4-score-intro">Compare all ten areas on the same scale: <strong>5 = more Head-led</strong>, <strong>15 = balanced</strong>, and <strong>25 = more Heart-led</strong>. The progress bars make the pattern easy to compare at a glance.</p>
+    <div className="v4-summary-grid v4-all-areas-grid">{columns.map((column, columnIndex) => <div key={`score-column-${columnIndex}`}>{column.map(([label, value]) => <article key={label}><div><span>{v3AreaName(trackKey, label, label)}</span><strong>{value}/25</strong></div><ScaleBar score={value} /></article>)}</div>)}</div>
+    {legend && <p className="preview-note"><strong>How to read these scores:</strong> {legend}</p>}
   </section>;
 }
 
@@ -306,7 +306,7 @@ export default function ReportView({ payload, token, onReset }) {
       <div className="paid-heading"><div><p className="eyebrow">Complete report</p><h2>{unlocked ? "Your full development report" : "This is the short version"}</h2></div>{!unlocked && <span className="lock-badge"><Lock /> Locked</span>}</div>
       {unlocked ? <FullReportContent report={report} summary={summary} content={paidContent} token={token} /> : <>
         <p>Your Full Report goes deeper into the patterns behind this result and turns them into practical development guidance.</p><UpgradeReasons items={upgradePreview} locked />
-        {!upgradePreview.length && <div className="locked-preview"><div><h3>10-area radar and deep dive</h3><p>See how your pattern shifts across decisions, relationships, conflict and pressure.</p></div><div><h3>Practical development roadmap</h3><p>Receive tailored actions, working-style guidance and track-specific development insights.</p></div></div>}
+        {!upgradePreview.length && <div className="locked-preview"><div><h3>10-area score breakdown and deep dive</h3><p>Compare how your pattern shifts across decisions, relationships, conflict and pressure.</p></div><div><h3>Practical development roadmap</h3><p>Receive tailored actions, working-style guidance and track-specific development insights.</p></div></div>}
         {checkout.error && <p className="form-error" role="alert">{checkout.error}</p>}
         <div className="upgrade-box"><div><span>One-time payment</span><strong>{price}</strong><small>{report?.reportExperience?.paymentWording || "Secure payment unlocks your private Full Development Report."}</small></div><div className="upgrade-box__actions"><button className="button button--primary" disabled={!checkoutAvailable || checkout.busy} onClick={openCheckout}>{checkout.busy ? "Opening checkout…" : checkoutAvailable ? "Pay by card" : "Full Report checkout coming soon"} {checkoutAvailable && <ArrowRight />}</button>{cashOnDeliveryAvailable && <button className="button button--ghost" disabled={checkout.busy} onClick={openCashOnDelivery}>UAT Test — No Payment</button>}</div></div>
         {cashOnDeliveryAvailable && <p className="preview-note">UAT Test — No Payment is temporarily enabled for client testing. It unlocks the Full Report and queues the normal confirmation/report email with the PDF attachment without charging Stripe.</p>}
