@@ -51,7 +51,7 @@ body,
 }
 
 .v4-report--personal .paid-report.locked .upgrade-box::before {
-  content: "For less than a cup of coffee, find out more about yourself.  ✦";
+  content: "For less than a cup of coffee, find out more about yourself! ✨";
   position: absolute;
   left: 0;
   right: 0;
@@ -67,6 +67,7 @@ body,
   background: linear-gradient(135deg, #f6fff3 0%, #ecfbe8 100%);
   box-shadow: 0 8px 20px rgba(71, 135, 62, .12);
   color: #3f9638;
+  font-family: var(--body-font, "DM Sans", sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
   font-size: clamp(16px, 1.8vw, 20px);
   line-height: 1.25;
   font-weight: 700;
