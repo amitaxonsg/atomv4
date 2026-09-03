@@ -1,0 +1,4 @@
+Current approved V4 live application commit:
+7bf9eeb0106c14b5be7f341a3ccacef0d1d0985c
+
+Accepted on 3 September 2026 after 74/74 frontend tests, successful Vite production build, successful Apache deployment and healthy production checks.
