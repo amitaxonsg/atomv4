@@ -34,6 +34,14 @@ test("participant report shows safe Stripe readiness and full CMS schema", () =>
   assert.match(reportView, /Full Report checkout coming soon/);
   assert.match(reportView, /checkoutAvailable/);
   assert.match(reportView, /UpgradeReasons/);
+  assert.match(reportView, /Your alignment pattern/);
+  assert.match(reportView, /Top three strengths/);
+  assert.match(reportView, /Development observations/);
+  assert.match(reportView, /Your Full Report goes deeper into the patterns behind this result/);
+  assert.match(reportCss, /V4 Lite Report visual refresh/);
+  assert.match(reportCss, /v4-report:has\(\.paid-report\.locked\)/);
+  assert.match(reportCss, /report-hero[\s\S]*radial-gradient/);
+  assert.match(reportCss, /report-card:first-child li:first-child[\s\S]*grid-column:\s*1 \/ -1/);
   for (const field of richFields) assert.match(reportView, new RegExp(field));
 });
 
