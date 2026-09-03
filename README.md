@@ -14,8 +14,9 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Live deployed application commit** | `7bf9eeb0106c14b5be7f341a3ccacef0d1d0985c` |
-| Current pre-change Git backup branch | `v4-prechange-backup-20260903-3c21f04` |
+| **Live deployed application commit** | `ecf57b8273cbbd74e4e37f3fc29c225dd9c6b082` |
+| Current live Git backup branch | `v4-live-backup-20260903-ecf57b8` |
+| Pre-change Git backup branch | `v4-prechange-backup-20260903-3c21f04` |
 | Pre-change server backup | `/var/backups/growth-alignment-v4/prechange-20260903-042350` |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
 | Releases | `/var/www/v4.atomglobal.com/releases` |
@@ -63,29 +64,33 @@ both the UAT button and UAT explanatory message are hidden after a fresh report 
 
 ### 2. Personal checkout coffee value banner
 
-The Personal-only line:
+The Personal-only line is now:
 
-`For less than a cup of coffee, find out more about yourself. ✦`
+`For less than a cup of coffee, find out more about yourself! ✨`
 
-is now promoted out of the dark payment panel and displayed as a separate highlighted value banner immediately above checkout.
+It is displayed as a separate highlighted value banner immediately above the dark checkout panel.
 
-Current treatment:
+Current accepted treatment:
 
 - Personal assessment only;
 - soft green-tinted background;
 - green border with stronger left accent;
-- larger, bolder text;
+- lively **Libre Caslon Display** typography;
+- larger, expressive text with restrained weight;
+- real sparkle emoji with color-emoji font fallbacks where supported by the browser/OS;
 - subtle shadow and spacing;
 - responsive mobile layout;
 - payment/UAT/report logic unchanged.
 
-The earlier supporting-text styling was introduced in:
+Change history:
 
-`4c784a6cc5ffebb025f4ab27443fa03a94f2661b`
+- initial supporting-text styling: `4c784a6cc5ffebb025f4ab27443fa03a94f2661b`
+- accepted green banner treatment: `7bf9eeb0106c14b5be7f341a3ccacef0d1d0985c`
+- final copy + sparkle emoji: `3c31cf6597002bbde3641867abf6bf778d3d0d7c`
+- lively banner typography: `33b75de6b905ec3f650af5ad5e5bb17b7468dc85`
+- regression-test update for the approved final copy: `ecf57b8273cbbd74e4e37f3fc29c225dd9c6b082`
 
-The accepted banner treatment is implemented and live in:
-
-`7bf9eeb0106c14b5be7f341a3ccacef0d1d0985c`
+The final release passed **74/74 tests**, built successfully, deployed successfully through the V4 Apache deployer, and returned healthy production checks.
 
 ### 3. Mobile autosave race-condition fix
 
@@ -130,9 +135,9 @@ The README regression expectation was then restored and the deployment passed at
 
 `3c21f046134e19dcbd1df656ac199c650c86fe62`
 
-The later Personal checkout banner release passed **74/74 tests** and is the current approved live application baseline:
+The current approved V4 live application baseline is:
 
-`7bf9eeb0106c14b5be7f341a3ccacef0d1d0985c`
+`ecf57b8273cbbd74e4e37f3fc29c225dd9c6b082`
 
 ## Approved visual state
 
@@ -145,7 +150,8 @@ The approved production presentation must remain unchanged unless specifically r
 - inner-stage CMS/content images remain authoritative;
 - mobile keeps the approved responsive presentation and iOS-safe controls;
 - no obsolete hard-coded image fallback should override valid CMS settings;
-- Personal checkout displays the accepted green coffee value banner above the dark payment panel.
+- Personal checkout displays the accepted green coffee value banner above the dark payment panel;
+- final Personal banner wording is `For less than a cup of coffee, find out more about yourself! ✨` using the approved lively typography treatment.
 
 ### Critical landing-stage state
 
@@ -294,12 +300,18 @@ curl -fsS https://v4.atomglobal.com/api/health
 The live deployed marker for the current application baseline is:
 
 ```text
-7bf9eeb0106c14b5be7f341a3ccacef0d1d0985c
+ecf57b8273cbbd74e4e37f3fc29c225dd9c6b082
 ```
 
 ## Approved V4 backup procedure
 
-Current Git safety branch for the pre-change live baseline:
+Current Git safety branch for the approved live application baseline:
+
+```text
+v4-live-backup-20260903-ecf57b8
+```
+
+Pre-change Git safety branch:
 
 ```text
 v4-prechange-backup-20260903-3c21f04
@@ -334,8 +346,10 @@ Retest at minimum:
 - stale `Load failed` clearing after successful save;
 - resume persistence;
 - Lite Report/Full Report lock;
-- Personal coffee value banner above checkout on desktop and mobile;
-- old yellow coffee text absent from inside the dark payment box;
+- final Personal coffee value banner above checkout on desktop and mobile;
+- final text reads `For less than a cup of coffee, find out more about yourself! ✨`;
+- lively banner font renders correctly and the sparkle appears as an emoji where supported;
+- old yellow coffee text is absent from inside the dark payment box;
 - Pay by card still opens correctly;
 - Admin UAT enabled → button/explanation visible;
 - Admin UAT disabled → button/explanation absent;
