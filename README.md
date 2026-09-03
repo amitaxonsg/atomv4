@@ -6,7 +6,7 @@
 
 Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Global Consulting, including questionnaire, CMS/Admin, Lite/Full reports, Stripe payments, UAT no-payment control, PDF/email delivery, analytics, affiliates and audit history.
 
-## Current production baseline — 2 September 2026
+## Current production baseline — 3 September 2026
 
 | Item | Current V4 value |
 |---|---|
@@ -14,8 +14,9 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Live deployed application commit** | `3c21f046134e19dcbd1df656ac199c650c86fe62` |
+| **Live deployed application commit** | `7bf9eeb0106c14b5be7f341a3ccacef0d1d0985c` |
 | Current pre-change Git backup branch | `v4-prechange-backup-20260903-3c21f04` |
+| Pre-change server backup | `/var/backups/growth-alignment-v4/prechange-20260903-042350` |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
 | Releases | `/var/www/v4.atomglobal.com/releases` |
 | Active release | `/var/www/v4.atomglobal.com/current` |
@@ -26,13 +27,13 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Cron | `/etc/cron.d/growth-alignment-v4` |
 | Web server | Apache + PHP 8.3-FPM |
 
-> The README/documentation commit may be newer than the deployed application commit because README-only changes do not require a production redeploy. The authoritative live runtime marker is `/var/www/v4.atomglobal.com/deployed-commit.txt`.
+> README/documentation commits may be newer than the deployed application commit because documentation-only changes do not require a production redeploy. The authoritative live runtime marker is `/var/www/v4.atomglobal.com/deployed-commit.txt`.
 
-The current V4 production build passed **73/73 frontend tests**, Vite production build, PHP syntax/tests and deployment health checks.
+The current V4 production build passed **74/74 frontend tests**, Vite production build, PHP syntax/tests and deployment health checks.
 
-Latest health confirmed `status: ok` with database, migrations, storage, Stripe, Stripe webhook, email and cron healthy. `feedbackGitHub:false` is optional and not a launch blocker.
+Latest production health confirmed `status: ok` with database, migrations, storage, Stripe, Stripe webhook, email and cron healthy. `feedbackGitHub:false` is optional and is not a launch blocker.
 
-## What was updated on 2 September 2026
+## What was updated on 2–3 September 2026
 
 ### 1. Admin UAT No-Payment visibility fix
 
@@ -60,24 +61,31 @@ system.cash_on_delivery_enabled = false
 
 both the UAT button and UAT explanatory message are hidden after a fresh report load, and the backend UAT route remains unavailable.
 
-### 2. Personal checkout supporting message emphasis
+### 2. Personal checkout coffee value banner
 
 The Personal-only line:
 
-`For less than a cup of coffee, find out more about yourself.`
+`For less than a cup of coffee, find out more about yourself. ✦`
 
-was made easier to notice while remaining scoped only to the Personal assessment.
+is now promoted out of the dark payment panel and displayed as a separate highlighted value banner immediately above checkout.
 
-Updated styling:
+Current treatment:
 
-- slightly larger text;
-- stronger font weight;
-- warm accent color rather than white;
-- improved spacing beneath the payment wording.
+- Personal assessment only;
+- soft green-tinted background;
+- green border with stronger left accent;
+- larger, bolder text;
+- subtle shadow and spacing;
+- responsive mobile layout;
+- payment/UAT/report logic unchanged.
 
-Implemented in commit:
+The earlier supporting-text styling was introduced in:
 
 `4c784a6cc5ffebb025f4ab27443fa03a94f2661b`
+
+The accepted banner treatment is implemented and live in:
+
+`7bf9eeb0106c14b5be7f341a3ccacef0d1d0985c`
 
 ### 3. Mobile autosave race-condition fix
 
@@ -118,11 +126,13 @@ The first milestone markup attempt changed too much of `AssessmentLayout.jsx` an
 
 `4a31759fdc7b2aa28bef636167699991c152f1f4`
 
-The README regression expectation was then restored and the complete deployment passed at:
+The README regression expectation was then restored and the deployment passed at:
 
 `3c21f046134e19dcbd1df656ac199c650c86fe62`
 
-This is the current live deployed V4 application baseline.
+The later Personal checkout banner release passed **74/74 tests** and is the current approved live application baseline:
+
+`7bf9eeb0106c14b5be7f341a3ccacef0d1d0985c`
 
 ## Approved visual state
 
@@ -134,7 +144,8 @@ The approved production presentation must remain unchanged unless specifically r
 - landing stage (`version`) intentionally uses the deployed approved `/media/stages/reflection-portrait.png` when no CMS media assignment is present;
 - inner-stage CMS/content images remain authoritative;
 - mobile keeps the approved responsive presentation and iOS-safe controls;
-- no obsolete hard-coded image fallback should override valid CMS settings.
+- no obsolete hard-coded image fallback should override valid CMS settings;
+- Personal checkout displays the accepted green coffee value banner above the dark payment panel.
 
 ### Critical landing-stage state
 
@@ -283,24 +294,31 @@ curl -fsS https://v4.atomglobal.com/api/health
 The live deployed marker for the current application baseline is:
 
 ```text
-3c21f046134e19dcbd1df656ac199c650c86fe62
+7bf9eeb0106c14b5be7f341a3ccacef0d1d0985c
 ```
 
 ## Approved V4 backup procedure
 
-Current Git safety branch for the current live pre-change baseline:
+Current Git safety branch for the pre-change live baseline:
 
 ```text
 v4-prechange-backup-20260903-3c21f04
 ```
 
-A full operational backup should also include:
+Confirmed full pre-change server backup:
 
-- MariaDB `growth_alignment_v4` dump;
-- `/etc/growth-alignment/v4.env` with protected permissions;
-- content-stage/media state;
-- effective UAT setting;
-- current active release/deployed commit marker.
+```text
+/var/backups/growth-alignment-v4/prechange-20260903-042350
+```
+
+That server backup includes:
+
+- validated compressed MariaDB dump for `growth_alignment_v4`;
+- `/etc/growth-alignment/v4.env` with restricted permissions;
+- deployed commit marker;
+- source Git HEAD;
+- active release reference;
+- clean Git status snapshot.
 
 Git alone does not contain all live CMS/database configuration.
 
@@ -316,7 +334,9 @@ Retest at minimum:
 - stale `Load failed` clearing after successful save;
 - resume persistence;
 - Lite Report/Full Report lock;
-- Personal checkout coffee supporting line styling;
+- Personal coffee value banner above checkout on desktop and mobile;
+- old yellow coffee text absent from inside the dark payment box;
+- Pay by card still opens correctly;
 - Admin UAT enabled → button/explanation visible;
 - Admin UAT disabled → button/explanation absent;
 - Stripe checkout open/cancel/return/retry;
