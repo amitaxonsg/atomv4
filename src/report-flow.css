@@ -68,18 +68,24 @@
 .v4-scale__track i { position: absolute; top: 50%; width: 3px; height: 17px; transform: translate(-50%, -50%); border-radius: 2px; background: var(--text-primary); box-shadow: 0 0 0 2px var(--surface); }
 .v4-score-list > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; padding: 12px 0; }
 
-/* V4 score visualisation: readable numbered radar + explicit 5–25 scale. */
+/* V4 score visualisation: readable A–J radar + prominent score cards. */
 .v4-score-intro {
+  position: relative;
   max-width: 900px;
   margin: 8px 0 0;
-  font-size: 13px;
+  font-size: 0;
   line-height: 1.55;
   color: var(--muted-text);
 }
 
+.v4-score-intro::after {
+  content: "The radar uses letters A–J to stay readable. Match each letter to the score card beside it. Every area runs from 5 (more Head-led) through 15 (balanced) to 25 (more Heart-led).";
+  font-size: 13px;
+}
+
 .v4-report .report-radar-wrap {
   display: grid;
-  grid-template-columns: minmax(360px, .95fr) minmax(0, 1.35fr);
+  grid-template-columns: minmax(360px, .9fr) minmax(0, 1.4fr);
   gap: 34px;
   align-items: center;
   margin-top: 22px;
@@ -94,8 +100,8 @@
 
 .v4-report .report-radar-wrap > .radar text {
   font-family: var(--body-font, "DM Sans", sans-serif);
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 700;
   fill: var(--text-primary);
 }
 
@@ -109,37 +115,49 @@
 .v4-report .v4-score-list > div {
   display: block;
   min-width: 0;
-  padding: 14px 15px 13px;
-  border: 1px solid var(--border);
+  padding: 16px 16px 15px;
+  border: 1px solid color-mix(in srgb, var(--v4-accent) 20%, var(--border));
   border-radius: 10px;
-  background: linear-gradient(180deg, var(--surface), var(--v4-soft));
+  background: linear-gradient(180deg, var(--surface), color-mix(in srgb, var(--v4-soft) 72%, white));
+  box-shadow: 0 5px 14px rgba(50, 42, 34, .05);
 }
 
 .v4-score-card__heading {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) auto;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
 }
 
 .v4-score-index {
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: var(--v4-accent);
   color: #fff;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 0;
+  font-weight: 800;
   line-height: 1;
 }
+.v4-score-index::after { font-size: 13px; }
+.v4-score-list > div:nth-child(1) .v4-score-index::after { content: "A"; }
+.v4-score-list > div:nth-child(2) .v4-score-index::after { content: "B"; }
+.v4-score-list > div:nth-child(3) .v4-score-index::after { content: "C"; }
+.v4-score-list > div:nth-child(4) .v4-score-index::after { content: "D"; }
+.v4-score-list > div:nth-child(5) .v4-score-index::after { content: "E"; }
+.v4-score-list > div:nth-child(6) .v4-score-index::after { content: "F"; }
+.v4-score-list > div:nth-child(7) .v4-score-index::after { content: "G"; }
+.v4-score-list > div:nth-child(8) .v4-score-index::after { content: "H"; }
+.v4-score-list > div:nth-child(9) .v4-score-index::after { content: "I"; }
+.v4-score-list > div:nth-child(10) .v4-score-index::after { content: "J"; }
 
 .v4-score-name {
   min-width: 0;
-  font-size: 12px;
-  line-height: 1.3;
-  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.25;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
@@ -156,29 +174,24 @@
 }
 
 .v4-report .v4-score-list .v4-scale {
-  margin-top: 11px;
+  margin-top: 12px;
 }
 
 .v4-report .v4-score-list .v4-scale__labels {
   gap: 8px;
-  font-size: 8px;
+  font-size: 8.5px;
   line-height: 1.2;
-  letter-spacing: .02em;
+  letter-spacing: .01em;
   text-transform: none;
-  opacity: .86;
+  opacity: .9;
 }
 
-.v4-report .v4-score-list .v4-scale__labels span:nth-child(2) {
-  text-align: center;
-}
-
-.v4-report .v4-score-list .v4-scale__labels span:last-child {
-  text-align: right;
-}
+.v4-report .v4-score-list .v4-scale__labels span:nth-child(2) { text-align: center; }
+.v4-report .v4-score-list .v4-scale__labels span:last-child { text-align: right; }
 
 .v4-report .v4-score-list .v4-scale__track {
-  height: 13px;
-  margin-top: 6px;
+  height: 15px;
+  margin-top: 7px;
   background: linear-gradient(90deg,
     color-mix(in srgb, var(--head) 18%, white) 0 33%,
     color-mix(in srgb, var(--canvas) 90%, white) 33% 66%,
@@ -191,7 +204,7 @@
 
 .v4-report .v4-score-list .v4-scale__track i {
   width: 4px;
-  height: 21px;
+  height: 23px;
 }
 
 .v4-executive-summary { background: var(--v4-soft); }
@@ -210,45 +223,16 @@
     grid-template-columns: minmax(300px, .9fr) minmax(0, 1.1fr);
     gap: 22px;
   }
-
-  .v4-report .report-radar-wrap > .radar {
-    min-height: 410px;
-  }
-
-  .v4-report .v4-score-list {
-    grid-template-columns: 1fr;
-  }
+  .v4-report .report-radar-wrap > .radar { min-height: 410px; }
+  .v4-report .v4-score-list { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 700px) {
   .v4-summary-grid { grid-template-columns: 1fr; }
-
-  .v4-report .report-radar-wrap {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  .v4-report .report-radar-wrap > .radar {
-    width: min(100%, 460px);
-    min-height: 340px;
-    margin: 0 auto;
-  }
-
-  .v4-report .v4-score-list {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  .v4-report .v4-score-list > div {
-    padding: 13px 14px;
-  }
-
-  .v4-score-card__heading {
-    grid-template-columns: 26px minmax(0, 1fr) auto;
-    gap: 8px;
-  }
-
-  .v4-report .v4-score-list .v4-scale__labels {
-    font-size: 7.5px;
-  }
+  .v4-report .report-radar-wrap { grid-template-columns: 1fr; gap: 18px; }
+  .v4-report .report-radar-wrap > .radar { width: min(100%, 460px); min-height: 340px; margin: 0 auto; }
+  .v4-report .v4-score-list { grid-template-columns: 1fr; gap: 10px; }
+  .v4-report .v4-score-list > div { padding: 14px; }
+  .v4-score-card__heading { grid-template-columns: 30px minmax(0, 1fr) auto; gap: 8px; }
+  .v4-report .v4-score-list .v4-scale__labels { font-size: 8px; }
 }
