@@ -47,7 +47,7 @@ final class PdfService
 
         $html = '<!doctype html><html><head><meta charset="utf-8"><style>'
             . '@page{margin:25mm 19mm 22mm}body{font-family:' . $this->css($body) . ';color:' . $this->css($ink) . ';font-size:10.5pt;line-height:1.55;background:#fff}'
-            . 'h1,h2,h3,h4{font-family:' . $this->css($heading) . ';font-weight:normal;page-break-after:avoid}h1{font-size:28pt;margin:0 0 5mm}h2{font-size:18pt;margin:10mm 0 3mm;border-bottom:1px solid #ddd;padding-bottom:2mm}h3{font-size:14pt;margin:6mm 0 2mm}h4{font-size:11.5pt;margin:3mm 0 1mm}.logo{width:52mm;max-height:18mm;object-fit:contain}.brand{font-weight:bold;letter-spacing:.08em;color:' . $this->css($heart) . ';font-size:10pt}.meta{color:' . $this->css($muted) . ';font-size:8.8pt}.hero{background:' . $this->css($canvas) . ';padding:9mm;margin:7mm 0;border-left:3px solid ' . $this->css($gold) . '}.score{font-family:' . $this->css($heading) . ';font-size:27pt}.report-block{page-break-inside:avoid;border:1px solid #e4ddcf;border-radius:4px;padding:5mm;margin:4mm 0}.edge-grid,.summary-grid{width:100%;border-collapse:separate;border-spacing:4mm}.edge-grid td,.summary-grid td{width:50%;vertical-align:top;border:1px solid #e4ddcf;padding:5mm}.subscale{page-break-inside:avoid;margin:3mm 0}.comparison-row{border-bottom:1px solid #eee;padding:2mm 0}.scale{height:3mm;background:#eee;border-radius:2mm;margin:1mm 0 3mm}.scale span{display:block;height:100%;background:' . $this->css($head) . ';border-radius:2mm}.scale-labels{width:100%;font-size:6.7pt;color:' . $this->css($muted) . ';line-height:1.2}.scale-labels td{border:0!important;padding:0!important;width:33.33%!important}.scale-labels td:nth-child(2){text-align:center}.scale-labels td:last-child{text-align:right}.current-profile{border-left:3px solid ' . $this->css($gold) . ';padding-left:4mm}.radar{page-break-inside:avoid;text-align:center;margin:3mm 0}.radar-intro{font-size:8.7pt;color:' . $this->css($muted) . ';margin:2mm 0 4mm}.radar-score-grid{width:100%;border-collapse:separate;border-spacing:2mm;table-layout:fixed}.radar-score-grid>tbody>tr>td{width:50%;vertical-align:top;padding:0;border:0}.radar-score-card{border:1px solid #e4ddcf;background:' . $this->css($canvas) . ';padding:3.2mm;page-break-inside:avoid}.radar-score-head{width:100%;border-collapse:collapse;margin-bottom:2mm}.radar-score-head td{border:0;padding:0;vertical-align:middle}.radar-index{display:inline-block;min-width:5mm;height:5mm;line-height:5mm;text-align:center;border-radius:50%;background:' . $this->css($heart) . ';color:#fff;font-size:8pt;font-weight:bold}.radar-area{padding-left:2mm!important;font-size:8.3pt;font-weight:bold;line-height:1.2}.radar-value{text-align:right;font-size:8pt;font-weight:bold;white-space:nowrap}.radar-legend{font-size:8.5pt;color:' . $this->css($muted) . ';background:' . $this->css($canvas) . ';padding:4mm}.footer{position:fixed;bottom:-13mm;left:0;right:0;color:' . $this->css($muted) . ';font-size:8pt;text-align:center}ul,ol{padding-left:6mm;margin-top:2mm}li{margin-bottom:1.5mm}</style></head><body>'
+            . 'h1,h2,h3,h4{font-family:' . $this->css($heading) . ';font-weight:normal;page-break-after:avoid}h1{font-size:28pt;margin:0 0 5mm}h2{font-size:18pt;margin:10mm 0 3mm;border-bottom:1px solid #ddd;padding-bottom:2mm}h3{font-size:14pt;margin:6mm 0 2mm}h4{font-size:11.5pt;margin:3mm 0 1mm}.logo{width:52mm;max-height:18mm;object-fit:contain}.brand{font-weight:bold;letter-spacing:.08em;color:' . $this->css($heart) . ';font-size:10pt}.meta{color:' . $this->css($muted) . ';font-size:8.8pt}.hero{background:' . $this->css($canvas) . ';padding:9mm;margin:7mm 0;border-left:3px solid ' . $this->css($gold) . '}.score{font-family:' . $this->css($heading) . ';font-size:27pt}.report-block{page-break-inside:avoid;border:1px solid #e4ddcf;border-radius:4px;padding:5mm;margin:4mm 0}.edge-grid,.summary-grid,.score-grid{width:100%;border-collapse:separate;border-spacing:4mm}.edge-grid td,.summary-grid td{width:50%;vertical-align:top;border:1px solid #e4ddcf;padding:5mm}.subscale{page-break-inside:avoid;margin:3mm 0}.comparison-row{border-bottom:1px solid #eee;padding:2mm 0}.scale{height:3mm;background:#eee;border-radius:2mm;margin:1mm 0 3mm}.scale span{display:block;height:100%;background:' . $this->css($head) . ';border-radius:2mm}.scale-labels{width:100%;font-size:6.7pt;color:' . $this->css($muted) . ';line-height:1.2}.scale-labels td{border:0!important;padding:0!important;width:33.33%!important}.scale-labels td:nth-child(2){text-align:center}.scale-labels td:last-child{text-align:right}.current-profile{border-left:3px solid ' . $this->css($gold) . ';padding-left:4mm}.score-intro{font-size:8.7pt;color:' . $this->css($muted) . ';margin:2mm 0 4mm}.score-grid{table-layout:fixed;border-spacing:3mm}.score-grid>tbody>tr>td{width:50%;vertical-align:top;padding:0;border:0}.score-item{border:1px solid #e4ddcf;background:#fff;padding:3.5mm;page-break-inside:avoid}.score-item-head{width:100%;border-collapse:collapse;margin-bottom:2mm}.score-item-head td{border:0;padding:0;vertical-align:middle}.score-area{font-size:8.5pt;font-weight:bold;line-height:1.2}.score-value{text-align:right;font-size:8.2pt;font-weight:bold;white-space:nowrap}.score-legend{font-size:8.5pt;color:' . $this->css($muted) . ';background:' . $this->css($canvas) . ';padding:4mm}.footer{position:fixed;bottom:-13mm;left:0;right:0;color:' . $this->css($muted) . ';font-size:8pt;text-align:center}ul,ol{padding-left:6mm;margin-top:2mm}li{margin-bottom:1.5mm}</style></head><body>'
             . $brand . '<p class="meta">GROWTH ALIGNMENT · ' . $this->h($row['track_name']) . '</p>'
             . '<h1>' . $this->h((string) ($free['profile'] ?? 'Growth Alignment Report')) . '</h1>'
             . '<p class="meta">Prepared for ' . $this->h((string) $row['participant_name']) . ' · Completed ' . $this->h((string) ($row['completed_at'] ?? '')) . '</p>'
@@ -56,7 +56,7 @@ final class PdfService
             . $this->section('Development observations', $watchouts)
             . '<h2>Full Development Report</h2>'
             . $this->executiveSummary($scores, $trackKey)
-            . $this->radarSection($scores, $trackKey, (string) ($content['radarLegend'] ?? ''), $heart, $head)
+            . $this->scoreBreakdownSection($scores, $trackKey, (string) ($content['radarLegend'] ?? ''))
             . $this->edgeSection($content, $trackKey)
             . $this->textBlock('Complete profile summary', $content['summary'] ?? '')
             . $this->listBlock('Full strengths list', $content['strengths'] ?? [])
@@ -139,32 +139,27 @@ final class PdfService
         return '<div class="report-block"><h3>' . $this->h($title) . '</h3>' . $this->renderValue($value, $trackKey) . '</div>';
     }
 
-    private function radarSection(array $scores, string $trackKey, string $legend, string $heart, string $head): string
+    private function scoreBreakdownSection(array $scores, string $trackKey, string $legend): string
     {
         if (!$scores) return '';
-        $chart = $this->radarSvg($scores, $trackKey, $heart, $head);
         $cards = [];
-        $index = 0;
         foreach (array_slice($scores, 0, 10, true) as $code => $score) {
             $value = max(5, min(25, (int) $score));
             $width = max(0, min(100, (int) round((($value - 5) / 20) * 100)));
-            $marker = chr(65 + $index);
-            $cards[] = '<div class="radar-score-card">'
-                . '<table class="radar-score-head"><tr><td style="width:8mm"><span class="radar-index">' . $marker . '</span></td>'
-                . '<td class="radar-area">' . $this->h($this->areaName($trackKey, (string) $code)) . '</td>'
-                . '<td class="radar-value">' . $value . '/25</td></tr></table>'
+            $cards[] = '<div class="score-item">'
+                . '<table class="score-item-head"><tr><td class="score-area">' . $this->h($this->areaName($trackKey, (string) $code)) . '</td>'
+                . '<td class="score-value">' . $value . '/25</td></tr></table>'
                 . '<table class="scale-labels"><tr><td>5 · Head-led</td><td>15 · Balanced</td><td>25 · Heart-led</td></tr></table>'
                 . '<div class="scale"><span style="width:' . $width . '%"></span></div></div>';
-            $index++;
         }
         $rows = '';
         for ($i = 0; $i < count($cards); $i += 2) {
             $rows .= '<tr><td>' . $cards[$i] . '</td><td>' . ($cards[$i + 1] ?? '') . '</td></tr>';
         }
-        return '<div class="report-block"><h3>Your 10-area radar and score breakdown</h3>'
-            . '<p class="radar-intro">The radar uses letters A–J to keep the chart readable. Match each letter to the score card below. Every area runs from <strong>5 (more Head-led)</strong> through <strong>15 (balanced)</strong> to <strong>25 (more Heart-led)</strong>.</p>'
-            . '<div class="radar">' . $chart . '</div><table class="radar-score-grid"><tbody>' . $rows . '</tbody></table>'
-            . ($legend !== '' ? '<p class="radar-legend"><strong>How to read the chart:</strong> ' . $this->h($legend) . '</p>' : '') . '</div>';
+        return '<div class="report-block"><h3>Your 10-area score breakdown</h3>'
+            . '<p class="score-intro">Compare all ten areas on the same scale: <strong>5 = more Head-led</strong>, <strong>15 = balanced</strong>, and <strong>25 = more Heart-led</strong>. The progress bars make the pattern easy to compare at a glance.</p>'
+            . '<table class="score-grid"><tbody>' . $rows . '</tbody></table>'
+            . ($legend !== '' ? '<p class="score-legend"><strong>How to read these scores:</strong> ' . $this->h($legend) . '</p>' : '') . '</div>';
     }
 
     private function executiveSummary(array $scores, string $trackKey): string
@@ -187,37 +182,6 @@ final class PdfService
             $cells .= '<td>' . $body . '</td>';
         }
         return '<div class="report-block"><h2>Executive Summary</h2><p>Your three highest and three lowest assessment areas show current strengths and focused development opportunities.</p><table class="summary-grid"><tr>' . $cells . '</tr></table></div>';
-    }
-
-    private function radarSvg(array $scores, string $trackKey, string $heart, string $head): string
-    {
-        $entries = array_slice(array_values(array_map(static fn($code, $score): array => ['code' => (string) $code, 'score' => (int) $score], array_keys($scores), array_values($scores))), 0, 10);
-        if (count($entries) < 3) return '';
-        $cx = 210.0; $cy = 205.0; $radius = 125.0; $count = count($entries);
-        $rings = '';
-        foreach ([0.2, 0.4, 0.6, 0.8, 1.0] as $factor) {
-            $points = [];
-            for ($i = 0; $i < $count; $i++) {
-                $angle = -M_PI / 2 + (2 * M_PI * $i / $count);
-                $points[] = round($cx + cos($angle) * $radius * $factor, 2) . ',' . round($cy + sin($angle) * $radius * $factor, 2);
-            }
-            $rings .= '<polygon points="' . implode(' ', $points) . '" fill="none" stroke="#D8D8D8" stroke-width="1" />';
-        }
-        $axes = ''; $labels = ''; $dataPoints = [];
-        foreach ($entries as $i => $entry) {
-            $angle = -M_PI / 2 + (2 * M_PI * $i / $count);
-            $x = $cx + cos($angle) * $radius; $y = $cy + sin($angle) * $radius;
-            $axes .= '<line x1="' . $cx . '" y1="' . $cy . '" x2="' . round($x, 2) . '" y2="' . round($y, 2) . '" stroke="#D8D8D8" stroke-width="1" />';
-            $labelX = $cx + cos($angle) * ($radius + 28); $labelY = $cy + sin($angle) * ($radius + 28);
-            $labels .= '<text x="' . round($labelX, 2) . '" y="' . round($labelY, 2) . '" text-anchor="middle" font-size="12" font-weight="bold" fill="#444">' . chr(65 + $i) . '</text>';
-            $normalised = max(0, min(1, ($entry['score'] - 5) / 20));
-            $dataRadius = $radius * $normalised;
-            $dataPoints[] = round($cx + cos($angle) * $dataRadius, 2) . ',' . round($cy + sin($angle) * $dataRadius, 2);
-        }
-        return '<svg xmlns="http://www.w3.org/2000/svg" width="420" height="390" viewBox="0 0 420 390">'
-            . $rings . $axes
-            . '<polygon points="' . implode(' ', $dataPoints) . '" fill="' . $this->h($heart) . '" fill-opacity="0.18" stroke="' . $this->h($head) . '" stroke-width="2" />'
-            . $labels . '</svg>';
     }
 
     private function edgeSection(array $content, string $trackKey): string
