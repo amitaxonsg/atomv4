@@ -4,6 +4,8 @@ import test from "node:test";
 
 const reportView = fs.readFileSync("src/components/assessment/ReportView.jsx", "utf8");
 const reportCss = fs.readFileSync("src/report-flow.css", "utf8");
+const editorialCss = fs.readFileSync("src/report-editorial-v4.css", "utf8");
+const main = fs.readFileSync("src/main.jsx", "utf8");
 const pdfService = fs.readFileSync("backend/src/Services/PdfService.php", "utf8");
 const reportService = fs.readFileSync("backend/src/Services/ReportService.php", "utf8");
 const reportAudit = fs.readFileSync("backend/bin/report-flow-audit.php", "utf8");
@@ -42,6 +44,12 @@ test("participant report shows safe Stripe readiness and full CMS schema", () =>
   assert.match(reportCss, /v4-report:has\(\.paid-report\.locked\)/);
   assert.match(reportCss, /report-hero[\s\S]*radial-gradient/);
   assert.match(reportCss, /report-card:first-child li:first-child[\s\S]*grid-column:\s*1 \/ -1/);
+  assert.match(main, /report-editorial-v4\.css/);
+  assert.match(editorialCss, /V4 Full Development Report editorial refresh/);
+  assert.match(editorialCss, /v4-report:has\(\.paid-report\.unlocked\)/);
+  assert.match(editorialCss, /--editorial-red/);
+  assert.match(editorialCss, /paid-report\.unlocked[\s\S]*paid-heading/);
+  assert.match(editorialCss, /v4-commitment[\s\S]*linear-gradient/);
   for (const field of richFields) assert.match(reportView, new RegExp(field));
 });
 
@@ -56,6 +64,8 @@ test("V4 browser and PDF use the same 10-area progress-bar breakdown", () => {
   assert.match(reportCss, /v4-score-breakdown[\s\S]*v4-all-areas-grid[\s\S]*v4-scale__track/);
   assert.match(reportCss, /v4-score-breakdown[\s\S]*display:\s*block\s*!important/);
   assert.match(reportCss, /v4-executive-summary[\s\S]*v4-scale__track/);
+  assert.match(editorialCss, /v4-all-areas-grid article:nth-child\(5\)/);
+  assert.match(editorialCss, /v4-score-breakdown \.v4-scale__track > span/);
   assert.match(pdfService, /scoreBreakdownSection/);
   assert.match(pdfService, /score-grid/);
   assert.match(pdfService, /Your 10-area score breakdown/);
@@ -65,6 +75,11 @@ test("V4 browser and PDF use the same 10-area progress-bar breakdown", () => {
   assert.match(pdfService, /15 · Balanced/);
   assert.match(pdfService, /25 · Heart-led/);
   assert.match(pdfService, /\(\(\$value - 5\) \/ 20\)/);
+  assert.match(pdfService, /\$pdfAccent = \$trackKey === 'personal' \? \$heart : \$head/);
+  assert.match(pdfService, /section-banner/);
+  assert.match(pdfService, /score-color-5/);
+  assert.match(pdfService, /commitment-block/);
+  assert.match(pdfService, /coach-block/);
 });
 
 test("database audit and smoke test cover locked unlock and PDF lifecycle", () => {
