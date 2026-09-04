@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use AtomGlobal\Http\Request;
 use AtomGlobal\Http\Response;
+use AtomGlobal\Payments\StripeCheckoutReconciler;
 use AtomGlobal\Security\RateLimiter;
 
 require __DIR__ . '/question-text-policy-routes.php';
@@ -11,33 +12,71 @@ require __DIR__ . '/attribution-routes.php';
 require __DIR__ . '/feedback-routes.php';
 require __DIR__ . '/assessment-experience-routes.php';
 
-$router->add('GET', '/api/payments/status', function (Request $request) use ($db) {
+$router->add('GET', '/api/payments/status', function (Request $request) use ($db, $container, $config) {
     $checkout = trim((string) ($request->query['checkout'] ?? ''));
     if (!preg_match('/^cs_[A-Za-z0-9_]+$/', $checkout)) {
         return Response::error('Checkout reference is invalid.', 422);
     }
 
     $key = 'payment-status:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . ':' . hash('sha256', $checkout);
-    if (!(new RateLimiter($db))->hit($key, 80, 120)) {
+    if (!(new RateLimiter($db))->hit($key, 120, 300)) {
         return Response::error('Please wait before checking payment status again.', 429);
     }
 
     $payment = $db->fetch(
-        'SELECT status, paid_at, metadata_json FROM payments WHERE provider = ? AND stripe_checkout_session_id = ? LIMIT 1',
+        'SELECT id, status, paid_at, metadata_json FROM payments WHERE provider = ? AND stripe_checkout_session_id = ? LIMIT 1',
         ['stripe', $checkout]
     );
     if (!$payment) return Response::error('Checkout reference was not found.', 404);
 
     $metadata = json_decode((string) ($payment['metadata_json'] ?? '{}'), true) ?: [];
+    $reportUrl = trim((string) ($metadata['reportUrl'] ?? ''));
+    if ($payment['status'] === 'checkout_started' || ($payment['status'] === 'paid' && $reportUrl === '')) {
+        try {
+            $reconciler = new StripeCheckoutReconciler($db, $container['settings'], $container['reports'], $config);
+            $reconciler->reconcile($checkout);
+        } catch (\Throwable $error) {
+            error_log('V4 Stripe checkout reconciliation: ' . $error->getMessage());
+        }
+
+        $payment = $db->fetch(
+            'SELECT id, status, paid_at, metadata_json FROM payments WHERE provider = ? AND stripe_checkout_session_id = ? LIMIT 1',
+            ['stripe', $checkout]
+        ) ?: $payment;
+        $metadata = json_decode((string) ($payment['metadata_json'] ?? '{}'), true) ?: [];
+        $reportUrl = trim((string) ($metadata['reportUrl'] ?? ''));
+    }
+
     $paid = $payment['status'] === 'paid';
-    $reportUrl = $paid ? trim((string) ($metadata['reportUrl'] ?? '')) : '';
+    $reportId = (int) ($metadata['reportId'] ?? 0);
+    $reportReady = $paid && $reportUrl !== '' && $reportId > 0;
+    $emailStatus = null;
+    if ($reportId > 0) {
+        $email = $db->fetch(
+            "SELECT status FROM email_queue WHERE template_key = ? AND JSON_UNQUOTE(JSON_EXTRACT(variables_json, '$.reportId')) = ? ORDER BY id DESC LIMIT 1",
+            ['paid_report_ready', (string) $reportId]
+        );
+        $emailStatus = $email['status'] ?? null;
+    }
+    $adminNotified = (bool) $db->fetch(
+        'SELECT id FROM notification_events WHERE event_key = ? AND entity_type = ? AND entity_id = ? LIMIT 1',
+        ['payment_paid', 'payment', (string) $payment['id']]
+    );
+
+    $progress = $reportReady ? 100 : ($paid ? 85 : 55);
+    $stage = $reportReady ? 'Full Report ready' : ($paid ? 'Unlocking Full Report' : 'Verifying payment');
 
     return Response::json([
         'status' => (string) $payment['status'],
         'paid' => $paid,
-        'reportReady' => $paid && $reportUrl !== '',
-        'reportUrl' => $paid && $reportUrl !== '' ? $reportUrl : null,
+        'reportReady' => $reportReady,
+        'reportUrl' => $reportReady ? $reportUrl : null,
+        'reportId' => $reportId > 0 ? $reportId : null,
         'paidAt' => $paid ? ($payment['paid_at'] ?? null) : null,
+        'progress' => $progress,
+        'stage' => $stage,
+        'pdfEmailStatus' => $emailStatus,
+        'adminNotified' => $adminNotified,
     ]);
 });
 
