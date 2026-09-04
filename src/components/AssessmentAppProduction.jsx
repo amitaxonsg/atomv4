@@ -10,8 +10,46 @@ function PaymentStatus({ cancelled = false }) {
   const params = new URLSearchParams(window.location.search);
   const method = params.get("method") || "";
   const reportUrl = params.get("report") || "";
+  const checkout = params.get("checkout") || "";
   const emailDelivery = params.get("email") || "queued";
   const uatNoPayment = method === "cash-on-delivery";
+  const [paidState, setPaidState] = React.useState({ checking: !cancelled && !uatNoPayment && Boolean(checkout), reportUrl: "", error: "" });
+
+  React.useEffect(() => {
+    if (cancelled || uatNoPayment || !checkout) return undefined;
+    let active = true;
+    let attempts = 0;
+    let timer = null;
+
+    const poll = async () => {
+      attempts += 1;
+      try {
+        const response = await fetch(`/api/payments/status?checkout=${encodeURIComponent(checkout)}`, {
+          credentials: "same-origin",
+          headers: { Accept: "application/json" },
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!active) return;
+        if (response.ok && result?.reportReady && result?.reportUrl) {
+          setPaidState({ checking: false, reportUrl: result.reportUrl, error: "" });
+          return;
+        }
+      } catch {
+        // Signed Stripe webhook remains authoritative; keep polling briefly.
+      }
+
+      if (active && attempts < 48) timer = window.setTimeout(poll, 1250);
+      else if (active) setPaidState(current => ({ ...current, checking: false, error: "Your payment was received. Your Full Report link is being prepared and will also be sent by email." }));
+    };
+
+    poll();
+    return () => {
+      active = false;
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [cancelled, uatNoPayment, checkout]);
+
+  const resolvedReportUrl = uatNoPayment ? reportUrl : paidState.reportUrl;
 
   return <StageShell>
     <p className="eyebrow">Secure checkout</p>
@@ -22,10 +60,15 @@ function PaymentStatus({ cancelled = false }) {
         ? emailDelivery === "sent"
           ? "UAT Test — No Payment is enabled for client testing. No Stripe charge was made. Your Full Report has been unlocked, and the confirmation and PDF report emails were accepted by the email provider."
           : "UAT Test — No Payment is enabled for client testing. No Stripe charge was made. Your Full Report has been unlocked, but email delivery is retrying in the background."
-        : "Stripe is confirming your payment. After the signed webhook is verified, a fresh private Full Report link and PDF report email are sent."}</p>
-    {uatNoPayment && reportUrl
-      ? <a className="button button--primary" href={reportUrl}>Open Full Report</a>
-      : <a className="button button--primary" href="/">Return to assessment</a>}
+        : resolvedReportUrl
+          ? "Payment confirmed. Your Full Development Report is unlocked. A confirmation email and your PDF Full Report are also being sent to your email."
+          : "Stripe is confirming your payment. Your Full Development Report will open as soon as the signed webhook is verified, and your PDF report will also be sent by email."}</p>
+    {paidState.error && !resolvedReportUrl && <p className="preview-note" role="status">{paidState.error}</p>}
+    {cancelled
+      ? <a className="button button--primary" href="/">Return to assessment</a>
+      : resolvedReportUrl
+        ? <a className="button button--primary" href={resolvedReportUrl}>Open Full Report</a>
+        : <button className="button button--primary" type="button" disabled>{paidState.checking ? "Preparing Full Report…" : "Full Report link is being emailed"}</button>}
   </StageShell>;
 }
 
