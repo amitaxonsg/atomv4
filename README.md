@@ -14,10 +14,12 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Server-verified live application commit** | `7940582a08ca0c5aafb3cc5f0c1b052ff34f630b` |
-| Lite/Full overall-result parity status | **DEPLOYED / LIVE / HEALTHY** |
-| Full Report web/PDF parity baseline | `53dafea465f4f4d7d87bda97584c3646e1c1fdab` |
-| Lite/Full result-card parity commit | `7940582a08ca0c5aafb3cc5f0c1b052ff34f630b` |
+| **Server-verified live application commit** | `f05f2adaae488d3c947f49acfae96e6dce12e1d5` |
+| Lite/Full reference result-card status | **DEPLOYED / LIVE / HEALTHY** |
+| Reference result-card / PDF parity baseline | `6559a26bf78ef40f36b94a8d27ff3d09830948ee` |
+| Lite contrast/readability fix | `f05f2adaae488d3c947f49acfae96e6dce12e1d5` |
+| Pre-Lite-contrast Git safety branch | `v4-pre-lite-contrast-fix-20260904-6559a26` |
+| Pre-reference-result-card safety branch | `v4-pre-reference-result-card-20260904` |
 | Pre-Lite-parity Git safety branch | `v4-pre-lite-hero-parity-20260904-0608dbc` |
 | Pre-Full-Report-hero Git safety branch | `v4-pre-full-report-meter-20260904-ec93906` |
 | Earlier live/payment safety branch | `v4-live-backup-20260904-9e99467` |
@@ -32,7 +34,7 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Cron | `/etc/cron.d/growth-alignment-v4` |
 | Web server | Apache + PHP 8.3-FPM |
 
-The `7940582...` release was deployed successfully through the V4 Apache deployer. The deploy output confirmed:
+The `f05f2ada...` release was deployed successfully through the V4 Apache deployer. The deploy output confirmed:
 
 - **81/81 frontend tests passed**;
 - Vite production build passed;
@@ -40,49 +42,54 @@ The `7940582...` release was deployed successfully through the V4 Apache deploye
 - Apache release switch completed successfully;
 - Stripe reconciliation background job ran with `0` failures;
 - administrator alert and email processors completed without failure;
-- background processing remains scheduled every five minutes;
+- background processing remains scheduled every five minutes and was verified healthy;
 - production health returned `status: ok` with database, migrations, storage, Stripe, Stripe webhook configuration, email and cron healthy;
 - `feedbackGitHub:false` remains optional and is not a launch blocker.
 
 > Documentation-only commits may be newer than the deployed application. The authoritative live application is the target of `/var/www/v4.atomglobal.com/current`; `/var/www/v4.atomglobal.com/deployed-commit.txt` should match the application commit encoded in that active release.
 
-## Approved Lite and Full Report overall-result UI
+## Approved Lite, Full and PDF overall-result UI
 
-The Lite Report and Full Report website now share the same approved overall-result card structure. The generated Full Report PDF keeps the same Full Report score/meter hierarchy.
+The Lite Report and Full Report website use the same approved reference-card composition, and the generated Full Report PDF mirrors the same overall result hierarchy.
 
-Required and deployed website behavior:
+Required and deployed layout:
 
-- the overall score is shown clearly as `x` with **Out of 250**;
-- the score sits inside a dedicated result/score panel;
-- the Head-led ↔ Heart-led meter sits **directly below the score inside the same panel**;
-- the meter is centered horizontally;
-- the labels show `Head-led`, the current `x/250`, and `Heart-led`;
-- the result badge/title and supporting alignment narrative remain clearly readable;
-- desktop keeps the score/meter panel beside `Your alignment pattern` and its supporting text;
-- mobile stacks the score, meter, title and supporting text without moving the meter outside the score panel;
+- the overall result is shown clearly as `x` with **OUT OF 250**;
+- the score and `OUT OF 250` are centered horizontally and vertically inside the dedicated left score box;
+- `YOUR ALIGNMENT PATTERN` appears in the right narrative area;
+- the supporting alignment text remains directly below the title;
+- the Head-led ↔ Heart-led meter sits below the supporting text in the same right narrative area, matching the approved visual reference;
+- meter labels show `Head-led`, the current `x/250`, and `Heart-led`;
+- the card uses a dark premium background with strong white/gold contrast;
+- Lite uses an explicit dark fallback background so white text can never become unreadable if an advanced gradient/color-mix rule is unavailable or overridden;
+- mobile stacks the score box and narrative cleanly without losing contrast or readability;
 - Personal and Professional tracks use the same structural rule;
-- the Lite Report and Full Report use the same overall visual language so the transition after payment feels consistent.
+- the transition from Lite to Full remains visually consistent.
 
 Implementation history:
 
-- `c4edad01bcaf50ee07ca58a4367ba62223af7877` — add V4 Full Report result hero styling
+- `c4edad01bcaf50ee07ca58a4367ba62223af7877` — add initial V4 Full Report result hero styling
 - `46002f79f5c61897f91a974bd31e2c446e051197` — load V4 result hero stylesheet
 - `a76e6298348b2982d1db7bd1a7b9e9e05ffa368d` — align Full Report PDF overall-result hero with website structure
 - `ad911f651b51d13ca9a6bd700b970a1185a654a1` — guard Full Report website/PDF hero parity
 - `53dafea465f4f4d7d87bda97584c3646e1c1fdab` — accepted/deployed Full Report web/PDF parity release
-- `1792955d411182db39f36f577f5d6baf7eb66d69` — apply the same approved result-card structure to Lite and Full website reports
-- `7940582a08ca0c5aafb3cc5f0c1b052ff34f630b` — guard Lite/Full result-card meter parity and accepted live release
+- `1792955d411182db39f36f577f5d6baf7eb66d69` — apply shared result-card structure to Lite and Full website reports
+- `7940582a08ca0c5aafb3cc5f0c1b052ff34f630b` — guard Lite/Full result-card parity
+- `a01e6dafafd68f03cdc274fbfb14b52eea9161fe` — match Lite/Full website card to the approved screenshot reference
+- `6c38ed57752f264f342989414ca72a1a34975a2d` — guard reference-card composition
+- `6559a26bf78ef40f36b94a8d27ff3d09830948ee` — match generated Full Report PDF to the approved reference composition
+- `251d151a842f2df4b3a10b9e45282c8cedda98ed` — add explicit Lite dark fallback/high-contrast styling
+- `f05f2adaae488d3c947f49acfae96e6dce12e1d5` — guard Lite contrast and accepted live release
 
 ## Approved Full Report website/PDF parity
 
-The generated Full Report PDF uses the same overall score semantics and hierarchy as the Full Report website:
+The generated Full Report PDF uses the same overall score semantics and reference hierarchy as the Full Report website:
 
 - same 0–250 overall result;
-- clear `x / 250` presentation;
-- meter directly below the score;
-- Head-led / current score / Heart-led labels;
-- `Your alignment pattern` supporting narrative;
-- readable contrast and balanced visual hierarchy.
+- centered `x` / `OUT OF 250` inside the left score box;
+- `Your alignment pattern` and supporting narrative in the right content area;
+- Head-led / current score / Heart-led meter below that narrative;
+- readable dark-card contrast and balanced visual hierarchy.
 
 Interactive website controls are naturally not part of the PDF, and pagination may differ, but the report content, score meaning and overall result hierarchy should remain aligned.
 
@@ -192,8 +199,9 @@ The approved V4 presentation includes:
 - inner-stage CMS/content images remain authoritative;
 - mobile responsive presentation and iOS-safe controls;
 - Personal value banner above checkout;
-- Lite and Full Reports share the same overall result-card structure;
-- Full Report website and PDF use the same overall score/meter hierarchy;
+- Lite and Full Reports share the same approved reference result-card structure;
+- Lite result cards must retain a dark readable fallback background;
+- Full Report website and PDF use the same overall score/reference hierarchy;
 - Executive Summary Highest 3 / Lowest 3 has visible score bars;
 - 10-area score breakdown uses progress bars only — no radar.
 
@@ -241,7 +249,7 @@ php backend/bin/production-report-flow-smoke-test.php \
 
 Do not add `--send-email` unless the test is intentionally meant to exercise live UAT email delivery.
 
-The current Lite/Full website result-card parity release passed **81 tests** and the Vite production build before deployment. The earlier Full Report PDF parity release also passed the guarded production report smoke test.
+The current reference-card/contrast release passed **81 tests** and the Vite production build before deployment. The reference-card PDF candidate also passed the guarded production report smoke test before this CSS-only contrast fix.
 
 ## Standard V4 deployment
 
@@ -278,7 +286,7 @@ The active release path, deployed commit marker and source application commit mu
 Current server-verified application commit:
 
 ```text
-7940582a08ca0c5aafb3cc5f0c1b052ff34f630b
+f05f2adaae488d3c947f49acfae96e6dce12e1d5
 ```
 
 ## Approved V4 backup procedure
@@ -292,6 +300,18 @@ Before a meaningful production change:
 5. never treat an empty backup directory as a valid backup;
 6. verify compressed database backups with `gzip -t` when created manually;
 7. do not use a V5/V3 backup as a V4 rollback source.
+
+Pre-Lite-contrast-fix Git safety branch:
+
+```text
+v4-pre-lite-contrast-fix-20260904-6559a26
+```
+
+Pre-reference-result-card Git safety branch:
+
+```text
+v4-pre-reference-result-card-20260904
+```
 
 Pre-Lite-parity Git safety branch:
 
@@ -331,10 +351,12 @@ Retest at minimum:
 - rapid mobile autosave and stale-error recovery;
 - resume persistence;
 - Lite/Full Report lock;
-- Lite Report score and meter remain inside the same centered score card;
-- Full Report score and meter remain inside the same centered score card;
-- Lite and Full overall result-card structure matches;
+- Lite Report result card remains dark and readable;
+- Lite score + `OUT OF 250` remain centered inside the left score box;
+- Full Report uses the same score-box/reference hierarchy;
+- Lite and Full overall result-card composition matches;
 - Full Report website/PDF overall-result hierarchy matches;
+- Head-led / `x/250` / Heart-led meter remains readable below the alignment narrative;
 - Pay by Card flow;
 - payment success progress screen;
 - automatic opening of the unlocked Full Report;
