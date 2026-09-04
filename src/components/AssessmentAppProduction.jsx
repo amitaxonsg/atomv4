@@ -13,13 +13,30 @@ function PaymentStatus({ cancelled = false }) {
   const checkout = params.get("checkout") || "";
   const emailDelivery = params.get("email") || "queued";
   const uatNoPayment = method === "cash-on-delivery";
-  const [paidState, setPaidState] = React.useState({ checking: !cancelled && !uatNoPayment && Boolean(checkout), reportUrl: "", error: "" });
+  const shouldCheckCard = !cancelled && !uatNoPayment && Boolean(checkout);
+  const [retryNonce, setRetryNonce] = React.useState(0);
+  const [paidState, setPaidState] = React.useState({
+    checking: shouldCheckCard,
+    reportUrl: "",
+    error: "",
+    progress: shouldCheckCard ? 25 : 0,
+    stage: shouldCheckCard ? "Payment received" : "",
+    pdfEmailStatus: null,
+  });
 
   React.useEffect(() => {
-    if (cancelled || uatNoPayment || !checkout) return undefined;
+    if (!shouldCheckCard) return undefined;
     let active = true;
     let attempts = 0;
     let timer = null;
+
+    setPaidState(current => ({
+      ...current,
+      checking: true,
+      error: "",
+      progress: Math.max(25, current.progress || 0),
+      stage: current.stage || "Payment received",
+    }));
 
     const poll = async () => {
       attempts += 1;
@@ -30,16 +47,39 @@ function PaymentStatus({ cancelled = false }) {
         });
         const result = await response.json().catch(() => ({}));
         if (!active) return;
-        if (response.ok && result?.reportReady && result?.reportUrl) {
-          setPaidState({ checking: false, reportUrl: result.reportUrl, error: "" });
-          return;
+
+        if (response.ok) {
+          const progress = Math.max(25, Math.min(100, Number(result?.progress) || (result?.paid ? 85 : 55)));
+          setPaidState(current => ({
+            ...current,
+            checking: !result?.reportReady,
+            progress: Math.max(current.progress || 0, progress),
+            stage: result?.stage || (result?.paid ? "Unlocking Full Report" : "Verifying payment"),
+            pdfEmailStatus: result?.pdfEmailStatus || current.pdfEmailStatus,
+            error: "",
+            reportUrl: result?.reportReady && result?.reportUrl ? result.reportUrl : current.reportUrl,
+          }));
+
+          if (result?.reportReady && result?.reportUrl) {
+            timer = window.setTimeout(() => {
+              if (active) window.location.replace(result.reportUrl);
+            }, 900);
+            return;
+          }
         }
       } catch {
-        // Signed Stripe webhook remains authoritative; keep polling briefly.
+        // The signed Stripe webhook and verified server reconciliation remain authoritative.
       }
 
-      if (active && attempts < 48) timer = window.setTimeout(poll, 1250);
-      else if (active) setPaidState(current => ({ ...current, checking: false, error: "Your payment was received. Your Full Report link is being prepared and will also be sent by email." }));
+      if (active && attempts < 90) {
+        timer = window.setTimeout(poll, 2000);
+      } else if (active) {
+        setPaidState(current => ({
+          ...current,
+          checking: false,
+          error: "Your payment has been received, but the Full Report is taking longer than expected to prepare. Please check again. Your PDF report will also be sent by email once processing completes.",
+        }));
+      }
     };
 
     poll();
@@ -47,9 +87,10 @@ function PaymentStatus({ cancelled = false }) {
       active = false;
       if (timer) window.clearTimeout(timer);
     };
-  }, [cancelled, uatNoPayment, checkout]);
+  }, [shouldCheckCard, checkout, retryNonce]);
 
   const resolvedReportUrl = uatNoPayment ? reportUrl : paidState.reportUrl;
+  const progressLabel = `${Math.round(paidState.progress)}%`;
 
   return <StageShell>
     <p className="eyebrow">Secure checkout</p>
@@ -61,14 +102,35 @@ function PaymentStatus({ cancelled = false }) {
           ? "UAT Test — No Payment is enabled for client testing. No Stripe charge was made. Your Full Report has been unlocked, and the confirmation and PDF report emails were accepted by the email provider."
           : "UAT Test — No Payment is enabled for client testing. No Stripe charge was made. Your Full Report has been unlocked, but email delivery is retrying in the background."
         : resolvedReportUrl
-          ? "Payment confirmed. Your Full Development Report is unlocked. A confirmation email and your PDF Full Report are also being sent to your email."
-          : "Stripe is confirming your payment. Your Full Development Report will open as soon as the signed webhook is verified, and your PDF report will also be sent by email."}</p>
+          ? "Payment confirmed. Your Full Development Report is ready and will open automatically. A confirmation email and your PDF Full Report are also being sent to your email."
+          : "Please don’t close this page. We’re verifying your payment, unlocking your Full Development Report, and preparing your PDF email."}</p>
+
+    {!cancelled && !uatNoPayment && <div style={{ maxWidth: 560, margin: "24px 0 18px" }}>
+      <div
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow={Math.round(paidState.progress)}
+        aria-label="Full Report processing progress"
+        style={{ height: 14, overflow: "hidden", borderRadius: 999, background: "#e9e1d5", border: "1px solid #ddd2c3" }}
+      >
+        <span style={{ display: "block", width: `${paidState.progress}%`, height: "100%", borderRadius: 999, background: "linear-gradient(90deg, #6c8fae, #c9a15a 55%, #c1443f)", transition: "width .45s ease" }} />
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 16, marginTop: 8, fontSize: 13 }}>
+        <strong>{progressLabel}</strong>
+        <span>{resolvedReportUrl ? "Opening Full Report…" : paidState.stage}</span>
+      </div>
+      {paidState.pdfEmailStatus && <p className="preview-note" role="status">PDF report email: {paidState.pdfEmailStatus === "sent" ? "sent" : paidState.pdfEmailStatus === "failed" ? "retry required" : "queued for delivery"}.</p>}
+    </div>}
+
     {paidState.error && !resolvedReportUrl && <p className="preview-note" role="status">{paidState.error}</p>}
     {cancelled
       ? <a className="button button--primary" href="/">Return to assessment</a>
       : resolvedReportUrl
         ? <a className="button button--primary" href={resolvedReportUrl}>Open Full Report</a>
-        : <button className="button button--primary" type="button" disabled>{paidState.checking ? "Preparing Full Report…" : "Full Report link is being emailed"}</button>}
+        : paidState.checking
+          ? <button className="button button--primary" type="button" disabled>Processing Full Report…</button>
+          : <button className="button button--primary" type="button" onClick={() => setRetryNonce(value => value + 1)}>Check payment status again</button>}
   </StageShell>;
 }
 
