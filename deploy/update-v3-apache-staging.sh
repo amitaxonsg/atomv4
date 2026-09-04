@@ -13,6 +13,7 @@ PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-php8.3-fpm}"
 EXPECTED_APP_ENV="${EXPECTED_APP_ENV:-staging}"
 CMS_APPLY_SCRIPT="${CMS_APPLY_SCRIPT-bin/apply-v3-public-cms.php}"
 PREVIOUS_RELEASE=""
+PREVIOUS_COMMIT=""
 SWITCHED=0
 
 if [[ -x /opt/node-v22/bin/node ]]; then
@@ -42,6 +43,9 @@ rollback() {
     echo "Health/deploy failure after switch; restoring previous staging release." >&2
     ln -sfn "$PREVIOUS_RELEASE" "$APP_ROOT/current.rollback"
     mv -Tf "$APP_ROOT/current.rollback" "$APP_ROOT/current"
+    if [[ -n "$PREVIOUS_COMMIT" ]]; then
+      printf '%s\n' "$PREVIOUS_COMMIT" > "$APP_ROOT/deployed-commit.txt"
+    fi
     systemctl reload "$PHP_FPM_SERVICE" 2>/dev/null || true
     systemctl reload apache2 2>/dev/null || true
   fi
@@ -69,6 +73,12 @@ RELEASE_ID="$(date -u +%Y%m%d%H%M%S)-${COMMIT:0:12}"
 RELEASE_DIR="$APP_ROOT/releases/$RELEASE_ID"
 TEMP_DIR="$APP_ROOT/releases/.$RELEASE_ID.tmp"
 PREVIOUS_RELEASE="$(readlink -f "$APP_ROOT/current" 2>/dev/null || true)"
+if [[ -n "$PREVIOUS_RELEASE" ]]; then
+  PREVIOUS_COMMIT_PREFIX="${PREVIOUS_RELEASE##*-}"
+  if [[ "$PREVIOUS_COMMIT_PREFIX" =~ ^[0-9A-Fa-f]{7,40}$ ]]; then
+    PREVIOUS_COMMIT="$(git rev-parse "${PREVIOUS_COMMIT_PREFIX}^{commit}" 2>/dev/null || true)"
+  fi
+fi
 
 load_env_file
 for variable in APP_ENV APP_URL APP_KEY DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD STORAGE_PATH; do
