@@ -22,7 +22,7 @@ $rows = $db->fetchAll(
                     SELECT 1 FROM notification_events n
                     WHERE n.event_key = 'payment_paid'
                       AND n.entity_type = 'payment'
-                      AND n.entity_id = CAST(p.id AS CHAR)
+                      AND CAST(n.entity_id AS UNSIGNED) = p.id
                 )
             )
        )
