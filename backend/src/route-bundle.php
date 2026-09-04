@@ -11,6 +11,36 @@ require __DIR__ . '/attribution-routes.php';
 require __DIR__ . '/feedback-routes.php';
 require __DIR__ . '/assessment-experience-routes.php';
 
+$router->add('GET', '/api/payments/status', function (Request $request) use ($db) {
+    $checkout = trim((string) ($request->query['checkout'] ?? ''));
+    if (!preg_match('/^cs_[A-Za-z0-9_]+$/', $checkout)) {
+        return Response::error('Checkout reference is invalid.', 422);
+    }
+
+    $key = 'payment-status:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . ':' . hash('sha256', $checkout);
+    if (!(new RateLimiter($db))->hit($key, 80, 120)) {
+        return Response::error('Please wait before checking payment status again.', 429);
+    }
+
+    $payment = $db->fetch(
+        'SELECT status, paid_at, metadata_json FROM payments WHERE provider = ? AND stripe_checkout_session_id = ? LIMIT 1',
+        ['stripe', $checkout]
+    );
+    if (!$payment) return Response::error('Checkout reference was not found.', 404);
+
+    $metadata = json_decode((string) ($payment['metadata_json'] ?? '{}'), true) ?: [];
+    $paid = $payment['status'] === 'paid';
+    $reportUrl = $paid ? trim((string) ($metadata['reportUrl'] ?? '')) : '';
+
+    return Response::json([
+        'status' => (string) $payment['status'],
+        'paid' => $paid,
+        'reportReady' => $paid && $reportUrl !== '',
+        'reportUrl' => $paid && $reportUrl !== '' ? $reportUrl : null,
+        'paidAt' => $paid ? ($payment['paid_at'] ?? null) : null,
+    ]);
+});
+
 $router->add('POST', '/api/admin/password-reset/request', function (Request $request) use ($container, $db) {
     $email = strtolower(trim((string) ($request->body['email'] ?? '')));
     $key = 'admin-password-reset:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . ':' . hash('sha256', $email);
