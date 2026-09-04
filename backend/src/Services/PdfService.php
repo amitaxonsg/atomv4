@@ -34,6 +34,7 @@ final class PdfService
         $heading = (string) $this->settings->get('branding.heading_font', 'Georgia, Times New Roman, serif');
         $body = (string) $this->settings->get('branding.body_font', 'Arial, Helvetica, sans-serif');
         $logo = $this->logoDataUri((string) $this->settings->get('branding.report_logo_url', '/media/brand/atom-global-wordmark.png'));
+        $pdfAccent = $trackKey === 'personal' ? $heart : $head;
 
         $summary = $free['summary']['summary'] ?? $free['summary'] ?? '';
         if (is_array($summary)) $summary = json_encode($summary, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -46,15 +47,15 @@ final class PdfService
             : '<div class="brand">ATOM GLOBAL CONSULTING</div>';
 
         $html = '<!doctype html><html><head><meta charset="utf-8"><style>'
-            . '@page{margin:25mm 19mm 22mm}body{font-family:' . $this->css($body) . ';color:' . $this->css($ink) . ';font-size:10.5pt;line-height:1.55;background:#fff}'
-            . 'h1,h2,h3,h4{font-family:' . $this->css($heading) . ';font-weight:normal;page-break-after:avoid}h1{font-size:28pt;margin:0 0 5mm}h2{font-size:18pt;margin:10mm 0 3mm;border-bottom:1px solid #ddd;padding-bottom:2mm}h3{font-size:14pt;margin:6mm 0 2mm}h4{font-size:11.5pt;margin:3mm 0 1mm}.logo{width:52mm;max-height:18mm;object-fit:contain}.brand{font-weight:bold;letter-spacing:.08em;color:' . $this->css($heart) . ';font-size:10pt}.meta{color:' . $this->css($muted) . ';font-size:8.8pt}.hero{background:' . $this->css($canvas) . ';padding:9mm;margin:7mm 0;border-left:3px solid ' . $this->css($gold) . '}.score{font-family:' . $this->css($heading) . ';font-size:27pt}.report-block{page-break-inside:avoid;border:1px solid #e4ddcf;border-radius:4px;padding:5mm;margin:4mm 0}.edge-grid,.summary-grid,.score-grid{width:100%;border-collapse:separate;border-spacing:4mm}.edge-grid td,.summary-grid td{width:50%;vertical-align:top;border:1px solid #e4ddcf;padding:5mm}.subscale{page-break-inside:avoid;margin:3mm 0}.comparison-row{border-bottom:1px solid #eee;padding:2mm 0}.scale{height:3mm;background:#eee;border-radius:2mm;margin:1mm 0 3mm}.scale span{display:block;height:100%;background:' . $this->css($head) . ';border-radius:2mm}.scale-labels{width:100%;font-size:6.7pt;color:' . $this->css($muted) . ';line-height:1.2}.scale-labels td{border:0!important;padding:0!important;width:33.33%!important}.scale-labels td:nth-child(2){text-align:center}.scale-labels td:last-child{text-align:right}.current-profile{border-left:3px solid ' . $this->css($gold) . ';padding-left:4mm}.score-intro{font-size:8.7pt;color:' . $this->css($muted) . ';margin:2mm 0 4mm}.score-grid{table-layout:fixed;border-spacing:3mm}.score-grid>tbody>tr>td{width:50%;vertical-align:top;padding:0;border:0}.score-item{border:1px solid #e4ddcf;background:#fff;padding:3.5mm;page-break-inside:avoid}.score-item-head{width:100%;border-collapse:collapse;margin-bottom:2mm}.score-item-head td{border:0;padding:0;vertical-align:middle}.score-area{font-size:8.5pt;font-weight:bold;line-height:1.2}.score-value{text-align:right;font-size:8.2pt;font-weight:bold;white-space:nowrap}.score-legend{font-size:8.5pt;color:' . $this->css($muted) . ';background:' . $this->css($canvas) . ';padding:4mm}.footer{position:fixed;bottom:-13mm;left:0;right:0;color:' . $this->css($muted) . ';font-size:8pt;text-align:center}ul,ol{padding-left:6mm;margin-top:2mm}li{margin-bottom:1.5mm}</style></head><body>'
+            . '@page{margin:22mm 17mm 20mm}body{font-family:' . $this->css($body) . ';color:' . $this->css($ink) . ';font-size:10pt;line-height:1.5;background:#F7F1E8}'
+            . 'h1,h2,h3,h4{font-family:' . $this->css($heading) . ';page-break-after:avoid}h1{font-size:29pt;line-height:1.05;margin:2mm 0 3mm;color:#A94739}h2{font-size:17pt;margin:0 0 3mm;padding:0;border:0}h3{font-size:13.5pt;margin:0 0 2.5mm}h4{font-size:10.8pt;margin:0 0 1.5mm}.logo{width:48mm;max-height:16mm;object-fit:contain}.brand{font-weight:bold;letter-spacing:.08em;color:' . $this->css($heart) . ';font-size:9.5pt}.meta{color:' . $this->css($muted) . ';font-size:8pt;letter-spacing:.03em}.hero{page-break-inside:avoid;background:#FFFDF9;padding:6mm;margin:5mm 0;border:1px solid #E7DDD1;border-left:4px solid ' . $this->css($pdfAccent) . ';border-radius:5px}.score{font-family:' . $this->css($heading) . ';font-size:25pt;color:#A94739;margin-bottom:2mm}.section-banner{page-break-inside:avoid;background:#27302F;color:#fff;padding:5mm 6mm;margin:7mm 0 4mm;border-radius:5px}.section-banner h2{color:#fff;margin:0;font-size:18pt}.report-block{page-break-inside:avoid;border:1px solid #E7DDD1;border-left:3px solid ' . $this->css($pdfAccent) . ';border-radius:5px;padding:5mm;margin:3.5mm 0;background:#FFFDF9}.intro-list{border-left-color:#2F9E69;background:#F8FCF9}.intro-list:nth-of-type(even){border-left-color:#B54B3D;background:#FFF8F6}.edge-grid,.summary-grid,.score-grid{width:100%;border-collapse:separate;border-spacing:3mm}.edge-grid td,.summary-grid td{width:50%;vertical-align:top;border:1px solid #E7DDD1;padding:4mm;background:#fff}.edge-grid td:first-child{border-top:3px solid #36A89B}.edge-grid td:last-child{border-top:3px solid #D99035}.summary-grid td:first-child{border-top:3px solid #2F9E69;background:#F6FCF8}.summary-grid td:last-child{border-top:3px solid #B54B3D;background:#FFF7F5}.subscale{page-break-inside:avoid;margin:2.5mm 0;padding:2.5mm 0;border-bottom:1px solid #EEE6DD}.subscale:last-child{border-bottom:0}.comparison-row{border-bottom:1px solid #EEE6DD;padding:2mm 0}.scale{height:3mm;background:#EEE7DE;border-radius:2mm;margin:1mm 0 2.5mm}.scale span{display:block;height:100%;background:' . $this->css($head) . ';border-radius:2mm}.scale-labels{width:100%;font-size:6.3pt;color:' . $this->css($muted) . ';line-height:1.2}.scale-labels td{border:0!important;padding:0!important;width:33.33%!important}.scale-labels td:nth-child(2){text-align:center}.scale-labels td:last-child{text-align:right}.current-profile{border-left:3px solid ' . $this->css($gold) . ';padding-left:3mm;background:#FFF9EA}.score-intro{font-size:8.2pt;color:' . $this->css($muted) . ';margin:1.5mm 0 3.5mm}.score-grid{table-layout:fixed;border-spacing:2.5mm}.score-grid>tbody>tr>td{width:50%;vertical-align:top;padding:0;border:0}.score-item{border:1px solid #E7DDD1;border-left:3px solid #3D82D8;background:#fff;padding:3mm;page-break-inside:avoid}.score-color-1{border-left-color:#3D82D8}.score-color-1 .scale span{background:#3D82D8}.score-color-2{border-left-color:#D8568C}.score-color-2 .scale span{background:#D8568C}.score-color-3{border-left-color:#36A89B}.score-color-3 .scale span{background:#36A89B}.score-color-4{border-left-color:#D99035}.score-color-4 .scale span{background:#D99035}.score-color-5{border-left-color:#7964D8}.score-color-5 .scale span{background:#7964D8}.score-item-head{width:100%;border-collapse:collapse;margin-bottom:2mm}.score-item-head td{border:0;padding:0;vertical-align:middle}.score-area{font-size:8.5pt;font-weight:bold;line-height:1.2}.score-value{text-align:right;font-size:8pt;font-weight:bold;white-space:nowrap}.score-legend{font-size:8.2pt;color:' . $this->css($muted) . ';background:#FFF8EE;padding:3.5mm;border:1px solid #EADCC7}.roadmap-block{border-left-color:#C9A15A;background:#FFFCF5}.roadmap-block>h3{color:#8B6A1F}.commitment-block{background:#27302F;color:#fff;border:0}.commitment-block h3,.commitment-block p{color:#fff}.coach-block{border-left-color:#C9A15A;background:#FFF7DE}.retake-block{border-left-color:#7964D8;background:#F8F6FF}.profile-block{border-left-color:#36A89B}.reflection-block{border-left-color:#3D82D8}.methodology-block{border-left-color:#D99035}.footer{position:fixed;bottom:-12mm;left:0;right:0;color:' . $this->css($muted) . ';font-size:7.5pt;text-align:center}ul,ol{padding-left:5mm;margin-top:2mm}li{margin-bottom:1.2mm}</style></head><body>'
             . $brand . '<p class="meta">GROWTH ALIGNMENT · ' . $this->h($row['track_name']) . '</p>'
             . '<h1>' . $this->h((string) ($free['profile'] ?? 'Growth Alignment Report')) . '</h1>'
             . '<p class="meta">Prepared for ' . $this->h((string) $row['participant_name']) . ' · Completed ' . $this->h((string) ($row['completed_at'] ?? '')) . '</p>'
             . '<div class="hero"><div class="score">' . (int) ($free['total'] ?? 0) . ' / 250</div><p>' . $this->h((string) $summary) . '</p></div>'
             . $this->section('Top three strengths', $strengths)
             . $this->section('Development observations', $watchouts)
-            . '<h2>Full Development Report</h2>'
+            . '<div class="section-banner"><h2>Full Development Report</h2></div>'
             . $this->executiveSummary($scores, $trackKey)
             . $this->scoreBreakdownSection($scores, $trackKey, (string) ($content['radarLegend'] ?? ''))
             . $this->edgeSection($content, $trackKey)
@@ -115,7 +116,7 @@ final class PdfService
     {
         if (!$items) return '';
         $tag = $ordered ? 'ol' : 'ul';
-        return '<h2>' . $this->h($title) . '</h2><' . $tag . '>' . implode('', array_map(fn($item) => '<li>' . $this->h((string) $item) . '</li>', $items)) . '</' . $tag . '>';
+        return '<div class="report-block intro-list"><h2>' . $this->h($title) . '</h2><' . $tag . '>' . implode('', array_map(fn($item) => '<li>' . $this->h((string) $item) . '</li>', $items)) . '</' . $tag . '></div>';
     }
 
     private function textBlock(string $title, mixed $value): string
@@ -143,14 +144,17 @@ final class PdfService
     {
         if (!$scores) return '';
         $cards = [];
+        $index = 0;
         foreach (array_slice($scores, 0, 10, true) as $code => $score) {
             $value = max(5, min(25, (int) $score));
             $width = max(0, min(100, (int) round((($value - 5) / 20) * 100)));
-            $cards[] = '<div class="score-item">'
+            $colourClass = 'score-color-' . (($index % 5) + 1);
+            $cards[] = '<div class="score-item ' . $colourClass . '">'
                 . '<table class="score-item-head"><tr><td class="score-area">' . $this->h($this->areaName($trackKey, (string) $code)) . '</td>'
                 . '<td class="score-value">' . $value . '/25</td></tr></table>'
                 . '<table class="scale-labels"><tr><td>5 · Head-led</td><td>15 · Balanced</td><td>25 · Heart-led</td></tr></table>'
                 . '<div class="scale"><span style="width:' . $width . '%"></span></div></div>';
+            $index++;
         }
         $rows = '';
         for ($i = 0; $i < count($cards); $i += 2) {
@@ -208,7 +212,7 @@ final class PdfService
     private function roadmap(mixed $items): string
     {
         if (!is_array($items) || !$items) return '';
-        $html = '<div class="report-block"><h3>Development roadmap</h3><p>Focus on three to five areas and practise a small number of observable steps consistently.</p>';
+        $html = '<div class="report-block roadmap-block"><h3>Development roadmap</h3><p>Focus on three to five areas and practise a small number of observable steps consistently.</p>';
         foreach (array_slice($items, 0, 5) as $index => $item) {
             if (!is_array($item)) continue;
             $title = (string) ($item['area'] ?? ('Development area ' . ($index + 1)));
@@ -223,7 +227,7 @@ final class PdfService
     private function profileSpectrum(mixed $items): string
     {
         if (!is_array($items) || !$items) return '';
-        $html = '<div class="report-block"><h3>Understand the Head–Heart profile spectrum</h3><p>Your current profile is highlighted below. The other definitions show the neighbouring patterns and score ranges.</p>';
+        $html = '<div class="report-block profile-block"><h3>Understand the Head–Heart profile spectrum</h3><p>Your current profile is highlighted below. The other definitions show the neighbouring patterns and score ranges.</p>';
         foreach ($items as $item) {
             if (!is_array($item)) continue;
             $class = !empty($item['current']) ? ' current-profile' : '';
@@ -237,7 +241,7 @@ final class PdfService
     private function writtenReflections(mixed $items): string
     {
         if (!is_array($items) || !$items) return '';
-        $html = '<div class="report-block"><h3>Your written reflections</h3><p>Your own notes are included as context for the numerical pattern.</p>';
+        $html = '<div class="report-block reflection-block"><h3>Your written reflections</h3><p>Your own notes are included as context for the numerical pattern.</p>';
         foreach ($items as $item) {
             if (!is_array($item)) continue;
             $html .= '<div class="subscale"><h4>Question ' . (int) ($item['questionPosition'] ?? 0) . '</h4>';
@@ -251,7 +255,7 @@ final class PdfService
     private function methodology(mixed $items): string
     {
         if (!is_array($items) || !$items) return '';
-        $html = '<div class="report-block"><h3>Methodology and sourcing</h3>';
+        $html = '<div class="report-block methodology-block"><h3>Methodology and sourcing</h3>';
         foreach ($items as $title => $value) {
             if (!is_scalar($value) || trim((string) $value) === '') continue;
             $html .= '<div class="subscale"><h4>' . $this->h((string) $title) . '</h4><p>' . $this->h((string) $value) . '</p></div>';
@@ -299,7 +303,7 @@ final class PdfService
     {
         $heading = (string) $this->settings->get('reports.commitment_heading', 'My 90-day development commitment');
         $prompt = (string) $this->settings->get('reports.commitment_prompt', 'Choose one or two development areas and write down the action you will practise consistently.');
-        $body = '<div class="report-block"><h3>' . $this->h($heading) . '</h3><p>' . $this->h($prompt) . '</p>';
+        $body = '<div class="report-block commitment-block"><h3>' . $this->h($heading) . '</h3><p>' . $this->h($prompt) . '</p>';
         if ($text !== '') $body .= '<p><strong>' . $this->h($text) . '</strong></p>';
         if ($date !== '') $body .= '<p>Suggested check-in: ' . $this->h($date) . '</p>';
         return $body . '</div>';
@@ -311,7 +315,7 @@ final class PdfService
         $body = (string) $this->settings->get('reports.coach_body', 'Turn your report into a focused development plan with an Atom Global coach.');
         $primary = (string) $this->settings->get('reports.coach_primary_name', 'Reeta Nathwani') . ' — ' . (string) $this->settings->get('reports.coach_primary_email', 'reeta.nathwani@atomglobal.com');
         $secondary = (string) $this->settings->get('reports.coach_secondary_name', 'Sunil Setpaul') . ' — ' . (string) $this->settings->get('reports.coach_secondary_email', 'sunil.setpaul@atomglobal.com');
-        return '<div class="report-block"><h3>' . $this->h($heading) . '</h3><p>' . $this->h($body) . '</p><p>' . $this->h($primary) . '<br>' . $this->h($secondary) . '</p></div>';
+        return '<div class="report-block coach-block"><h3>' . $this->h($heading) . '</h3><p>' . $this->h($body) . '</p><p>' . $this->h($primary) . '<br>' . $this->h($secondary) . '</p></div>';
     }
 
     private function retakePlan(string $trackKey): string
@@ -319,7 +323,7 @@ final class PdfService
         $defaults = ['personal' => 299, 'newjoiner' => 995, 'manager' => 2995, 'executive' => 4995];
         $minor = max(0, (int) $this->settings->get('retest.price_' . $trackKey . '_minor', $defaults[$trackKey] ?? 299));
         $price = 'US$' . number_format($minor / 100, 2);
-        return '<div class="report-block"><h3>90-day retest and progress check</h3><p>Commit to one or two development areas and practise them consistently. The retest becomes available 90 days after the original paid assessment and the new Full Development Report compares both results.</p><p><strong>Retest price: ' . $this->h($price) . '.</strong></p></div>';
+        return '<div class="report-block retake-block"><h3>90-day retest and progress check</h3><p>Commit to one or two development areas and practise them consistently. The retest becomes available 90 days after the original paid assessment and the new Full Development Report compares both results.</p><p><strong>Retest price: ' . $this->h($price) . '.</strong></p></div>';
     }
 
     private function areaName(string $trackKey, string $code): string
