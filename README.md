@@ -2,7 +2,7 @@
 
 > **V4 ONLY — CURRENT SOURCE OF TRUTH**
 >
-> This README describes the approved V4 application at `https://v4.atomglobal.com/`. Do not use V5, V3, another repository, or an older preview as a deployment, database, CMS, scoring, payment, report or visual source of truth for V4 work.
+> This README describes the approved V4 application at `https://v4.atomglobal.com/`. Do not use V5, V3, another repository, or an older preview as a deployment, database, CMS, scoring, payment, report, or visual source of truth for V4 work.
 
 Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Global Consulting, including questionnaire, CMS/Admin, Lite/Full reports, Stripe payments, UAT no-payment control, PDF/email delivery, analytics, affiliates, commitments and audit history.
 
@@ -14,16 +14,15 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Server-verified live application commit** | `f05f2adaae488d3c947f49acfae96e6dce12e1d5` |
+| **Server-verified live application commit** | `7e4d89ec30fa13f1b14c2bea938189c89482d7da` |
 | Lite/Full reference result-card status | **DEPLOYED / LIVE / HEALTHY** |
 | Reference result-card / PDF parity baseline | `6559a26bf78ef40f36b94a8d27ff3d09830948ee` |
-| Lite contrast/readability fix | `f05f2adaae488d3c947f49acfae96e6dce12e1d5` |
-| Pre-Lite-contrast Git safety branch | `v4-pre-lite-contrast-fix-20260904-6559a26` |
+| Lite contrast/readability baseline | `f05f2adaae488d3c947f49acfae96e6dce12e1d5` |
+| Commitment contrast/readability fix | `7e4d89ec30fa13f1b14c2bea938189c89482d7da` |
+| Pre-commitment-contrast safety branch | `v4-pre-commitment-contrast-20260904` |
+| Pre-Lite-contrast safety branch | `v4-pre-lite-contrast-fix-20260904-6559a26` |
 | Pre-reference-result-card safety branch | `v4-pre-reference-result-card-20260904` |
-| Pre-Lite-parity Git safety branch | `v4-pre-lite-hero-parity-20260904-0608dbc` |
-| Pre-Full-Report-hero Git safety branch | `v4-pre-full-report-meter-20260904-ec93906` |
 | Earlier live/payment safety branch | `v4-live-backup-20260904-9e99467` |
-| Confirmed older full server backup | `/var/backups/growth-alignment-v4/prechange-20260903-042350` |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
 | Releases | `/var/www/v4.atomglobal.com/releases` |
 | Active release symlink | `/var/www/v4.atomglobal.com/current` |
@@ -34,64 +33,86 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Cron | `/etc/cron.d/growth-alignment-v4` |
 | Web server | Apache + PHP 8.3-FPM |
 
-The `f05f2ada...` release was deployed successfully through the V4 Apache deployer. The deploy output confirmed:
+The `7e4d89ec...` release was deployed successfully through the V4 Apache deployer. The deployment output confirmed:
 
 - **81/81 frontend tests passed**;
 - Vite production build passed;
 - PHP syntax check passed;
 - Apache release switch completed successfully;
 - Stripe reconciliation background job ran with `0` failures;
-- administrator alert and email processors completed without failure;
-- background processing remains scheduled every five minutes and was verified healthy;
-- production health returned `status: ok` with database, migrations, storage, Stripe, Stripe webhook configuration, email and cron healthy;
+- administrator alert processor completed without failure;
+- email queue processor completed without failure;
+- background processing is scheduled every five minutes and verified healthy;
+- production `/api/health` returned `status: ok` with database, migrations, storage, Stripe, Stripe webhook configuration, email and cron healthy;
 - `feedbackGitHub:false` remains optional and is not a launch blocker.
 
 > Documentation-only commits may be newer than the deployed application. The authoritative live application is the target of `/var/www/v4.atomglobal.com/current`; `/var/www/v4.atomglobal.com/deployed-commit.txt` should match the application commit encoded in that active release.
 
 ## Approved Lite, Full and PDF overall-result UI
 
-The Lite Report and Full Report website use the same approved reference-card composition, and the generated Full Report PDF mirrors the same overall result hierarchy.
+The Lite Report and Full Report website use the same approved reference-card composition. The generated Full Report PDF mirrors the same overall result hierarchy.
 
-Required and deployed layout:
+Required deployed layout:
 
-- the overall result is shown clearly as `x` with **OUT OF 250**;
-- the score and `OUT OF 250` are centered horizontally and vertically inside the dedicated left score box;
-- `YOUR ALIGNMENT PATTERN` appears in the right narrative area;
-- the supporting alignment text remains directly below the title;
-- the Head-led ↔ Heart-led meter sits below the supporting text in the same right narrative area, matching the approved visual reference;
-- meter labels show `Head-led`, the current `x/250`, and `Heart-led`;
-- the card uses a dark premium background with strong white/gold contrast;
-- Lite uses an explicit dark fallback background so white text can never become unreadable if an advanced gradient/color-mix rule is unavailable or overridden;
-- mobile stacks the score box and narrative cleanly without losing contrast or readability;
-- Personal and Professional tracks use the same structural rule;
-- the transition from Lite to Full remains visually consistent.
+- overall result shown clearly as `x` with **OUT OF 250**;
+- score and `OUT OF 250` centered horizontally and vertically inside the dedicated left score box;
+- `YOUR ALIGNMENT PATTERN` in the right narrative area;
+- supporting alignment text directly below the title;
+- Head-led ↔ Heart-led meter below the supporting text in the same narrative area;
+- meter labels show `Head-led`, current `x/250`, and `Heart-led`;
+- dark premium background with explicit readable white/gold contrast;
+- Lite has a hard dark fallback so white text cannot become unreadable if advanced gradient styling is unavailable or overridden;
+- mobile stacks cleanly without losing contrast or hierarchy;
+- Personal and Professional tracks share the same structural rule.
 
-Implementation history:
+Key result-card commits:
 
-- `c4edad01bcaf50ee07ca58a4367ba62223af7877` — add initial V4 Full Report result hero styling
-- `46002f79f5c61897f91a974bd31e2c446e051197` — load V4 result hero stylesheet
-- `a76e6298348b2982d1db7bd1a7b9e9e05ffa368d` — align Full Report PDF overall-result hero with website structure
-- `ad911f651b51d13ca9a6bd700b970a1185a654a1` — guard Full Report website/PDF hero parity
-- `53dafea465f4f4d7d87bda97584c3646e1c1fdab` — accepted/deployed Full Report web/PDF parity release
-- `1792955d411182db39f36f577f5d6baf7eb66d69` — apply shared result-card structure to Lite and Full website reports
-- `7940582a08ca0c5aafb3cc5f0c1b052ff34f630b` — guard Lite/Full result-card parity
-- `a01e6dafafd68f03cdc274fbfb14b52eea9161fe` — match Lite/Full website card to the approved screenshot reference
+- `a01e6dafafd68f03cdc274fbfb14b52eea9161fe` — match Lite/Full website result card to approved reference
 - `6c38ed57752f264f342989414ca72a1a34975a2d` — guard reference-card composition
-- `6559a26bf78ef40f36b94a8d27ff3d09830948ee` — match generated Full Report PDF to the approved reference composition
-- `251d151a842f2df4b3a10b9e45282c8cedda98ed` — add explicit Lite dark fallback/high-contrast styling
-- `f05f2adaae488d3c947f49acfae96e6dce12e1d5` — guard Lite contrast and accepted live release
+- `6559a26bf78ef40f36b94a8d27ff3d09830948ee` — match generated Full Report PDF to approved reference
+- `251d151a842f2df4b3a10b9e45282c8cedda98ed` — explicit Lite dark fallback/high-contrast styling
+- `f05f2adaae488d3c947f49acfae96e6dce12e1d5` — guard Lite contrast/readability
 
-## Approved Full Report website/PDF parity
+## Commitment section — approved contrast behavior
 
-The generated Full Report PDF uses the same overall score semantics and reference hierarchy as the Full Report website:
+The Full Report development commitment section uses a dark panel. All text in that panel must remain readable regardless of other report heading styles.
 
-- same 0–250 overall result;
-- centered `x` / `OUT OF 250` inside the left score box;
-- `Your alignment pattern` and supporting narrative in the right content area;
-- Head-led / current score / Heart-led meter below that narrative;
-- readable dark-card contrast and balanced visual hierarchy.
+Approved browser behavior:
 
-Interactive website controls are naturally not part of the PDF, and pagination may differ, but the report content, score meaning and overall result hierarchy should remain aligned.
+- `MAKE IT ACTIONABLE` is white/high contrast;
+- `My 90-day development commitment` is white/high contrast;
+- instruction/body text is white/high contrast;
+- saved/check-in status text is white/high contrast;
+- saved commitment text is white/high contrast;
+- textarea remains white with dark readable input text;
+- placeholder remains clearly readable;
+- button, layout, persistence, wording and business logic are unchanged.
+
+The commitment contrast guard is intentionally loaded after the other report styles so older heading rules cannot override it.
+
+Approved PDF behavior:
+
+- the commitment block remains dark;
+- commitment heading and paragraph text remain explicitly white/high contrast;
+- saved commitment and suggested check-in continue to render in the generated Full Report PDF.
+
+Implementation:
+
+- `d9d2b769d9305d940ab289e91f412d18f221c60e` — add V4 commitment contrast stylesheet
+- `0ddcd74e854ce2f858ee96e0ac9ba150622010a2` — load commitment contrast stylesheet last
+- `7e4d89ec30fa13f1b14c2bea938189c89482d7da` — guard web/PDF commitment contrast; accepted live release
+
+## Development commitment persistence
+
+When a participant selects **Save my commitment**:
+
+- commitment text is stored in `report_commitments`;
+- it is linked to the specific `generated_report_id`;
+- the check-in date is stored with it;
+- reopening the same private Full Report retrieves the saved commitment;
+- PDF generation reads the same commitment table and includes the saved commitment/check-in date when generated or regenerated after the save.
+
+The commitment is server-side data, not merely browser/local state.
 
 ## Approved 10-area score breakdown
 
@@ -104,8 +125,8 @@ Approved semantics:
 - `5 = more Head-led`;
 - `15 = balanced`;
 - `25 = more Heart-led`;
-- bar normalization is `(value - 5) / 20`;
-- browser and PDF use the same score meaning;
+- normalization is `(value - 5) / 20`;
+- browser and PDF use the same meaning;
 - no A–J markers;
 - Executive Summary Highest 3 / Lowest 3 also uses visible proportional bars.
 
@@ -117,52 +138,38 @@ The real Pay-by-Card flow has been tested with live Stripe transactions.
 
 Approved behavior:
 
-1. Stripe Checkout receives the payment.
-2. The signed Stripe webhook remains the primary fulfilment path.
-3. If the webhook is delayed or missed, V4 securely retrieves that exact Checkout Session directly from Stripe.
-4. V4 only marks the payment paid when Stripe reports `payment_status = paid` and Checkout metadata matches the recorded assessment session and `payment_purpose = full_report`.
-5. Payment details are stored in `payments`, including amount, currency, Payment Intent and paid timestamp.
-6. The generated Full Report is unlocked.
-7. A fresh secure report token/URL is stored.
-8. Customer payment-confirmation and `paid_report_ready` emails are queued exactly once.
-9. The PDF is generated and attached to the Full Report email.
-10. An administrator `payment_paid` notification event is recorded.
-11. Scheduled background reconciliation protects customers if the success page is closed or the webhook is delayed/missed.
+1. Stripe Checkout receives payment.
+2. Signed Stripe webhook remains the primary fulfilment path.
+3. If webhook delivery is delayed/missed, V4 retrieves the exact Checkout Session directly from Stripe.
+4. V4 marks paid only when Stripe reports `payment_status = paid` and metadata matches the assessment session with `payment_purpose = full_report`.
+5. Payment details are stored, including amount, currency, Payment Intent and paid timestamp.
+6. Full Report is unlocked.
+7. Secure report token/URL is stored.
+8. Customer confirmation and `paid_report_ready` emails are queued idempotently.
+9. PDF is generated and attached to the Full Report email.
+10. Administrator `payment_paid` notification is recorded.
+11. Scheduled reconciliation protects customers if the success page is closed or webhook delivery is missed.
 
-The customer success screen shows **Please don’t close this page**, percentage progress, and automatically opens the Full Report when fulfilment reaches 100%.
+The payment success screen shows **Please don’t close this page**, percentage progress, and automatically opens the Full Report when fulfilment reaches 100%.
 
-### Live payment burn-in evidence
+### Live burn-in evidence
 
-Payment ID `44` was recovered from `checkout_started` to `paid` by verified Stripe reconciliation. The Full Report was unlocked, the PDF was generated, the PDF email was sent with a provider message ID, and the administrator notification was recorded.
+Payment ID `44` was recovered from `checkout_started` to `paid` by verified Stripe reconciliation; report unlock, PDF generation, PDF email with provider message ID, and administrator notification were verified.
 
-Payment ID `45` also reached `paid`, stored the Payment Intent, unlocked the Full Report, created a secure report URL, queued the PDF Full Report email and recorded the administrator notification.
+Payment ID `45` also reached `paid`, stored its Payment Intent, unlocked the Full Report, created a secure report URL, queued the PDF Full Report email and recorded the administrator notification.
 
-A separate operational issue remains: the tested Checkout Sessions did not appear in `stripe_webhook_events`, so the Stripe Dashboard endpoint/delivery should still be reviewed. The direct Stripe reconciliation and scheduled fallback protect the customer flow while that operational issue is investigated.
-
-## Development commitment behavior
-
-The Full Report commitment box is persistent server-side functionality.
-
-When the participant selects **Save my commitment**:
-
-- the text is stored in `report_commitments`;
-- it is linked to the specific `generated_report_id`;
-- the check-in date is stored with it;
-- reopening the same private Full Report retrieves the saved commitment;
-- PDF generation reads the same commitment table and includes the saved commitment/check-in date when the PDF is generated or regenerated after the save.
-
-The commitment is not merely browser/local state.
+The tested Checkout Sessions did not appear in `stripe_webhook_events`, so Stripe Dashboard endpoint/delivery still warrants operational review. The direct Stripe reconciliation and scheduled fallback protect the customer flow meanwhile.
 
 ## Current participant journey
 
-V4 exposes four public assessment tracks:
+V4 exposes four tracks:
 
 - Personal
 - New Joiner
 - Manager
 - Executive
 
-The questionnaire uses **40 questions across 10 sections**.
+Questionnaire: **40 questions across 10 sections**.
 
 Journey:
 
@@ -170,8 +177,8 @@ Journey:
 2. introduction;
 3. participant details and consent;
 4. secure survey session creation;
-5. 40-question assessment;
-6. autosave and resume;
+5. assessment;
+6. autosave/resume;
 7. completion/scoring;
 8. Lite Report;
 9. Stripe checkout or explicitly enabled UAT no-payment route;
@@ -190,20 +197,17 @@ Admin uses `system.cash_on_delivery_enabled` as the authoritative UAT no-payment
 
 ## Approved visual/CMS state
 
-The approved V4 presentation includes:
-
 - desktop split layout: visual panel left, application content right;
 - Atom Global public logo in the right/content panel;
-- left visual headline/support copy positioned bottom-left on desktop;
 - landing stage `version` intentionally uses `/media/stages/reflection-portrait.png` when no CMS media assignment exists;
 - inner-stage CMS/content images remain authoritative;
 - mobile responsive presentation and iOS-safe controls;
-- Personal value banner above checkout;
-- Lite and Full Reports share the same approved reference result-card structure;
-- Lite result cards must retain a dark readable fallback background;
+- Lite and Full Reports share the approved reference result-card structure;
+- Lite result card retains a dark readable fallback;
 - Full Report website and PDF use the same overall score/reference hierarchy;
-- Executive Summary Highest 3 / Lowest 3 has visible score bars;
-- 10-area score breakdown uses progress bars only — no radar.
+- commitment section uses explicit high-contrast text on its dark panel;
+- Executive Summary uses visible score bars;
+- 10-area breakdown uses progress bars only — no radar.
 
 Critical landing-stage state:
 
@@ -239,7 +243,7 @@ php -l backend/bin/reconcile-stripe-checkouts.php
 php -l backend/bin/cron.php
 ```
 
-For report/PDF backend changes, run the guarded production report smoke test with a temporary recipient address that does not already exist in `participants`:
+For report/PDF backend changes, run:
 
 ```bash
 php backend/bin/production-report-flow-smoke-test.php \
@@ -247,9 +251,9 @@ php backend/bin/production-report-flow-smoke-test.php \
   --recipient=unused-v4-smoke@example.com
 ```
 
-Do not add `--send-email` unless the test is intentionally meant to exercise live UAT email delivery.
+Do not add `--send-email` unless intentionally testing live UAT email delivery.
 
-The current reference-card/contrast release passed **81 tests** and the Vite production build before deployment. The reference-card PDF candidate also passed the guarded production report smoke test before this CSS-only contrast fix.
+CSS-only presentation changes still require `npm test` and `npm run build` before deployment.
 
 ## Standard V4 deployment
 
@@ -260,7 +264,7 @@ sudo BRANCH=production-readiness-v4-mobile-final-20260902 \
   bash deploy/update-v4-apache.sh
 ```
 
-The deployer automatically creates a database dump before switching releases and runs background processing plus health checks after the switch.
+The deployer creates a database dump before switching releases and runs background processing plus health checks after the switch.
 
 ### Post-deployment verification
 
@@ -281,12 +285,10 @@ echo "HEALTH:"
 curl -fsS https://v4.atomglobal.com/api/health
 ```
 
-The active release path, deployed commit marker and source application commit must agree after a successful deployment.
-
 Current server-verified application commit:
 
 ```text
-f05f2adaae488d3c947f49acfae96e6dce12e1d5
+7e4d89ec30fa13f1b14c2bea938189c89482d7da
 ```
 
 ## Approved V4 backup procedure
@@ -294,40 +296,21 @@ f05f2adaae488d3c947f49acfae96e6dce12e1d5
 Before a meaningful production change:
 
 1. create a Git safety branch from the current accepted/live V4 commit;
-2. preserve the V4 database/CMS state with the deployment backup or an explicit validated dump;
+2. preserve V4 database/CMS state with the deployment backup or an explicit validated dump;
 3. confirm the backup path before changing production;
 4. keep V4 backups under `/var/backups/growth-alignment-v4`;
-5. never treat an empty backup directory as a valid backup;
+5. never treat an empty backup directory as valid;
 6. verify compressed database backups with `gzip -t` when created manually;
-7. do not use a V5/V3 backup as a V4 rollback source.
+7. never use V5/V3 as a V4 rollback source.
 
-Pre-Lite-contrast-fix Git safety branch:
+Current relevant Git safety branches:
 
 ```text
+v4-pre-commitment-contrast-20260904
 v4-pre-lite-contrast-fix-20260904-6559a26
-```
-
-Pre-reference-result-card Git safety branch:
-
-```text
 v4-pre-reference-result-card-20260904
-```
-
-Pre-Lite-parity Git safety branch:
-
-```text
 v4-pre-lite-hero-parity-20260904-0608dbc
-```
-
-Pre-Full-Report-hero Git safety branch:
-
-```text
 v4-pre-full-report-meter-20260904-ec93906
-```
-
-Earlier live/payment safety branch:
-
-```text
 v4-live-backup-20260904-9e99467
 ```
 
@@ -337,42 +320,32 @@ Confirmed older full server backup:
 /var/backups/growth-alignment-v4/prechange-20260903-042350
 ```
 
-That confirmed backup contains the database dump and V4 environment snapshot and previously passed `gzip -t` validation. Newer automatic deployment dumps may exist in `/var/backups/growth-alignment-v4`; do not cite a newer dump as confirmed until its exact path is captured and validated.
-
 Git alone does not contain all live CMS/database configuration.
 
 ## UAT focus
 
 Retest at minimum:
 
-- Personal/New Joiner/Manager/Executive starts;
+- all four assessment tracks;
 - 40 questions / 10 sections;
-- halfway and completion milestones;
-- rapid mobile autosave and stale-error recovery;
-- resume persistence;
+- autosave/resume;
 - Lite/Full Report lock;
-- Lite Report result card remains dark and readable;
-- Lite score + `OUT OF 250` remain centered inside the left score box;
-- Full Report uses the same score-box/reference hierarchy;
-- Lite and Full overall result-card composition matches;
-- Full Report website/PDF overall-result hierarchy matches;
-- Head-led / `x/250` / Heart-led meter remains readable below the alignment narrative;
-- Pay by Card flow;
-- payment success progress screen;
-- automatic opening of the unlocked Full Report;
-- missed-webhook reconciliation fallback;
-- secure Full Report token creation;
-- PDF generation and email attachment delivery;
+- Lite result card remains dark/readable;
+- score + `OUT OF 250` remain centered in the left score box;
+- Full Report/PDF overall-result hierarchy matches;
+- Head-led / `x/250` / Heart-led meter is readable;
+- commitment panel heading/body/status text is readable on dark background;
+- commitment textarea remains white with dark text;
+- saved commitment persists after reload;
+- regenerated PDF includes saved commitment with readable text;
+- Pay by Card flow and reconciliation fallback;
+- secure Full Report token;
+- PDF/email delivery;
 - administrator payment notification;
-- UAT no-payment enabled/disabled behavior;
-- Executive Summary six bars remain visible and proportional;
-- all 10 score-breakdown bars are present and no radar is shown;
-- all `x/25` values match their bar positions;
-- 5 / 15 / 25 labels are readable;
-- commitment save persists after reload;
-- regenerated PDF includes the saved commitment;
-- mobile reports stack without overflow;
-- CMS image/logo/content edits reflect correctly.
+- Executive Summary bars;
+- 10-area bars with no radar;
+- mobile report layout;
+- CMS image/logo/content edits.
 
 ## Change-control rule
 
@@ -386,7 +359,7 @@ Before any V4 production change:
 4. run the complete automated gate;
 5. review the diff;
 6. deploy with the V4 Apache deployer;
-7. verify the actual active release, deployed commit marker and `/api/health`;
+7. verify active release, deployed commit marker and `/api/health`;
 8. perform browser/mobile/PDF UAT;
 9. update this README when the accepted baseline changes.
 
