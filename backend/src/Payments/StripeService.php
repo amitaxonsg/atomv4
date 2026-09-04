@@ -155,6 +155,11 @@ final class StripeService
         $this->db->execute('UPDATE payments SET status = ?, stripe_payment_intent_id = ?, stripe_customer_id = ?, amount = ?, currency = ?, paid_at = NOW(), updated_at = NOW() WHERE id = ?', ['paid', $checkout->payment_intent ?? null, $checkout->customer ?? null, $amount, $currency, $payment['id']]);
         $this->reports->unlockBySession($sessionId, 'stripe_webhook');
         $reportAccess = $this->rotateReportAccess($sessionId);
+        $metadata = json_decode((string) ($payment['metadata_json'] ?? '{}'), true) ?: [];
+        $metadata['reportUrl'] = $reportAccess['reportUrl'];
+        $metadata['reportId'] = $reportAccess['reportId'];
+        $metadata['reportReadyAt'] = gmdate(DATE_ATOM);
+        $this->db->execute('UPDATE payments SET metadata_json = ?, updated_at = NOW() WHERE id = ?', [json_encode($metadata, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), $payment['id']]);
         $this->db->execute('UPDATE affiliate_attributions SET conversion_at = COALESCE(conversion_at, NOW()) WHERE survey_session_id = ?', [$sessionId]);
 
         if ($payment['affiliate_id']) {
