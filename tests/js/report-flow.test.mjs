@@ -6,8 +6,13 @@ const reportView = fs.readFileSync("src/components/assessment/ReportView.jsx", "
 const reportCss = fs.readFileSync("src/report-flow.css", "utf8");
 const editorialCss = fs.readFileSync("src/report-editorial-v4.css", "utf8");
 const main = fs.readFileSync("src/main.jsx", "utf8");
+const paymentHandoff = fs.readFileSync("src/components/shared/PaymentSuccessHandoff.jsx", "utf8");
 const pdfService = fs.readFileSync("backend/src/Services/PdfService.php", "utf8");
 const reportService = fs.readFileSync("backend/src/Services/ReportService.php", "utf8");
+const stripeService = fs.readFileSync("backend/src/Payments/StripeService.php", "utf8");
+const routeBundle = fs.readFileSync("backend/src/route-bundle.php", "utf8");
+const mailProcessor = fs.readFileSync("backend/src/Mail/MailQueueProcessor.php", "utf8");
+const schema = fs.readFileSync("database/migrations/001_initial_schema.sql", "utf8");
 const reportAudit = fs.readFileSync("backend/bin/report-flow-audit.php", "utf8");
 const reportSmoke = fs.readFileSync("backend/bin/production-report-flow-smoke-test.php", "utf8");
 
@@ -45,6 +50,10 @@ test("participant report shows safe Stripe readiness and full CMS schema", () =>
   assert.match(reportCss, /report-hero[\s\S]*radial-gradient/);
   assert.match(reportCss, /report-card:first-child li:first-child[\s\S]*grid-column:\s*1 \/ -1/);
   assert.match(main, /report-editorial-v4\.css/);
+  assert.match(main, /PaymentSuccessHandoff/);
+  assert.match(paymentHandoff, /\/api\/payments\/status\?checkout=/);
+  assert.match(paymentHandoff, /reportReady/);
+  assert.match(paymentHandoff, /window\.location\.replace\(result\.reportUrl\)/);
   assert.match(editorialCss, /V4 Full Development Report editorial refresh/);
   assert.match(editorialCss, /v4-report:has\(\.paid-report\.unlocked\)/);
   assert.match(editorialCss, /--editorial-red/);
@@ -89,4 +98,25 @@ test("database audit and smoke test cover locked unlock and PDF lifecycle", () =
   assert.match(reportSmoke, /Unlocked API reveals complete Full Report content/);
   assert.match(reportSmoke, /Unlocked Full Report PDF was generated/);
   assert.match(reportSmoke, /DATABASE LEFT CLEAN AFTER REPORT TEST/);
+
+  assert.match(stripeService, /Webhook::constructEvent/);
+  assert.match(stripeService, /checkout\.session\.completed/);
+  assert.match(stripeService, /stripe_payment_intent_id/);
+  assert.match(stripeService, /stripe_customer_id/);
+  assert.match(stripeService, /amount = \?/);
+  assert.match(stripeService, /paid_at = NOW\(\)/);
+  assert.match(stripeService, /unlockBySession\(\$sessionId, 'stripe_webhook'\)/);
+  assert.match(stripeService, /\$metadata\['reportUrl'\]/);
+  assert.match(stripeService, /paid_report_ready/);
+  assert.match(routeBundle, /GET', '\/api\/payments\/status/);
+  assert.match(routeBundle, /stripe_checkout_session_id = \?/);
+  assert.match(routeBundle, /reportReady/);
+  assert.match(mailProcessor, /addPaidReportAttachment/);
+  assert.match(mailProcessor, /Growth-Alignment-Full-Development-Report\.pdf/);
+  assert.match(schema, /CREATE TABLE payments/);
+  assert.match(schema, /stripe_checkout_session_id VARCHAR\(255\)/);
+  assert.match(schema, /stripe_payment_intent_id VARCHAR\(255\)/);
+  assert.match(schema, /stripe_customer_id VARCHAR\(255\)/);
+  assert.match(schema, /CREATE TABLE stripe_webhook_events/);
+  assert.match(schema, /CREATE TABLE email_logs/);
 });
