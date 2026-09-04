@@ -2,11 +2,11 @@
 
 > **V4 ONLY — CURRENT SOURCE OF TRUTH**
 >
-> This README describes the approved V4 application at `https://v4.atomglobal.com/`. Do not use another version/repository as a visual, deployment, database, CMS or feature reference for V4 work.
+> This README describes the approved V4 application at `https://v4.atomglobal.com/`. Do not use V5, V3, another repository, or an older preview as a deployment, database, CMS, scoring, payment, report or visual source of truth for V4 work.
 
-Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Global Consulting, including questionnaire, CMS/Admin, Lite/Full reports, Stripe payments, UAT no-payment control, PDF/email delivery, analytics, affiliates and audit history.
+Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Global Consulting, including questionnaire, CMS/Admin, Lite/Full reports, Stripe payments, UAT no-payment control, PDF/email delivery, analytics, affiliates, commitments and audit history.
 
-## Current V4 baseline — 3 September 2026
+## Current V4 baseline — 4 September 2026
 
 | Item | Current V4 value |
 |---|---|
@@ -14,18 +14,15 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Server-verified live application commit** | `f529c5972b750ba9f94f5e1e3e41f1a46bc8babb` |
-| **Latest accepted V4 code commit** | `f529c5972b750ba9f94f5e1e3e41f1a46bc8babb` |
-| Current live Git backup branch | `v4-live-backup-20260903-f529c59` |
-| Accepted-code Git backup branch | `v4-accepted-backup-20260903-f529c59` |
-| Previous accepted-code backup | `v4-live-backup-20260903-d32aedf` |
-| Earlier live backup | `v4-live-backup-20260903-0e7966a` |
-| Pre-change Git backup | `v4-prechange-backup-20260903-3c21f04` |
-| Confirmed pre-change server backup | `/var/backups/growth-alignment-v4/prechange-20260903-042350` |
-| Latest full server backup | pending final path/validation output |
+| **Server-verified live application commit** | `ec939068e4b3ee36dd7fa79922de8a3faa80921d` |
+| Latest Full Report hero feature commit | `ad911f651b51d13ca9a6bd700b970a1185a654a1` |
+| Full Report hero deployment status | **Git only / pending final gate and deployment** |
+| Current pre-hero Git safety branch | `v4-pre-full-report-meter-20260904-ec93906` |
+| Earlier live/payment safety branch | `v4-live-backup-20260904-9e99467` |
+| Confirmed older full server backup | `/var/backups/growth-alignment-v4/prechange-20260903-042350` |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
 | Releases | `/var/www/v4.atomglobal.com/releases` |
-| Active release | `/var/www/v4.atomglobal.com/current` |
+| Active release symlink | `/var/www/v4.atomglobal.com/current` |
 | Environment | `/etc/growth-alignment/v4.env` |
 | Database | `growth_alignment_v4` |
 | Persistent storage | `/var/lib/growth-alignment-v4` |
@@ -33,143 +30,98 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Cron | `/etc/cron.d/growth-alignment-v4` |
 | Web server | Apache + PHP 8.3-FPM |
 
-> Documentation commits may be newer than the deployed application. The authoritative production runtime marker is `/var/www/v4.atomglobal.com/deployed-commit.txt`.
+The live `ec939068...` release was deployed successfully through the V4 Apache deployer. Production health returned `status: ok` with database, migrations, storage, Stripe, Stripe webhook configuration, email and cron healthy. `feedbackGitHub:false` remains optional and is not a launch blocker.
 
-The current V4 release passed **75/75 frontend tests**, the Vite production build, and clean PHP syntax for `backend/src/Services/PdfService.php` before deployment.
+The live release passed **80/80 frontend tests** before deployment. The newer Full Report web/PDF hero parity change adds another dedicated regression test and must pass the complete gate before deployment.
 
-The deployment completed successfully through the V4 Apache release process. Production health returned `status: ok` with database, migrations, storage, Stripe, Stripe webhook, email and cron healthy. Background processing was verified healthy and email queue items **300, 301 and 302** were sent during the deploy cycle. `feedbackGitHub:false` remains optional and is not a launch blocker.
+> The authoritative live code is the target of `/var/www/v4.atomglobal.com/current`. `/var/www/v4.atomglobal.com/deployed-commit.txt` should match it. The deploy rollback now restores both the live symlink and the previous commit marker if a post-switch health check fails.
 
-## Approved changes — 2–3 September 2026
+## Approved Sept 4 payment reliability state
 
-### Admin UAT No-Payment visibility
+The real Pay-by-Card flow has been tested with live Stripe transactions.
 
-Admin uses `system.cash_on_delivery_enabled` as the authoritative UAT override. When disabled, the `UAT Test — No Payment` button and explanatory text must be absent. When explicitly enabled for controlled client testing, the no-payment UAT path may appear.
+Approved behavior:
 
-Primary fix:
+1. Stripe Checkout receives the payment.
+2. The signed Stripe webhook remains the primary fulfilment path.
+3. If the webhook is delayed or missed, V4 securely retrieves that exact Checkout Session directly from Stripe.
+4. V4 only marks the payment paid when Stripe reports `payment_status = paid` and the Checkout metadata matches the recorded assessment session and `payment_purpose = full_report`.
+5. Payment details are stored in `payments`, including amount, currency, Payment Intent and paid timestamp.
+6. The generated Full Report is unlocked.
+7. A fresh secure report token/URL is stored.
+8. Customer payment-confirmation and `paid_report_ready` emails are queued exactly once.
+9. The PDF is generated and attached to the Full Report email.
+10. An administrator `payment_paid` notification event is recorded.
+11. The scheduled background process also reconciles recent `checkout_started` Full Report payments, so fulfilment does not depend on the customer keeping the success page open.
 
-`183027dc9ceefb156d0cad53b52664eb4b5d43b4`
+The customer success screen now shows a processing state with **“Please don’t close this page”**, percentage progress, and automatically opens the Full Report when fulfilment reaches 100%.
 
-### Personal checkout coffee value banner
+### Live payment burn-in evidence
 
-Final approved Personal-only wording:
+Payment ID `44` was recovered from `checkout_started` to `paid` by verified Stripe reconciliation. The Full Report was unlocked, the PDF was generated, the PDF email was sent with a provider message ID, and the administrator notification was recorded.
 
-`For less than a cup of coffee, find out more about yourself! ✨`
+A second fresh real-card test, Payment ID `45`, also reached `paid`, stored the Payment Intent, unlocked the Full Report, created a secure report URL, queued the PDF Full Report email and recorded the administrator notification.
 
-Accepted treatment:
+A separate operational issue remains: the tested Checkout Sessions did not appear in `stripe_webhook_events`, which indicates the Stripe Dashboard webhook endpoint/delivery should still be reviewed. V4 is protected by the direct Stripe reconciliation and scheduled fallback, but the webhook configuration should still be corrected.
 
-- Personal assessment only;
-- separate highlighted banner above the dark checkout panel;
-- green-tinted background and stronger left accent;
-- lively Libre Caslon Display typography;
-- color-emoji fallbacks where supported;
-- responsive desktop/mobile spacing;
-- Stripe/UAT/report logic unchanged.
+## Approved Full Report visual state
 
-Key commits:
+### Overall result hero — website and PDF parity
 
-- `7bf9eeb0106c14b5be7f341a3ccacef0d1d0985c` — green banner treatment
-- `3c31cf6597002bbde3641867abf6bf778d3d0d7c` — final wording and sparkle
-- `33b75de6b905ec3f650af5ad5e5bb17b7468dc85` — lively typography
-- `ecf57b8273cbbd74e4e37f3fc29c225dd9c6b082` — regression test aligned to final copy
+The approved V4 Full Report direction uses one readable premium result card for both website and generated PDF.
 
-### Mobile autosave race-condition fix
+Required layout:
 
-Rapid answering no longer allows an older failed save to leave a stale `Load failed` message after a newer save succeeds. Autosaves are serialized and the latest successful save clears stale errors.
+- overall score uses the same **0–250** result value on web and PDF;
+- `150` / `Out of 250` style score presentation is inside a dedicated centered score panel;
+- the Head-led ↔ Heart-led meter sits **directly below the score inside the same score panel**;
+- the meter labels show `Head-led`, the current `x/250`, and `Heart-led`;
+- the score/meter panel is centered and visually contained inside the result card;
+- `Your alignment pattern` and the explanatory narrative remain beside the score panel on desktop;
+- mobile stacks cleanly without moving the meter outside the score panel;
+- text contrast must remain clearly readable;
+- Personal and Professional Full Reports share the same structural rule;
+- Lite Report styling is not changed by the Full Report hero override.
 
-Key commits:
+Feature/parity commits:
 
-- `03d3e998e4ee9f97ef734de06e290d934e5ddbb4`
-- `d73684abf095063894b1dd90870a8ce3d2d37dc5`
+- `c4edad01bcaf50ee07ca58a4367ba62223af7877` — add V4 Full Report result hero styling
+- `46002f79f5c61897f91a974bd31e2c446e051197` — load the V4 Full Report hero stylesheet
+- `a76e6298348b2982d1db7bd1a7b9e9e05ffa368d` — align PDF overall result hero with website structure
+- `ad911f651b51d13ca9a6bd700b970a1185a654a1` — guard Full Report website/PDF hero parity
 
-### Halfway and completion milestones
+This feature is currently **committed to Git but not yet confirmed deployed**. Run the full gate before deploying.
 
-Halfway and completion feedback use approved lively milestone cards with stronger typography, gold accents, restrained animation, reduced-motion support and mobile-specific sizing.
+### 10-area score breakdown
 
-Approved correction:
+The radar visual is not part of approved V4.
 
-`4a31759fdc7b2aa28bef636167699991c152f1f4`
+Approved semantics:
 
-### Executive Summary score bars
+- 10 areas, bars only, no radar;
+- each area score is 5–25;
+- `5 = more Head-led`;
+- `15 = balanced`;
+- `25 = more Heart-led`;
+- bar normalization is `(value - 5) / 20`;
+- browser and PDF use the same score meaning;
+- no A–J markers.
 
-The Executive Summary Highest 3 / Lowest 3 items always display visible progress bars.
+The Executive Summary Highest 3 / Lowest 3 also uses visible proportional bars.
 
-Accepted behavior:
+## Development commitment behavior
 
-- each item shows area name and `x/25`;
-- scale labels remain `5 · Head-led`, `15 · Balanced`, `25 · Heart-led`;
-- the full-width pale track remains visible;
-- the filled bar remains visible and proportional to the 5–25 scale;
-- no ranking or scoring logic changes.
+The Full Report commitment box is persistent server-side functionality.
 
-Implementation/regression commits:
+When the participant selects **Save my commitment**:
 
-- `17eae9d80ceccd2625f29b402e837a87f24e42a0`
-- `d32aedf31f488374e023655bed2eba6e3e1b6fec`
+- the text is stored in `report_commitments`;
+- it is linked to the specific `generated_report_id`;
+- the 90-day/check-in date is stored with it;
+- reopening the same private Full Report retrieves the saved commitment;
+- PDF generation reads the same commitment table and includes the saved commitment/check-in date when the PDF is generated or regenerated after the save.
 
-### Full 10-area score breakdown — radar removed
-
-The radar visual is no longer part of the approved V4 Full Development Report. All ten assessment areas now use the same clear progress-bar language as the Executive Summary.
-
-Approved browser treatment:
-
-- heading: **Your 10-area score breakdown**;
-- no radar SVG;
-- no A–J markers;
-- two columns on desktop, five areas per column;
-- each area shows its full name and `x/25` value;
-- every area uses a visible horizontal progress bar;
-- all bars use the same correct **5–25 normalization**;
-- interpretation remains **5 = more Head-led, 15 = balanced, 25 = more Heart-led**;
-- mobile collapses to a clean single-column layout;
-- report scoring and business logic are unchanged.
-
-Approved PDF treatment:
-
-- generated PDF contains the same ten score areas and 5–15–25 scale;
-- no radar SVG is generated;
-- two-column progress-bar layout mirrors the browser meaning;
-- browser/PDF parity is covered by regression tests.
-
-Change history:
-
-- `fe955ba3226a686af102c0b3ab52ce2810455a59` — replace browser radar with full 10-area score bars
-- `e985a54aa0d040261393dd0179e2953fa20c4306` — style 10-area breakdown like Executive Summary
-- `cf62459ee4da5ad64b8d7473a111ce9afabf1679` — match generated PDF to bar-only breakdown
-- `8d043598de254b21ba543e800e4eb3840034a797` — browser/PDF bar-breakdown parity test
-- `f529c5972b750ba9f94f5e1e3e41f1a46bc8babb` — update legacy scope regression test to approved bar-only design
-
-The **approved and server-verified live V4 bar-only report baseline** is:
-
-`f529c5972b750ba9f94f5e1e3e41f1a46bc8babb`
-
-## Approved visual state
-
-The approved V4 presentation includes:
-
-- desktop split layout: visual panel left, application content right;
-- Atom Global public logo in the right/content panel;
-- left visual headline/support copy positioned bottom-left on desktop;
-- landing stage (`version`) intentionally uses `/media/stages/reflection-portrait.png` when no CMS media assignment exists;
-- inner-stage CMS/content images remain authoritative;
-- mobile responsive presentation and iOS-safe controls;
-- Personal green coffee value banner above checkout;
-- Executive Summary Highest 3 / Lowest 3 with visible score bars;
-- **10-area score breakdown uses progress bars only — no radar**;
-- browser and generated PDF use the same 5–25 score interpretation.
-
-Do not introduce obsolete hard-coded image fallbacks or compensate for valid CMS state with unrelated frontend overrides.
-
-### Critical landing-stage state
-
-```text
-stage_key: version
-desktop_media_id: NULL
-mobile_media_id: NULL
-focal_x: 52.00
-focal_y: 50.00
-```
-
-This is intentional V4 configuration.
+The commitment is not merely browser/local state.
 
 ## Current participant journey
 
@@ -193,7 +145,10 @@ Journey:
 7. completion/scoring;
 8. Lite Report;
 9. Stripe checkout or explicitly enabled UAT no-payment route;
-10. Full Report, secure link, PDF and email delivery.
+10. payment verification/reconciliation;
+11. unlocked private Full Report;
+12. PDF/email delivery;
+13. optional 90-day development commitment and later retest.
 
 ## Admin / CMS wiring
 
@@ -201,7 +156,36 @@ V4 Admin is connected to the production API/database for Dashboard, Participants
 
 CMS/database state is authoritative.
 
-## Standard V4 deployment
+Admin uses `system.cash_on_delivery_enabled` as the authoritative UAT no-payment override. When disabled, `UAT Test — No Payment` must be absent. When explicitly enabled for controlled testing, the UAT no-payment path may appear.
+
+## Approved visual/CMS state
+
+The approved V4 presentation includes:
+
+- desktop split layout: visual panel left, application content right;
+- Atom Global public logo in the right/content panel;
+- left visual headline/support copy positioned bottom-left on desktop;
+- landing stage `version` intentionally uses `/media/stages/reflection-portrait.png` when no CMS media assignment exists;
+- inner-stage CMS/content images remain authoritative;
+- mobile responsive presentation and iOS-safe controls;
+- Personal value banner above checkout;
+- Executive Summary Highest 3 / Lowest 3 with visible score bars;
+- 10-area score breakdown uses progress bars only — no radar;
+- browser and generated PDF use the same score interpretation and Full Report overall-result hierarchy.
+
+Critical landing-stage state:
+
+```text
+stage_key: version
+desktop_media_id: NULL
+mobile_media_id: NULL
+focal_x: 52.00
+focal_y: 50.00
+```
+
+Do not introduce obsolete hard-coded image fallbacks or compensate for valid CMS state with unrelated frontend overrides.
+
+## Standard V4 pre-deployment gate
 
 **Apache only.**
 
@@ -212,71 +196,84 @@ git fetch origin
 git checkout production-readiness-v4-mobile-final-20260902
 git reset --hard origin/production-readiness-v4-mobile-final-20260902
 
+git rev-parse HEAD
 npm test
 npm run build
+
 php -l backend/src/Services/PdfService.php
+php -l backend/src/Payments/StripeCheckoutReconciler.php
+php -l backend/src/route-bundle.php
+php -l backend/bin/reconcile-stripe-checkouts.php
+php -l backend/bin/cron.php
+
+php backend/bin/production-report-flow-smoke-test.php
+```
+
+For the Full Report hero parity candidate, the expected frontend suite is **81 tests** after the new parity regression test is included. Do not deploy if any test, build, PHP lint or required smoke test fails.
+
+## Standard V4 deployment
+
+```bash
+cd /srv/v4.atomglobal.com/source
 
 sudo BRANCH=production-readiness-v4-mobile-final-20260902 \
   bash deploy/update-v4-apache.sh
 ```
 
+The deployer automatically creates a database dump before switching releases and runs the background processor plus health checks after the switch.
+
 ### Post-deployment verification
 
 ```bash
+echo "ACTUAL LIVE RELEASE:"
+readlink -f /var/www/v4.atomglobal.com/current
+
+echo
+echo "LIVE COMMIT MARKER:"
+cat /var/www/v4.atomglobal.com/deployed-commit.txt
+
+echo
 echo "SOURCE:"
 git rev-parse HEAD
 
-echo "LIVE:"
-cat /var/www/v4.atomglobal.com/deployed-commit.txt
-
+echo
+echo "HEALTH:"
 curl -fsS https://v4.atomglobal.com/api/health
 ```
 
-Current server-verified live marker:
-
-```text
-f529c5972b750ba9f94f5e1e3e41f1a46bc8babb
-```
+The active release path, deployed commit marker and source commit must agree after a successful deployment.
 
 ## Approved V4 backup procedure
 
-Current live Git safety branch:
+Before a meaningful production change:
+
+1. create a Git safety branch from the current accepted/live V4 commit;
+2. preserve the V4 database/CMS state with the deployment backup or an explicit validated dump;
+3. confirm the backup path before changing production;
+4. keep V4 backups under `/var/backups/growth-alignment-v4`;
+5. never treat an empty backup directory as a valid backup;
+6. verify compressed database backups with `gzip -t` when created manually;
+7. do not use a V5/V3 backup as a V4 rollback source.
+
+Current pre-Full-Report-hero Git safety branch:
 
 ```text
-v4-live-backup-20260903-f529c59
+v4-pre-full-report-meter-20260904-ec93906
 ```
 
-Accepted-code Git safety branch:
+Earlier live/payment safety branch:
 
 ```text
-v4-accepted-backup-20260903-f529c59
+v4-live-backup-20260904-9e99467
 ```
 
-Previous accepted-code backup:
-
-```text
-v4-live-backup-20260903-d32aedf
-```
-
-Earlier live backup:
-
-```text
-v4-live-backup-20260903-0e7966a
-```
-
-Pre-change Git safety branch:
-
-```text
-v4-prechange-backup-20260903-3c21f04
-```
-
-Confirmed full pre-change server backup:
+Confirmed older full server backup:
 
 ```text
 /var/backups/growth-alignment-v4/prechange-20260903-042350
 ```
 
-A new full server backup was initiated after the `f529c59...` deployment, but its final generated path and `gzip -t` validation output have not yet been captured in this record. Do not treat that new backup as confirmed until the shell prints its exact path and validation result.
+That confirmed backup contains the database dump and V4 environment snapshot and previously passed `gzip -t` validation. Newer automatic deployment dumps may exist in `/var/backups/growth-alignment-v4`; do not cite a newer dump as confirmed until its exact path is captured and validated.
 
 Git alone does not contain all live CMS/database configuration.
 
@@ -286,20 +283,28 @@ Retest at minimum:
 
 - Personal/New Joiner/Manager/Executive starts;
 - 40 questions / 10 sections;
-- halfway milestone after question 20;
-- completion milestone after question 40;
+- halfway and completion milestones;
 - rapid mobile autosave and stale-error recovery;
 - resume persistence;
 - Lite/Full Report lock;
-- Personal coffee banner and `✨` rendering;
-- Pay by card flow and UAT enabled/disabled behavior;
-- secure Full Report/PDF/email delivery;
+- Pay by Card flow;
+- payment success progress screen;
+- automatic opening of the unlocked Full Report;
+- missed-webhook reconciliation fallback;
+- secure Full Report token creation;
+- PDF generation and email attachment delivery;
+- administrator payment notification;
+- UAT no-payment enabled/disabled behavior;
+- Full Report overall score and meter remain inside the same score card;
+- Full Report score/meter is centered and readable;
+- Full Report website/PDF overall-result hierarchy matches;
 - Executive Summary six bars remain visible and proportional;
-- **10-area score breakdown shows all ten progress bars and no radar**;
-- all ten `x/25` values match their bar positions;
-- 5 / 15 / 25 Head-led / Balanced / Heart-led labels are readable;
-- generated PDF contains the same bar-only score meaning as browser;
-- mobile score breakdown stacks without overflow;
+- all 10 score-breakdown bars are present and no radar is shown;
+- all `x/25` values match their bar positions;
+- 5 / 15 / 25 labels are readable;
+- commitment save persists after reload;
+- regenerated PDF includes the saved commitment;
+- mobile Full Report stacks without overflow;
 - CMS image/logo/content edits reflect correctly.
 
 ## Change-control rule
@@ -314,8 +319,8 @@ Before any V4 production change:
 4. run the complete automated gate;
 5. review the diff;
 6. deploy with the V4 Apache deployer;
-7. verify the deployed commit and `/api/health`;
+7. verify the actual active release, deployed commit marker and `/api/health`;
 8. perform browser/mobile/PDF UAT;
 9. update this README when the accepted baseline changes.
 
-The V4 branch, production runtime marker and this README are the authoritative operational references.
+The V4 branch, production runtime, database/CMS state and this README are the authoritative operational references.
