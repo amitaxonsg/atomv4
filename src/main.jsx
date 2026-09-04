@@ -17,6 +17,7 @@ import "./questionnaire-latest.css";
 import "./uat-layout-fix.css";
 import "./v4-mobile-burnin.css";
 import "./report-flow.css";
+import "./report-editorial-v4.css";
 
 function CheckoutReturnRecovery() {
   React.useEffect(() => {
