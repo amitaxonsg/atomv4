@@ -4,6 +4,7 @@ import test from "node:test";
 
 const main = fs.readFileSync("src/main.jsx", "utf8");
 const heroCss = fs.readFileSync("src/report-full-hero-v4.css", "utf8");
+const commitmentCss = fs.readFileSync("src/report-commitment-contrast-v4.css", "utf8");
 const reportView = fs.readFileSync("src/components/assessment/ReportView.jsx", "utf8");
 const pdf = fs.readFileSync("backend/src/Services/PdfService.php", "utf8");
 
@@ -37,4 +38,12 @@ test("V4 Lite, Full and PDF follow the approved reference result-card compositio
   assert.match(pdf, /\.score span\{[^}]*text-align:center/);
   assert.match(pdf, /class=\"hero-copy\"[\s\S]*<h2>Your alignment pattern<\/h2>[\s\S]*class=\"hero-meter-labels\"[\s\S]*class=\"hero-meter\"/);
   assert.match(pdf, /Head-led<\/td><td>' \. \$overallScore \. '\/250<\/td><td>Heart-led/);
+
+  assert.match(main, /report-full-hero-v4\.css";\nimport "\.\/report-commitment-contrast-v4\.css";/);
+  assert.match(commitmentCss, /\.v4-report \.v4-commitment > h3,[\s\S]*color:\s*#ffffff\s*!important/);
+  assert.match(commitmentCss, /\.v4-report \.v4-commitment > p,[\s\S]*color:\s*#ffffff\s*!important/);
+  assert.match(commitmentCss, /\.v4-report \.v4-commitment > \.preview-note,[\s\S]*color:\s*#ffffff\s*!important/);
+  assert.match(commitmentCss, /textarea \{[\s\S]*background:\s*#ffffff\s*!important;[\s\S]*color:\s*#2b241d\s*!important/);
+  assert.match(pdf, /\.commitment-block\{[^}]*color:#fff/);
+  assert.match(pdf, /\.commitment-block h3,\.commitment-block p\{color:#fff\}/);
 });
