@@ -1,0 +1,25 @@
+/* V4 report commitment contrast guard — presentation only.
+   Keeps the dark commitment panel readable without changing report content,
+   scoring, payment, persistence or layout. Loaded after other report styles. */
+
+.v4-report .v4-commitment {
+  color: #ffffff !important;
+}
+
+.v4-report .v4-commitment > .eyebrow,
+.v4-report .v4-commitment > h3,
+.v4-report .v4-commitment > p,
+.v4-report .v4-commitment > .preview-note,
+.v4-report .v4-commitment strong {
+  color: #ffffff !important;
+}
+
+.v4-report .v4-commitment textarea {
+  background: #ffffff !important;
+  color: #2b241d !important;
+}
+
+.v4-report .v4-commitment textarea::placeholder {
+  color: #6f7780 !important;
+  opacity: 1;
+}
