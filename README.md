@@ -14,12 +14,12 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Server-verified live application commit** | `53dafea465f4f4d7d87bda97584c3646e1c1fdab` |
-| **Accepted Full Report web/PDF parity release** | `53dafea465f4f4d7d87bda97584c3646e1c1fdab` |
-| Full Report hero feature/parity guard | `ad911f651b51d13ca9a6bd700b970a1185a654a1` |
-| Full Report hero deployment status | **DEPLOYED / LIVE / HEALTHY** |
-| Verified active release | `/var/www/v4.atomglobal.com/releases/20260904094651-53dafea465f4` |
-| Current pre-hero Git safety branch | `v4-pre-full-report-meter-20260904-ec93906` |
+| **Server-verified live application commit** | `7940582a08ca0c5aafb3cc5f0c1b052ff34f630b` |
+| Lite/Full overall-result parity status | **DEPLOYED / LIVE / HEALTHY** |
+| Full Report web/PDF parity baseline | `53dafea465f4f4d7d87bda97584c3646e1c1fdab` |
+| Lite/Full result-card parity commit | `7940582a08ca0c5aafb3cc5f0c1b052ff34f630b` |
+| Pre-Lite-parity Git safety branch | `v4-pre-lite-hero-parity-20260904-0608dbc` |
+| Pre-Full-Report-hero Git safety branch | `v4-pre-full-report-meter-20260904-ec93906` |
 | Earlier live/payment safety branch | `v4-live-backup-20260904-9e99467` |
 | Confirmed older full server backup | `/var/backups/growth-alignment-v4/prechange-20260903-042350` |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
@@ -32,79 +32,61 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Cron | `/etc/cron.d/growth-alignment-v4` |
 | Web server | Apache + PHP 8.3-FPM |
 
-The live `53dafea...` release was deployed successfully through the V4 Apache deployer. The actual release symlink, `/var/www/v4.atomglobal.com/deployed-commit.txt`, and the server source checkout were verified to agree on the same application commit.
+The `7940582...` release was deployed successfully through the V4 Apache deployer. The deploy output confirmed:
 
-Production health returned `status: ok` with database, migrations, storage, Stripe, Stripe webhook configuration, email and cron healthy. `feedbackGitHub:false` remains optional and is not a launch blocker.
-
-The accepted release passed **81/81 frontend tests**, the Vite production build, clean PHP syntax for `backend/src/Services/PdfService.php`, and the guarded production Lite/Full Report smoke test. The smoke test verified temporary session creation, 40 questions, Lite Report availability, locked/full content boundaries, authorised Full Report unlock, rich Full Report content, PDF generation, cleanup and a clean database state after the test.
+- **81/81 frontend tests passed**;
+- Vite production build passed;
+- PHP syntax check passed;
+- Apache release switch completed successfully;
+- Stripe reconciliation background job ran with `0` failures;
+- administrator alert and email processors completed without failure;
+- background processing remains scheduled every five minutes;
+- production health returned `status: ok` with database, migrations, storage, Stripe, Stripe webhook configuration, email and cron healthy;
+- `feedbackGitHub:false` remains optional and is not a launch blocker.
 
 > Documentation-only commits may be newer than the deployed application. The authoritative live application is the target of `/var/www/v4.atomglobal.com/current`; `/var/www/v4.atomglobal.com/deployed-commit.txt` should match the application commit encoded in that active release.
 
-## Approved Sept 4 payment reliability state
+## Approved Lite and Full Report overall-result UI
 
-The real Pay-by-Card flow has been tested with live Stripe transactions.
+The Lite Report and Full Report website now share the same approved overall-result card structure. The generated Full Report PDF keeps the same Full Report score/meter hierarchy.
 
-Approved behavior:
+Required and deployed website behavior:
 
-1. Stripe Checkout receives the payment.
-2. The signed Stripe webhook remains the primary fulfilment path.
-3. If the webhook is delayed or missed, V4 securely retrieves that exact Checkout Session directly from Stripe.
-4. V4 only marks the payment paid when Stripe reports `payment_status = paid` and the Checkout metadata matches the recorded assessment session and `payment_purpose = full_report`.
-5. Payment details are stored in `payments`, including amount, currency, Payment Intent and paid timestamp.
-6. The generated Full Report is unlocked.
-7. A fresh secure report token/URL is stored.
-8. Customer payment-confirmation and `paid_report_ready` emails are queued exactly once.
-9. The PDF is generated and attached to the Full Report email.
-10. An administrator `payment_paid` notification event is recorded.
-11. The scheduled background process also reconciles recent `checkout_started` Full Report payments, so fulfilment does not depend on the customer keeping the success page open.
+- the overall score is shown clearly as `x` with **Out of 250**;
+- the score sits inside a dedicated result/score panel;
+- the Head-led ↔ Heart-led meter sits **directly below the score inside the same panel**;
+- the meter is centered horizontally;
+- the labels show `Head-led`, the current `x/250`, and `Heart-led`;
+- the result badge/title and supporting alignment narrative remain clearly readable;
+- desktop keeps the score/meter panel beside `Your alignment pattern` and its supporting text;
+- mobile stacks the score, meter, title and supporting text without moving the meter outside the score panel;
+- Personal and Professional tracks use the same structural rule;
+- the Lite Report and Full Report use the same overall visual language so the transition after payment feels consistent.
 
-The customer success screen shows **“Please don’t close this page”**, percentage progress, and automatically opens the Full Report when fulfilment reaches 100%.
-
-### Live payment burn-in evidence
-
-Payment ID `44` was recovered from `checkout_started` to `paid` by verified Stripe reconciliation. The Full Report was unlocked, the PDF was generated, the PDF email was sent with a provider message ID, and the administrator notification was recorded.
-
-A second fresh real-card test, Payment ID `45`, also reached `paid`, stored the Payment Intent, unlocked the Full Report, created a secure report URL, queued the PDF Full Report email and recorded the administrator notification.
-
-A separate operational issue remains: the tested Checkout Sessions did not appear in `stripe_webhook_events`, which indicates the Stripe Dashboard webhook endpoint/delivery should still be reviewed. V4 is protected by the direct Stripe reconciliation and scheduled fallback, but the webhook configuration should still be corrected.
-
-## Approved Full Report visual state
-
-### Overall result hero — website and PDF parity
-
-The V4 Full Report website and generated PDF now use the same approved overall-result structure.
-
-Required and deployed layout:
-
-- overall score uses the same **0–250** result value on web and PDF;
-- `150` / `Out of 250` style score presentation is inside a dedicated centered score panel;
-- the Head-led ↔ Heart-led meter sits **directly below the score inside the same score panel**;
-- the meter labels show `Head-led`, the current `x/250`, and `Heart-led`;
-- the score/meter panel is centered and visually contained inside the result card;
-- `Your alignment pattern` and the explanatory narrative remain beside the score panel on desktop;
-- mobile stacks cleanly without moving the meter outside the score panel;
-- text contrast remains clearly readable;
-- Personal and Professional Full Reports share the same structural rule;
-- Lite Report styling is not changed by the Full Report hero override.
-
-Feature/parity commits:
+Implementation history:
 
 - `c4edad01bcaf50ee07ca58a4367ba62223af7877` — add V4 Full Report result hero styling
-- `46002f79f5c61897f91a974bd31e2c446e051197` — load the V4 Full Report hero stylesheet
-- `a76e6298348b2982d1db7bd1a7b9e9e05ffa368d` — align PDF overall result hero with website structure
+- `46002f79f5c61897f91a974bd31e2c446e051197` — load V4 result hero stylesheet
+- `a76e6298348b2982d1db7bd1a7b9e9e05ffa368d` — align Full Report PDF overall-result hero with website structure
 - `ad911f651b51d13ca9a6bd700b970a1185a654a1` — guard Full Report website/PDF hero parity
-- `53dafea465f4f4d7d87bda97584c3646e1c1fdab` — accepted/deployed V4 release containing the parity feature and updated operational README state
+- `53dafea465f4f4d7d87bda97584c3646e1c1fdab` — accepted/deployed Full Report web/PDF parity release
+- `1792955d411182db39f36f577f5d6baf7eb66d69` — apply the same approved result-card structure to Lite and Full website reports
+- `7940582a08ca0c5aafb3cc5f0c1b052ff34f630b` — guard Lite/Full result-card meter parity and accepted live release
 
-Deployment verification:
+## Approved Full Report website/PDF parity
 
-```text
-active release: /var/www/v4.atomglobal.com/releases/20260904094651-53dafea465f4
-deployed marker: 53dafea465f4f4d7d87bda97584c3646e1c1fdab
-source:          53dafea465f4f4d7d87bda97584c3646e1c1fdab
-health:          status ok
-```
+The generated Full Report PDF uses the same overall score semantics and hierarchy as the Full Report website:
 
-### 10-area score breakdown
+- same 0–250 overall result;
+- clear `x / 250` presentation;
+- meter directly below the score;
+- Head-led / current score / Heart-led labels;
+- `Your alignment pattern` supporting narrative;
+- readable contrast and balanced visual hierarchy.
+
+Interactive website controls are naturally not part of the PDF, and pagination may differ, but the report content, score meaning and overall result hierarchy should remain aligned.
+
+## Approved 10-area score breakdown
 
 The radar visual is not part of approved V4.
 
@@ -117,9 +99,38 @@ Approved semantics:
 - `25 = more Heart-led`;
 - bar normalization is `(value - 5) / 20`;
 - browser and PDF use the same score meaning;
-- no A–J markers.
+- no A–J markers;
+- Executive Summary Highest 3 / Lowest 3 also uses visible proportional bars.
 
-The Executive Summary Highest 3 / Lowest 3 also uses visible proportional bars.
+Do not reintroduce the radar.
+
+## Approved Sept 4 payment reliability state
+
+The real Pay-by-Card flow has been tested with live Stripe transactions.
+
+Approved behavior:
+
+1. Stripe Checkout receives the payment.
+2. The signed Stripe webhook remains the primary fulfilment path.
+3. If the webhook is delayed or missed, V4 securely retrieves that exact Checkout Session directly from Stripe.
+4. V4 only marks the payment paid when Stripe reports `payment_status = paid` and Checkout metadata matches the recorded assessment session and `payment_purpose = full_report`.
+5. Payment details are stored in `payments`, including amount, currency, Payment Intent and paid timestamp.
+6. The generated Full Report is unlocked.
+7. A fresh secure report token/URL is stored.
+8. Customer payment-confirmation and `paid_report_ready` emails are queued exactly once.
+9. The PDF is generated and attached to the Full Report email.
+10. An administrator `payment_paid` notification event is recorded.
+11. Scheduled background reconciliation protects customers if the success page is closed or the webhook is delayed/missed.
+
+The customer success screen shows **Please don’t close this page**, percentage progress, and automatically opens the Full Report when fulfilment reaches 100%.
+
+### Live payment burn-in evidence
+
+Payment ID `44` was recovered from `checkout_started` to `paid` by verified Stripe reconciliation. The Full Report was unlocked, the PDF was generated, the PDF email was sent with a provider message ID, and the administrator notification was recorded.
+
+Payment ID `45` also reached `paid`, stored the Payment Intent, unlocked the Full Report, created a secure report URL, queued the PDF Full Report email and recorded the administrator notification.
+
+A separate operational issue remains: the tested Checkout Sessions did not appear in `stripe_webhook_events`, so the Stripe Dashboard endpoint/delivery should still be reviewed. The direct Stripe reconciliation and scheduled fallback protect the customer flow while that operational issue is investigated.
 
 ## Development commitment behavior
 
@@ -129,7 +140,7 @@ When the participant selects **Save my commitment**:
 
 - the text is stored in `report_commitments`;
 - it is linked to the specific `generated_report_id`;
-- the 90-day/check-in date is stored with it;
+- the check-in date is stored with it;
 - reopening the same private Full Report retrieves the saved commitment;
 - PDF generation reads the same commitment table and includes the saved commitment/check-in date when the PDF is generated or regenerated after the save.
 
@@ -160,7 +171,7 @@ Journey:
 10. payment verification/reconciliation;
 11. unlocked private Full Report;
 12. PDF/email delivery;
-13. optional 90-day development commitment and later retest.
+13. optional development commitment and later retest.
 
 ## Admin / CMS wiring
 
@@ -181,9 +192,10 @@ The approved V4 presentation includes:
 - inner-stage CMS/content images remain authoritative;
 - mobile responsive presentation and iOS-safe controls;
 - Personal value banner above checkout;
-- Executive Summary Highest 3 / Lowest 3 with visible score bars;
-- 10-area score breakdown uses progress bars only — no radar;
-- browser and generated PDF use the same score interpretation and Full Report overall-result hierarchy.
+- Lite and Full Reports share the same overall result-card structure;
+- Full Report website and PDF use the same overall score/meter hierarchy;
+- Executive Summary Highest 3 / Lowest 3 has visible score bars;
+- 10-area score breakdown uses progress bars only — no radar.
 
 Critical landing-stage state:
 
@@ -219,7 +231,7 @@ php -l backend/bin/reconcile-stripe-checkouts.php
 php -l backend/bin/cron.php
 ```
 
-For report/PDF changes, run the guarded production report smoke test with a temporary recipient address that does not already exist in `participants`:
+For report/PDF backend changes, run the guarded production report smoke test with a temporary recipient address that does not already exist in `participants`:
 
 ```bash
 php backend/bin/production-report-flow-smoke-test.php \
@@ -229,7 +241,7 @@ php backend/bin/production-report-flow-smoke-test.php \
 
 Do not add `--send-email` unless the test is intentionally meant to exercise live UAT email delivery.
 
-The accepted Full Report parity release passed **81 tests** plus the guarded production report smoke test. Do not deploy if any test, build, PHP lint or required smoke test fails.
+The current Lite/Full website result-card parity release passed **81 tests** and the Vite production build before deployment. The earlier Full Report PDF parity release also passed the guarded production report smoke test.
 
 ## Standard V4 deployment
 
@@ -240,7 +252,7 @@ sudo BRANCH=production-readiness-v4-mobile-final-20260902 \
   bash deploy/update-v4-apache.sh
 ```
 
-The deployer automatically creates a database dump before switching releases and runs the background processor plus health checks after the switch.
+The deployer automatically creates a database dump before switching releases and runs background processing plus health checks after the switch.
 
 ### Post-deployment verification
 
@@ -263,11 +275,10 @@ curl -fsS https://v4.atomglobal.com/api/health
 
 The active release path, deployed commit marker and source application commit must agree after a successful deployment.
 
-Current verified application deployment:
+Current server-verified application commit:
 
 ```text
-/var/www/v4.atomglobal.com/releases/20260904094651-53dafea465f4
-53dafea465f4f4d7d87bda97584c3646e1c1fdab
+7940582a08ca0c5aafb3cc5f0c1b052ff34f630b
 ```
 
 ## Approved V4 backup procedure
@@ -281,6 +292,12 @@ Before a meaningful production change:
 5. never treat an empty backup directory as a valid backup;
 6. verify compressed database backups with `gzip -t` when created manually;
 7. do not use a V5/V3 backup as a V4 rollback source.
+
+Pre-Lite-parity Git safety branch:
+
+```text
+v4-pre-lite-hero-parity-20260904-0608dbc
+```
 
 Pre-Full-Report-hero Git safety branch:
 
@@ -314,6 +331,10 @@ Retest at minimum:
 - rapid mobile autosave and stale-error recovery;
 - resume persistence;
 - Lite/Full Report lock;
+- Lite Report score and meter remain inside the same centered score card;
+- Full Report score and meter remain inside the same centered score card;
+- Lite and Full overall result-card structure matches;
+- Full Report website/PDF overall-result hierarchy matches;
 - Pay by Card flow;
 - payment success progress screen;
 - automatic opening of the unlocked Full Report;
@@ -322,16 +343,13 @@ Retest at minimum:
 - PDF generation and email attachment delivery;
 - administrator payment notification;
 - UAT no-payment enabled/disabled behavior;
-- Full Report overall score and meter remain inside the same score card;
-- Full Report score/meter is centered and readable;
-- Full Report website/PDF overall-result hierarchy matches;
 - Executive Summary six bars remain visible and proportional;
 - all 10 score-breakdown bars are present and no radar is shown;
 - all `x/25` values match their bar positions;
 - 5 / 15 / 25 labels are readable;
 - commitment save persists after reload;
 - regenerated PDF includes the saved commitment;
-- mobile Full Report stacks without overflow;
+- mobile reports stack without overflow;
 - CMS image/logo/content edits reflect correctly.
 
 ## Change-control rule
