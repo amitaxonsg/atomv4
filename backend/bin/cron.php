@@ -15,7 +15,9 @@ if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) exit(0);
 try {
     $commands = [
         PHP_BINARY . ' ' . escapeshellarg(__DIR__ . '/process-abandoned-surveys.php'),
+        PHP_BINARY . ' ' . escapeshellarg(__DIR__ . '/reconcile-stripe-checkouts.php') . ' 20',
         PHP_BINARY . ' ' . escapeshellarg(__DIR__ . '/generate-report-pdfs.php') . ' 25',
+        PHP_BINARY . ' ' . escapeshellarg(__DIR__ . '/process-admin-alerts.php'),
         PHP_BINARY . ' ' . escapeshellarg(__DIR__ . '/process-email-queue.php') . ' 50',
     ];
     foreach ($commands as $command) {
