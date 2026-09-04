@@ -14,9 +14,11 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Server-verified live application commit** | `ec939068e4b3ee36dd7fa79922de8a3faa80921d` |
-| Latest Full Report hero feature commit | `ad911f651b51d13ca9a6bd700b970a1185a654a1` |
-| Full Report hero deployment status | **Git only / pending final gate and deployment** |
+| **Server-verified live application commit** | `53dafea465f4f4d7d87bda97584c3646e1c1fdab` |
+| **Accepted Full Report web/PDF parity release** | `53dafea465f4f4d7d87bda97584c3646e1c1fdab` |
+| Full Report hero feature/parity guard | `ad911f651b51d13ca9a6bd700b970a1185a654a1` |
+| Full Report hero deployment status | **DEPLOYED / LIVE / HEALTHY** |
+| Verified active release | `/var/www/v4.atomglobal.com/releases/20260904094651-53dafea465f4` |
 | Current pre-hero Git safety branch | `v4-pre-full-report-meter-20260904-ec93906` |
 | Earlier live/payment safety branch | `v4-live-backup-20260904-9e99467` |
 | Confirmed older full server backup | `/var/backups/growth-alignment-v4/prechange-20260903-042350` |
@@ -30,11 +32,13 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Cron | `/etc/cron.d/growth-alignment-v4` |
 | Web server | Apache + PHP 8.3-FPM |
 
-The live `ec939068...` release was deployed successfully through the V4 Apache deployer. Production health returned `status: ok` with database, migrations, storage, Stripe, Stripe webhook configuration, email and cron healthy. `feedbackGitHub:false` remains optional and is not a launch blocker.
+The live `53dafea...` release was deployed successfully through the V4 Apache deployer. The actual release symlink, `/var/www/v4.atomglobal.com/deployed-commit.txt`, and the server source checkout were verified to agree on the same application commit.
 
-The live release passed **80/80 frontend tests** before deployment. The newer Full Report web/PDF hero parity change adds another dedicated regression test and must pass the complete gate before deployment.
+Production health returned `status: ok` with database, migrations, storage, Stripe, Stripe webhook configuration, email and cron healthy. `feedbackGitHub:false` remains optional and is not a launch blocker.
 
-> The authoritative live code is the target of `/var/www/v4.atomglobal.com/current`. `/var/www/v4.atomglobal.com/deployed-commit.txt` should match it. The deploy rollback now restores both the live symlink and the previous commit marker if a post-switch health check fails.
+The accepted release passed **81/81 frontend tests**, the Vite production build, clean PHP syntax for `backend/src/Services/PdfService.php`, and the guarded production Lite/Full Report smoke test. The smoke test verified temporary session creation, 40 questions, Lite Report availability, locked/full content boundaries, authorised Full Report unlock, rich Full Report content, PDF generation, cleanup and a clean database state after the test.
+
+> Documentation-only commits may be newer than the deployed application. The authoritative live application is the target of `/var/www/v4.atomglobal.com/current`; `/var/www/v4.atomglobal.com/deployed-commit.txt` should match the application commit encoded in that active release.
 
 ## Approved Sept 4 payment reliability state
 
@@ -54,7 +58,7 @@ Approved behavior:
 10. An administrator `payment_paid` notification event is recorded.
 11. The scheduled background process also reconciles recent `checkout_started` Full Report payments, so fulfilment does not depend on the customer keeping the success page open.
 
-The customer success screen now shows a processing state with **“Please don’t close this page”**, percentage progress, and automatically opens the Full Report when fulfilment reaches 100%.
+The customer success screen shows **“Please don’t close this page”**, percentage progress, and automatically opens the Full Report when fulfilment reaches 100%.
 
 ### Live payment burn-in evidence
 
@@ -68,9 +72,9 @@ A separate operational issue remains: the tested Checkout Sessions did not appea
 
 ### Overall result hero — website and PDF parity
 
-The approved V4 Full Report direction uses one readable premium result card for both website and generated PDF.
+The V4 Full Report website and generated PDF now use the same approved overall-result structure.
 
-Required layout:
+Required and deployed layout:
 
 - overall score uses the same **0–250** result value on web and PDF;
 - `150` / `Out of 250` style score presentation is inside a dedicated centered score panel;
@@ -79,7 +83,7 @@ Required layout:
 - the score/meter panel is centered and visually contained inside the result card;
 - `Your alignment pattern` and the explanatory narrative remain beside the score panel on desktop;
 - mobile stacks cleanly without moving the meter outside the score panel;
-- text contrast must remain clearly readable;
+- text contrast remains clearly readable;
 - Personal and Professional Full Reports share the same structural rule;
 - Lite Report styling is not changed by the Full Report hero override.
 
@@ -89,8 +93,16 @@ Feature/parity commits:
 - `46002f79f5c61897f91a974bd31e2c446e051197` — load the V4 Full Report hero stylesheet
 - `a76e6298348b2982d1db7bd1a7b9e9e05ffa368d` — align PDF overall result hero with website structure
 - `ad911f651b51d13ca9a6bd700b970a1185a654a1` — guard Full Report website/PDF hero parity
+- `53dafea465f4f4d7d87bda97584c3646e1c1fdab` — accepted/deployed V4 release containing the parity feature and updated operational README state
 
-This feature is currently **committed to Git but not yet confirmed deployed**. Run the full gate before deploying.
+Deployment verification:
+
+```text
+active release: /var/www/v4.atomglobal.com/releases/20260904094651-53dafea465f4
+deployed marker: 53dafea465f4f4d7d87bda97584c3646e1c1fdab
+source:          53dafea465f4f4d7d87bda97584c3646e1c1fdab
+health:          status ok
+```
 
 ### 10-area score breakdown
 
@@ -205,11 +217,19 @@ php -l backend/src/Payments/StripeCheckoutReconciler.php
 php -l backend/src/route-bundle.php
 php -l backend/bin/reconcile-stripe-checkouts.php
 php -l backend/bin/cron.php
-
-php backend/bin/production-report-flow-smoke-test.php
 ```
 
-For the Full Report hero parity candidate, the expected frontend suite is **81 tests** after the new parity regression test is included. Do not deploy if any test, build, PHP lint or required smoke test fails.
+For report/PDF changes, run the guarded production report smoke test with a temporary recipient address that does not already exist in `participants`:
+
+```bash
+php backend/bin/production-report-flow-smoke-test.php \
+  --confirm=RUN-PRODUCTION-REPORT-SMOKE \
+  --recipient=unused-v4-smoke@example.com
+```
+
+Do not add `--send-email` unless the test is intentionally meant to exercise live UAT email delivery.
+
+The accepted Full Report parity release passed **81 tests** plus the guarded production report smoke test. Do not deploy if any test, build, PHP lint or required smoke test fails.
 
 ## Standard V4 deployment
 
@@ -241,7 +261,14 @@ echo "HEALTH:"
 curl -fsS https://v4.atomglobal.com/api/health
 ```
 
-The active release path, deployed commit marker and source commit must agree after a successful deployment.
+The active release path, deployed commit marker and source application commit must agree after a successful deployment.
+
+Current verified application deployment:
+
+```text
+/var/www/v4.atomglobal.com/releases/20260904094651-53dafea465f4
+53dafea465f4f4d7d87bda97584c3646e1c1fdab
+```
 
 ## Approved V4 backup procedure
 
@@ -255,7 +282,7 @@ Before a meaningful production change:
 6. verify compressed database backups with `gzip -t` when created manually;
 7. do not use a V5/V3 backup as a V4 rollback source.
 
-Current pre-Full-Report-hero Git safety branch:
+Pre-Full-Report-hero Git safety branch:
 
 ```text
 v4-pre-full-report-meter-20260904-ec93906
