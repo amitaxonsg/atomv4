@@ -10,13 +10,23 @@ const pdf = fs.readFileSync("backend/src/Services/PdfService.php", "utf8");
 test("V4 Lite, Full and PDF follow the approved reference result-card composition", () => {
   assert.match(main, /report-full-hero-v4\.css/);
   assert.match(heroCss, /Lite \/ Full overall-result reference parity/);
-  assert.match(heroCss, /:has\(\.paid-report\)/);
+  assert.match(heroCss, /:has\(\.paid-report\.locked\)/);
+  assert.match(heroCss, /:has\(\.paid-report\.unlocked\)/);
+  assert.match(heroCss, /background-color:\s*#252832\s*!important/);
+  assert.match(heroCss, /background-image:[\s\S]*linear-gradient\(118deg, #1f2331/);
+  assert.match(heroCss, /background-color:\s*#2a2b36\s*!important/);
   assert.match(heroCss, /> \.report-hero > \.gauge[\s\S]*align-items:\s*center/);
   assert.match(heroCss, /> \.report-hero > \.gauge[\s\S]*justify-content:\s*center/);
+  assert.match(heroCss, /> \.report-hero > \.gauge strong[\s\S]*color:\s*#ffffff\s*!important/);
   assert.match(heroCss, /> \.report-hero > \.gauge strong[\s\S]*text-align:\s*center/);
+  assert.match(heroCss, /> \.report-hero > \.gauge > span[\s\S]*color:\s*#f7efe2\s*!important/);
   assert.match(heroCss, /> \.report-hero > \.gauge > span[\s\S]*text-align:\s*center/);
   assert.match(heroCss, /> \.report-hero > div:not\(\.gauge\)[\s\S]*flex-direction:\s*column/);
+  assert.match(heroCss, /> \.report-hero h2[\s\S]*color:\s*#f2d78f\s*!important/);
+  assert.match(heroCss, /> \.report-hero p[\s\S]*color:\s*#ffffff\s*!important/);
   assert.match(heroCss, /> \.report-hero \.v4-meter[\s\S]*width:\s*100%/);
+  assert.match(heroCss, /\.v4-meter__labels[\s\S]*color:\s*#eee7dc\s*!important/);
+  assert.match(heroCss, /\.v4-meter__track[\s\S]*background-color:\s*#62636b\s*!important/);
   assert.match(reportView, /<section className="report-hero"><AlignmentGauge score=\{summary\.total\} \/><div><h2>Your alignment pattern<\/h2><p>\{summary\.summary\}<\/p><AlignmentMeter score=\{summary\.total\} \/><\/div><\/section>/);
   assert.match(reportView, /<section className=\{`paid-report \$\{unlocked \? "unlocked" : "locked"\}`\}/);
 
