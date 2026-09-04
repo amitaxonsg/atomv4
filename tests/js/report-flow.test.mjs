@@ -3,10 +3,10 @@ import fs from "node:fs";
 import test from "node:test";
 
 const reportView = fs.readFileSync("src/components/assessment/ReportView.jsx", "utf8");
+const assessmentApp = fs.readFileSync("src/components/AssessmentAppProduction.jsx", "utf8");
 const reportCss = fs.readFileSync("src/report-flow.css", "utf8");
 const editorialCss = fs.readFileSync("src/report-editorial-v4.css", "utf8");
 const main = fs.readFileSync("src/main.jsx", "utf8");
-const paymentHandoff = fs.readFileSync("src/components/shared/PaymentSuccessHandoff.jsx", "utf8");
 const pdfService = fs.readFileSync("backend/src/Services/PdfService.php", "utf8");
 const reportService = fs.readFileSync("backend/src/Services/ReportService.php", "utf8");
 const stripeService = fs.readFileSync("backend/src/Payments/StripeService.php", "utf8");
@@ -50,10 +50,6 @@ test("participant report shows safe Stripe readiness and full CMS schema", () =>
   assert.match(reportCss, /report-hero[\s\S]*radial-gradient/);
   assert.match(reportCss, /report-card:first-child li:first-child[\s\S]*grid-column:\s*1 \/ -1/);
   assert.match(main, /report-editorial-v4\.css/);
-  assert.match(main, /PaymentSuccessHandoff/);
-  assert.match(paymentHandoff, /\/api\/payments\/status\?checkout=/);
-  assert.match(paymentHandoff, /reportReady/);
-  assert.match(paymentHandoff, /window\.location\.replace\(result\.reportUrl\)/);
   assert.match(editorialCss, /V4 Full Development Report editorial refresh/);
   assert.match(editorialCss, /v4-report:has\(\.paid-report\.unlocked\)/);
   assert.match(editorialCss, /--editorial-red/);
@@ -111,6 +107,10 @@ test("database audit and smoke test cover locked unlock and PDF lifecycle", () =
   assert.match(routeBundle, /GET', '\/api\/payments\/status/);
   assert.match(routeBundle, /stripe_checkout_session_id = \?/);
   assert.match(routeBundle, /reportReady/);
+  assert.match(assessmentApp, /\/api\/payments\/status\?checkout=/);
+  assert.match(assessmentApp, /Preparing Full Report…/);
+  assert.match(assessmentApp, /Open Full Report/);
+  assert.match(assessmentApp, /resolvedReportUrl/);
   assert.match(mailProcessor, /addPaidReportAttachment/);
   assert.match(mailProcessor, /Growth-Alignment-Full-Development-Report\.pdf/);
   assert.match(schema, /CREATE TABLE payments/);
