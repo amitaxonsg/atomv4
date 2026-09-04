@@ -29,9 +29,7 @@ $router->add('GET', '/api/payments/status', function (Request $request) use ($db
     );
     if (!$payment) return Response::error('Checkout reference was not found.', 404);
 
-    $metadata = json_decode((string) ($payment['metadata_json'] ?? '{}'), true) ?: [];
-    $reportUrl = trim((string) ($metadata['reportUrl'] ?? ''));
-    if ($payment['status'] === 'checkout_started' || ($payment['status'] === 'paid' && $reportUrl === '')) {
+    if (in_array($payment['status'], ['checkout_started', 'paid'], true)) {
         try {
             $reconciler = new StripeCheckoutReconciler($db, $container['settings'], $container['reports'], $config);
             $reconciler->reconcile($checkout);
@@ -43,11 +41,11 @@ $router->add('GET', '/api/payments/status', function (Request $request) use ($db
             'SELECT id, status, paid_at, metadata_json FROM payments WHERE provider = ? AND stripe_checkout_session_id = ? LIMIT 1',
             ['stripe', $checkout]
         ) ?: $payment;
-        $metadata = json_decode((string) ($payment['metadata_json'] ?? '{}'), true) ?: [];
-        $reportUrl = trim((string) ($metadata['reportUrl'] ?? ''));
     }
 
+    $metadata = json_decode((string) ($payment['metadata_json'] ?? '{}'), true) ?: [];
     $paid = $payment['status'] === 'paid';
+    $reportUrl = $paid ? trim((string) ($metadata['reportUrl'] ?? '')) : '';
     $reportId = (int) ($metadata['reportId'] ?? 0);
     $reportReady = $paid && $reportUrl !== '' && $reportId > 0;
     $emailStatus = null;
