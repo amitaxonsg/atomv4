@@ -56,6 +56,8 @@ test("V4 missed webhooks are recovered by the scheduled Stripe reconciliation ga
   assert.match(reconcileCron, /payment_purpose/);
   assert.match(reconcileCron, /full_report/);
   assert.match(reconcileCron, /payment_paid/);
+  assert.match(reconcileCron, /CAST\(n\.entity_id AS UNSIGNED\) = p\.id/);
+  assert.doesNotMatch(reconcileCron, /n\.entity_id = CAST\(p\.id AS CHAR\)/);
   assert.match(reconcileCron, /reconcile\(\$checkoutId\)/);
   assert.match(cron, /reconcile-stripe-checkouts\.php/);
   assert.match(cron, /reconcile-stripe-checkouts\.php[\s\S]*generate-report-pdfs\.php[\s\S]*process-admin-alerts\.php[\s\S]*process-email-queue\.php/);
