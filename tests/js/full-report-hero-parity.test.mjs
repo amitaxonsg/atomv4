@@ -7,15 +7,18 @@ const heroCss = fs.readFileSync("src/report-full-hero-v4.css", "utf8");
 const reportView = fs.readFileSync("src/components/assessment/ReportView.jsx", "utf8");
 const pdf = fs.readFileSync("backend/src/Services/PdfService.php", "utf8");
 
-test("V4 Full Report website and PDF keep the overall score meter inside the centered score panel", () => {
+test("V4 Lite and Full reports keep the overall score meter inside the same centered score panel", () => {
   assert.match(main, /report-full-hero-v4\.css/);
-  assert.match(heroCss, /paid-report\.unlocked/);
+  assert.match(heroCss, /Lite \/ Full report overall-result hero parity/);
+  assert.match(heroCss, /:has\(\.paid-report\)/);
   assert.match(heroCss, /report-hero::before/);
   assert.match(heroCss, /> \.report-hero \.v4-meter[\s\S]*grid-column:\s*1/);
   assert.match(heroCss, /justify-self:\s*center/);
   assert.match(heroCss, /grid-row:\s*2/);
+  assert.match(heroCss, /grid-row:\s*1 \/ 3/);
   assert.match(reportView, /<AlignmentGauge score=\{summary\.total\}/);
   assert.match(reportView, /<AlignmentMeter score=\{summary\.total\}/);
+  assert.match(reportView, /<section className=\{`paid-report \$\{unlocked \? "unlocked" : "locked"\}`\}/);
 
   assert.match(pdf, /\$overallScore = max\(0, min\(250/);
   assert.match(pdf, /\$overallWidth = max\(0, min\(100/);
