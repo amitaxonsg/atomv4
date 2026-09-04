@@ -29,6 +29,9 @@ final class StripeCheckoutReconciler
         );
         if (!$payment) throw new \RuntimeException('Stripe checkout payment record was not found.', 404);
 
+        $paymentMetadata = json_decode((string) ($payment['metadata_json'] ?? '{}'), true) ?: [];
+        if ((string) ($paymentMetadata['payment_purpose'] ?? 'full_report') !== 'full_report') return;
+
         if ($payment['status'] === 'paid') {
             $this->db->transaction(fn() => $this->ensureFulfilment((int) $payment['id']));
             return;
@@ -73,8 +76,10 @@ final class StripeCheckoutReconciler
         $payment = $this->db->fetch('SELECT * FROM payments WHERE id = ? FOR UPDATE', [$paymentId]);
         if (!$payment || $payment['status'] !== 'paid') return;
 
-        $sessionId = (int) $payment['survey_session_id'];
         $metadata = json_decode((string) ($payment['metadata_json'] ?? '{}'), true) ?: [];
+        if ((string) ($metadata['payment_purpose'] ?? 'full_report') !== 'full_report') return;
+
+        $sessionId = (int) $payment['survey_session_id'];
         $reportUrl = trim((string) ($metadata['reportUrl'] ?? ''));
         $reportId = (int) ($metadata['reportId'] ?? 0);
 
