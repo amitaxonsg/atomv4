@@ -108,8 +108,11 @@ test("database audit and smoke test cover locked unlock and PDF lifecycle", () =
   assert.match(routeBundle, /stripe_checkout_session_id = \?/);
   assert.match(routeBundle, /reportReady/);
   assert.match(assessmentApp, /\/api\/payments\/status\?checkout=/);
-  assert.match(assessmentApp, /Preparing Full Report…/);
+  assert.match(assessmentApp, /Processing Full Report…/);
+  assert.match(assessmentApp, /Please don’t close this page/);
+  assert.match(assessmentApp, /role="progressbar"/);
   assert.match(assessmentApp, /Open Full Report/);
+  assert.match(assessmentApp, /window\.location\.replace\(result\.reportUrl\)/);
   assert.match(assessmentApp, /resolvedReportUrl/);
   assert.match(mailProcessor, /addPaidReportAttachment/);
   assert.match(mailProcessor, /Growth-Alignment-Full-Development-Report\.pdf/);
