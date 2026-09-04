@@ -2,7 +2,6 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import AssessmentAppProduction from "./components/AssessmentAppProduction";
 import AppErrorBoundary from "./components/shared/AppErrorBoundary";
-import PaymentSuccessHandoff from "./components/shared/PaymentSuccessHandoff";
 import { BrandProvider } from "./branding/BrandContext";
 import "./styles.css";
 import "./brand-overrides.css";
@@ -95,7 +94,6 @@ createRoot(document.getElementById("root")).render(
       <BrandProvider>
         <AssessmentAppProduction />
         <CheckoutReturnRecovery />
-        <PaymentSuccessHandoff />
         <ServiceWorkerUpdate />
       </BrandProvider>
     </AppErrorBoundary>
