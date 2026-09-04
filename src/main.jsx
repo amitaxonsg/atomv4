@@ -19,6 +19,7 @@ import "./v4-mobile-burnin.css";
 import "./report-flow.css";
 import "./report-editorial-v4.css";
 import "./report-full-hero-v4.css";
+import "./report-commitment-contrast-v4.css";
 
 function CheckoutReturnRecovery() {
   React.useEffect(() => {
