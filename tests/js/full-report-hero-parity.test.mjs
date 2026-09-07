@@ -42,6 +42,13 @@ test("V4 Lite, Full and PDF follow the approved reference result-card compositio
   assert.match(pdf, /\.score span\{[^}]*text-align:center/);
   assert.match(pdf, /class=\"hero-copy\"[\s\S]*<h2>Your alignment pattern<\/h2>[\s\S]*class=\"hero-meter-labels\"[\s\S]*class=\"hero-meter\"/);
   assert.match(pdf, /Head-led<\/td><td>' \. \$overallScore \. '\/250<\/td><td>Heart-led/);
+  assert.match(pdf, /hero-meter span\{[^}]*background:#D8568C/);
+  assert.match(pdf, /style=\"width:' \. \$overallWidth \. '%;background-color:#D8568C\"/);
+  assert.doesNotMatch(pdf, /hero-meter span\{[^}]*linear-gradient/);
+  assert.match(pdf, /@page\{margin:10mm 10mm 12mm\}/);
+  assert.match(pdf, /score-breakdown-block,\.deep-dive-block,\.roadmap-block,\.profile-block,\.reflection-block,\.methodology-block\{page-break-inside:auto\}/);
+  assert.match(pdf, /if \(\$cards === ''\) return '';/);
+  assert.match(pdf, /deep-dive-block/);
   assert.match(pdf, /introCards\(\$strengths, \$watchouts\)/);
   assert.match(pdf, /<p class=\"block-eyebrow\">Complete report<\/p><h2>Your full development report<\/h2>/);
   assert.match(pdf, /\.executive-block\{[^}]*#CAA34B/);
