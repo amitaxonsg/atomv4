@@ -45,10 +45,18 @@ test("V4 Lite, Full and PDF follow the approved reference result-card compositio
   assert.match(pdf, /hero-meter span\{[^}]*background:#D8568C/);
   assert.match(pdf, /style=\"width:' \. \$overallWidth \. '%;background-color:#D8568C\"/);
   assert.doesNotMatch(pdf, /hero-meter span\{[^}]*linear-gradient/);
-  assert.match(pdf, /@page\{margin:10mm 10mm 12mm\}/);
-  assert.match(pdf, /score-breakdown-block,\.deep-dive-block,\.roadmap-block,\.profile-block,\.reflection-block,\.methodology-block\{page-break-inside:auto\}/);
+
+  // Dompdf pagination is packed at safe row/card boundaries instead of moving whole sections.
+  assert.match(pdf, /@page\{margin:8mm 9mm 10mm\}/);
+  assert.match(pdf, /\.executive-block,\.score-breakdown-block,\.deep-dive-block,\.roadmap-block,\.profile-block,\.reflection-block,\.methodology-block,\.upgrade-block\{page-break-inside:auto\}/);
+  assert.match(pdf, /\.summary-grid tr\{page-break-inside:avoid\}/);
+  assert.match(pdf, /\.feature-grid tr\{page-break-inside:avoid\}/);
+  assert.match(pdf, /<table class=\"summary-grid\"><thead><tr><th>Highest 3<\/th><th>Lowest 3<\/th><\/tr><\/thead><tbody>/);
+  assert.match(pdf, /executiveSummaryItem\(\$highest\[\$i\] \?\? null, \$trackKey\)/);
+  assert.match(pdf, /executiveSummaryItem\(\$lowest\[\$i\] \?\? null, \$trackKey\)/);
   assert.match(pdf, /if \(\$cards === ''\) return '';/);
   assert.match(pdf, /deep-dive-block/);
+
   assert.match(pdf, /introCards\(\$strengths, \$watchouts\)/);
   assert.match(pdf, /<p class=\"block-eyebrow\">Complete report<\/p><h2>Your full development report<\/h2>/);
   assert.match(pdf, /\.executive-block\{[^}]*#CAA34B/);
