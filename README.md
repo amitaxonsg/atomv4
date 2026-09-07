@@ -14,12 +14,15 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Last explicitly server-verified live application commit** | `09e445536055e67d0145070f2b56672ab5fb5f63` |
+| **Server-verified live application commit** | `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` |
+| **Server-verified live release** | `/var/www/v4.atomglobal.com/releases/20260907025619-0953ae66b5be` |
 | **Accepted PDF pagination/parity baseline** | `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` |
 | PDF visual UAT | **PASSED — 5-page compact report, visible overall meter, Executive Summary packed onto page 1** |
 | Previous PDF meter/space baseline | `09e445536055e67d0145070f2b56672ab5fb5f63` |
 | Reference website/PDF parity baseline | `0b7ff92370d01e6cb2adb0bb9b598bd0c250e9e0` |
 | Commitment contrast/readability baseline | `7e4d89ec30fa13f1b14c2bea938189c89482d7da` |
+| **Latest confirmed full pre-change backup** | `/var/backups/growth-alignment-v4/prechange-20260907T092220Z` |
+| Latest Git safety branch | `v4-prechange-backup-20260907-1720-ab0c8dd` |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
 | Releases | `/var/www/v4.atomglobal.com/releases` |
 | Active release symlink | `/var/www/v4.atomglobal.com/current` |
@@ -29,6 +32,14 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Backups | `/var/backups/growth-alignment-v4` |
 | Cron | `/etc/cron.d/growth-alignment-v4` |
 | Web server | Apache + PHP 8.3-FPM |
+
+The 7 September pre-change verification confirmed all three runtime/source markers agree:
+
+```text
+Active release: /var/www/v4.atomglobal.com/releases/20260907025619-0953ae66b5be
+Deployed commit: 0953ae66b5be5e1206df5d4ab37fb6beed4a8571
+Source commit:   0953ae66b5be5e1206df5d4ab37fb6beed4a8571
+```
 
 > Documentation-only commits may be newer than the deployed application. `/var/www/v4.atomglobal.com/current` and `/var/www/v4.atomglobal.com/deployed-commit.txt` remain authoritative for the actual live runtime.
 
@@ -77,9 +88,9 @@ Key PDF commits:
 - `2e586aed738a685eef9c82c6039f3956c93392ff` — align V4 Full Report PDF more closely with website hierarchy
 - `0b7ff92370d01e6cb2adb0bb9b598bd0c250e9e0` — guard website/PDF parity
 - `af23a2dc867d321005e78d8e4d94acac7b6fb44c` — Dompdf-safe meter fill and compact page spacing
-- `09e445536055e67d0145070f2b56672ab5fb5f63` — guard PDF meter and space usage; last explicitly server-verified live PDF release
+- `09e445536055e67d0145070f2b56672ab5fb5f63` — guard PDF meter and space usage
 - `8596ff2cd886771f0235bb6d335e888fae231c64` — improve Executive Summary and feature pagination packing
-- `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` — guard accepted PDF pagination packing baseline
+- `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` — guard accepted PDF pagination packing baseline and current server-verified live application
 
 ## Lite / Full overall-result UI
 
@@ -214,7 +225,7 @@ php backend/bin/production-report-flow-smoke-test.php \
 
 Do not add `--send-email` unless intentionally testing live UAT email delivery.
 
-The accepted `0953ae66...` PDF pagination candidate passed:
+The accepted `0953ae66...` PDF pagination baseline passed:
 
 - **81/81 tests**;
 - Vite production build;
@@ -255,21 +266,63 @@ echo "HEALTH:"
 curl -fsS https://v4.atomglobal.com/api/health
 ```
 
-Do not mark a candidate as server-verified live until the active release / deployed marker is explicitly confirmed.
+Current server-verified application commit:
+
+```text
+0953ae66b5be5e1206df5d4ab37fb6beed4a8571
+```
 
 ## Approved V4 backup procedure
 
 Before a meaningful production change:
 
-1. create a Git safety branch from the current accepted/live V4 commit;
+1. create a Git safety branch from the current V4 branch head;
 2. preserve V4 database/CMS state with the deployment backup or an explicit validated dump;
-3. confirm the backup path before changing production;
-4. keep V4 backups under `/var/backups/growth-alignment-v4`;
-5. never treat an empty backup directory as valid;
-6. verify compressed database backups with `gzip -t` when created manually;
-7. never use V5/V3 as a V4 rollback source.
+3. preserve the V4 environment, active-release marker, deployed commit marker and persistent storage when taking a full pre-change backup;
+4. confirm the backup path before changing production;
+5. keep V4 backups under `/var/backups/growth-alignment-v4`;
+6. never treat an empty backup directory as valid;
+7. verify compressed database/storage backups with `gzip -t` when created manually;
+8. never use V5/V3 as a V4 rollback source.
 
-Current relevant Git safety branches:
+### Confirmed full pre-change backup — 7 September 2026
+
+Backup directory:
+
+```text
+/var/backups/growth-alignment-v4/prechange-20260907T092220Z
+```
+
+Git safety branch created before the next change set:
+
+```text
+v4-prechange-backup-20260907-1720-ab0c8dd
+```
+
+The backup was created under strict shell error handling and reached `V4 BACKUP COMPLETE` after both archive validation commands, so the database and storage archives passed `gzip -t`.
+
+Confirmed contents include:
+
+```text
+current-release.txt
+deployed-commit.txt
+growth-alignment-v4              # cron/config marker copy
+growth-alignment-v4-storage.tar.gz
+growth_alignment_v4.sql.gz
+source-commit.txt
+v4.env
+```
+
+Captured sizes at backup time:
+
+```text
+growth-alignment-v4-storage.tar.gz  29M
+growth_alignment_v4.sql.gz         1.1M
+```
+
+The backup also confirms the live release, deployed marker and source all pointed to `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` before new changes.
+
+Earlier relevant Git safety branches:
 
 ```text
 v4-pre-pdf-pagination-pack-20260907-09e4455
