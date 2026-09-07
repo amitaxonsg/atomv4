@@ -18,6 +18,8 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | **Server-verified live release** | `/var/www/v4.atomglobal.com/releases/20260907025619-0953ae66b5be` |
 | **Accepted PDF pagination/parity baseline** | `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` |
 | PDF visual UAT | **PASSED — 5-page compact report, visible overall meter, Executive Summary packed onto page 1** |
+| Highlight-only sharing implementation | `243d55f25dd1cd6bfb92e98a3145ac63dd95ad05` — Git only / pending test and deployment |
+| Highlight-only sharing regression guard | `587390ad40ded3d8f8cad90b23934d71b6ae0b70` |
 | Previous PDF meter/space baseline | `09e445536055e67d0145070f2b56672ab5fb5f63` |
 | Reference website/PDF parity baseline | `0b7ff92370d01e6cb2adb0bb9b598bd0c250e9e0` |
 | Commitment contrast/readability baseline | `7e4d89ec30fa13f1b14c2bea938189c89482d7da` |
@@ -41,7 +43,7 @@ Deployed commit: 0953ae66b5be5e1206df5d4ab37fb6beed4a8571
 Source commit:   0953ae66b5be5e1206df5d4ab37fb6beed4a8571
 ```
 
-> Documentation-only commits may be newer than the deployed application. `/var/www/v4.atomglobal.com/current` and `/var/www/v4.atomglobal.com/deployed-commit.txt` remain authoritative for the actual live runtime.
+> Documentation-only commits and Git-only candidates may be newer than the deployed application. `/var/www/v4.atomglobal.com/current` and `/var/www/v4.atomglobal.com/deployed-commit.txt` remain authoritative for the actual live runtime.
 
 ## Accepted Full Report website / PDF parity
 
@@ -103,6 +105,33 @@ Lite and Full website reports share the same approved result-card structure:
 - centered meter underneath the narrative;
 - mobile stacks cleanly;
 - Lite keeps an explicit dark fallback so white text never becomes unreadable.
+
+## Highlight-only sharing and thank-you CTA
+
+V4 has a Git-only candidate that adds the same closing thank-you/share treatment to both Lite and Full website reports.
+
+Required closing message:
+
+> **Thank you for taking the assessment. If this is helpful, please share it with someone who will benefit from taking it!**
+
+Privacy and sharing rules:
+
+- `Share highlights` is available in the report action bar and in the closing thank-you card;
+- sharing uses the native device/browser share sheet when available and falls back to copying the highlight text;
+- only Lite-safe highlights are included: track/result title, profile, overall score, alignment summary, top three strengths and development observations;
+- the shared call-to-action uses only the public site origin/home page;
+- the current private report URL is never shared;
+- Full Report content is never included in the share payload;
+- PDF/private link, written reflections, methodology, roadmap, commitments, detailed development content and payment/report tokens are excluded;
+- the previous Full Report `Copy as text` action is removed to avoid copying private Full Report content into a shareable payload;
+- private Full Report self-delivery remains available through `Email PDF to self`, `Open PDF` and `Print report`.
+
+Implementation commits:
+
+- `243d55f25dd1cd6bfb92e98a3145ac63dd95ad05` — add highlight-only share action, Lite/Full thank-you CTA and private Full Report save wording
+- `587390ad40ded3d8f8cad90b23934d71b6ae0b70` — guard that sharing is built only from Lite-safe summary fields and excludes private Full Report data
+
+This candidate must pass the automated gate and visual Lite/Full UAT before it is marked deployed/live.
 
 ## Commitment section
 
@@ -236,6 +265,8 @@ The accepted `0953ae66...` PDF pagination baseline passed:
 - clean database after smoke testing;
 - visual PDF UAT.
 
+The highlight-only sharing candidate adds one new regression test, so its expected JavaScript test count is **82**.
+
 ## Standard V4 deployment
 
 ```bash
@@ -293,7 +324,7 @@ Backup directory:
 /var/backups/growth-alignment-v4/prechange-20260907T092220Z
 ```
 
-Git safety branch created before the next change set:
+Git safety branch created before this change set:
 
 ```text
 v4-prechange-backup-20260907-1720-ab0c8dd
@@ -360,6 +391,11 @@ Retest at minimum:
 - commitment panel text remains readable;
 - saved commitment persists after reload;
 - regenerated PDF includes saved commitment;
+- `Share highlights` appears on both Lite and Full reports;
+- thank-you CTA appears at the end of both Lite and Full reports;
+- native share / clipboard fallback contains only Lite-safe highlights;
+- shared text contains the public home page, not the private report URL;
+- private Full Report/PDF/reflections/methodology/roadmap/commitment details are absent from the share payload;
 - Pay by Card flow and reconciliation fallback;
 - secure Full Report token;
 - PDF/email delivery;
