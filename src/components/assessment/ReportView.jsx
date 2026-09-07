@@ -185,6 +185,11 @@ function CoachCallToAction({ report }) {
   return <section className="report-card v4-coach"><p className="eyebrow">Optional support</p><h3>{value.coachHeading || "Talk to a Coach"}</h3><p>{value.coachBody || "Turn your report into a focused development plan with an Atom Global coach."}</p><div className="v4-coach__actions">{contacts.map(item => <a className="button button--ghost" href={`mailto:${item.email}?subject=${encodeURIComponent("Growth Alignment coaching")}`} key={item.email}>Email {item.name}</a>)}</div></section>;
 }
 
+function publicShareUrl() {
+  if (typeof window !== "undefined" && window.location?.origin) return `${window.location.origin}/`;
+  return "https://v4.atomglobal.com/";
+}
+
 function highlightShareText(report, summary) {
   const lines = [
     `Growth Alignment — ${report?.trackName || "Assessment"}`,
@@ -198,31 +203,74 @@ function highlightShareText(report, summary) {
   const observations = Array.isArray(summary.watchouts) ? summary.watchouts.slice(0, 3) : [];
   if (strengths.length) lines.push("", "Top strengths", ...strengths.map(item => `- ${textValue(item)}`));
   if (observations.length) lines.push("", "Development observations", ...observations.map(item => `- ${textValue(item)}`));
-  if (typeof window !== "undefined" && window.location?.origin) lines.push("", `Take the Growth Alignment assessment: ${window.location.origin}/`);
+  lines.push("", `Take the Growth Alignment assessment: ${publicShareUrl()}`);
   return lines.join("\n");
 }
 
-async function shareHighlights(report, summary) {
-  const text = highlightShareText(report, summary);
-  if (navigator.share) {
-    await navigator.share({ title: "Growth Alignment highlights", text });
-    return "Highlights shared.";
-  }
-  await navigator.clipboard.writeText(text);
-  return "Highlights copied — paste them into your message or social post.";
+function highlightSharePayload(report, summary) {
+  return { title: "Growth Alignment highlights", text: highlightShareText(report, summary), url: publicShareUrl() };
 }
 
-function ShareHighlightsButton({ report, summary, className = "button button--ghost" }) {
-  const [label, setLabel] = React.useState("Share highlights");
-  const share = async () => {
+async function copyHighlightText(text) {
+  if (!navigator.clipboard?.writeText) return false;
+  await navigator.clipboard.writeText(text);
+  return true;
+}
+
+function openShareWindow(url) {
+  const popup = window.open(url, "_blank", "noopener,noreferrer");
+  if (popup) popup.opener = null;
+}
+
+async function shareHighlightsTo(network, report, summary) {
+  const payload = highlightSharePayload(report, summary);
+  if (network === "facebook") {
+    copyHighlightText(payload.text).catch(() => {});
+    openShareWindow(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(payload.url)}&quote=${encodeURIComponent(payload.text)}`);
+    return "Facebook share opened. Highlights were also copied in case Facebook asks you to paste them.";
+  }
+  if (network === "linkedin") {
+    copyHighlightText(payload.text).catch(() => {});
+    openShareWindow(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(payload.url)}`);
+    return "LinkedIn share opened. Highlights were also copied so you can paste them into your post.";
+  }
+  if (network === "instagram") {
+    if (navigator.share) {
+      await navigator.share(payload);
+      return "Choose Instagram in the share sheet to send your highlights.";
+    }
+    await copyHighlightText(payload.text);
+    openShareWindow("https://www.instagram.com/");
+    return "Highlights copied. Paste them into Instagram.";
+  }
+  if (navigator.share) {
+    await navigator.share(payload);
+    return "Highlights shared.";
+  }
+  await copyHighlightText(payload.text);
+  return "Highlights copied — paste them into any social app or message.";
+}
+
+function ShareHighlightsButton({ report, summary, className = "button button--primary" }) {
+  const [open, setOpen] = React.useState(false);
+  const [message, setMessage] = React.useState("");
+  const share = async network => {
     try {
-      const message = await shareHighlights(report, summary);
-      setLabel(message.startsWith("Highlights copied") ? "Highlights copied" : "Share highlights");
+      setMessage(await shareHighlightsTo(network, report, summary));
     } catch (error) {
-      if (error?.name !== "AbortError") setLabel("Share unavailable");
+      if (error?.name !== "AbortError") setMessage("Sharing is unavailable in this browser. You can still copy the highlights and paste them into the app.");
     }
   };
-  return <button className={className} type="button" onClick={share}>{label}</button>;
+  return <div className="v4-share-highlights">
+    <button className={className} type="button" aria-expanded={open} onClick={() => setOpen(value => !value)}>Share highlights</button>
+    {open && <div className="upgrade-box__actions" role="group" aria-label="Share highlights to a platform">
+      <button className="button button--ghost" type="button" onClick={() => share("facebook")}>Facebook</button>
+      <button className="button button--ghost" type="button" onClick={() => share("linkedin")}>LinkedIn</button>
+      <button className="button button--ghost" type="button" onClick={() => share("instagram")}>Instagram</button>
+      <button className="button button--ghost" type="button" onClick={() => share("more")}>More apps</button>
+    </div>}
+    {message && <p className="preview-note" role="status">{message}</p>}
+  </div>;
 }
 
 function ThankYouShare({ report, summary }) {
@@ -231,7 +279,7 @@ function ThankYouShare({ report, summary }) {
     <h3>Thank you for taking the assessment.</h3>
     <p>If this is helpful, please share it with someone who will benefit from taking it!</p>
     <p className="preview-note"><strong>Privacy:</strong> Share highlights sends only your result title, overall score, alignment summary, top strengths and development observations. Your private Full Report, PDF, private link, reflections and detailed development content are not included.</p>
-    <ShareHighlightsButton report={report} summary={summary} className="button button--primary" />
+    <ShareHighlightsButton report={report} summary={summary} />
   </section>;
 }
 
@@ -316,7 +364,7 @@ export default function ReportView({ payload, token, onReset }) {
     } catch (error) { setCheckout({ busy: false, error: error.message }); }
   };
 
-  const actions = <>{onReset ? <button className="button button--ghost" onClick={onReset}>Start again</button> : <a className="button button--ghost" href="/">New assessment</a>}{unlocked && token && <a className="button button--ghost" href={`/api/reports/${encodeURIComponent(token)}/pdf`} target="_blank" rel="noreferrer">Open PDF</a>}<ShareHighlightsButton report={report} summary={summary} /><button className="button button--primary" onClick={() => window.print()}>Print report</button></>;
+  const actions = <>{onReset ? <button className="button button--ghost" onClick={onReset}>Start again</button> : <a className="button button--ghost" href="/">New assessment</a>}{unlocked && token && <a className="button button--ghost" href={`/api/reports/${encodeURIComponent(token)}/pdf`} target="_blank" rel="noreferrer">Open PDF</a>}<button className="button button--primary" onClick={() => window.print()}>Print report</button></>;
 
   const reportClass = report?.trackKey === "personal" ? "v4-report--personal" : "v4-report--professional";
   return <StageShell stageKey="report" current={4} actions={actions}>
