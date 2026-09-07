@@ -11,6 +11,71 @@ function textValue(value) {
   return "";
 }
 
+function safeShareHighlights(summary) {
+  return {
+    profile: textValue(summary?.profile),
+    strengths: Array.isArray(summary?.strengths) ? summary.strengths.map(textValue).filter(Boolean).slice(0, 3) : [],
+  };
+}
+
+function shareHighlightsText(summary, publicUrl) {
+  const highlights = safeShareHighlights(summary);
+  const lines = [
+    "I completed the Head–Heart Alignment assessment by Atom Global.",
+    highlights.profile ? `My current profile: ${highlights.profile}.` : "",
+    highlights.strengths.length ? `Highlights: ${highlights.strengths.join(" · ")}.` : "",
+    "Only selected highlights are shared — not my private report or answers.",
+    `Take the assessment: ${publicUrl}`,
+  ];
+  return lines.filter(Boolean).join("\n");
+}
+
+function ShareHighlights({ summary, heading }) {
+  const [message, setMessage] = React.useState("");
+  const highlights = safeShareHighlights(summary);
+  const publicUrl = typeof window === "undefined" ? "https://v4.atomglobal.com/" : `${window.location.origin}/`;
+  const shareText = shareHighlightsText(summary, publicUrl);
+
+  const copyHighlights = async () => {
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setMessage("Highlights copied. You can paste them into any social post or message.");
+      return true;
+    } catch {
+      setMessage("Copy is unavailable in this browser. You can use the highlights shown above manually.");
+      return false;
+    }
+  };
+
+  const shareLinkedIn = async () => {
+    const copied = await copyHighlights();
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(publicUrl)}`, "_blank", "noopener,noreferrer");
+    setMessage(copied ? "LinkedIn opened and your highlights were copied. Paste them into the post if needed." : "LinkedIn opened. Add only the highlights shown above to your post.");
+  };
+
+  const shareFacebook = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(publicUrl)}&quote=${encodeURIComponent(shareText)}`, "_blank", "noopener,noreferrer");
+    setMessage("Facebook sharing opened with the public assessment link and selected highlights.");
+  };
+
+  return <section className="report-card v4-share-highlights">
+    <p className="eyebrow">Optional sharing</p>
+    <h3>{heading}</h3>
+    <p>Share a small, positive snapshot of your result without exposing your private report.</p>
+    <div className="v4-share-highlights__preview">
+      {highlights.profile && <div><span>Profile</span><strong>{highlights.profile}</strong></div>}
+      {highlights.strengths.length > 0 && <div><span>Top highlights</span><ul>{highlights.strengths.map(item => <li key={item}>{item}</li>)}</ul></div>}
+    </div>
+    <div className="v4-share-actions">
+      <button type="button" className="button button--ghost" onClick={shareLinkedIn}>Share on LinkedIn</button>
+      <button type="button" className="button button--ghost" onClick={shareFacebook}>Share on Facebook</button>
+      <button type="button" className="button button--ghost" onClick={copyHighlights}>Copy highlights</button>
+    </div>
+    <p className="preview-note v4-share-highlights__privacy"><strong>Privacy:</strong> Only your profile name, top three strengths and the public assessment link are included. Your Lite Report, Full Report, PDF, scores, answers, notes, email address and private report link are never shared.</p>
+    {message && <p className="preview-note" role="status">{message}</p>}
+  </section>;
+}
+
 function ScaleBar({ score, max = 25 }) {
   const value = Math.max(0, Math.min(max, Number(score) || 0));
   const percent = (value / max) * 100;
@@ -225,7 +290,7 @@ function FullReportActions({ report, summary, content, token }) {
       setState({ message: error.message, busy: false });
     }
   };
-  return <section className="report-card"><h3>Save or share your report</h3><p>Keep a copy of this report for your development work and your three-month comparison.</p><div className="upgrade-box__actions"><button className="button button--ghost" onClick={copy}>Copy as text</button><button className="button button--ghost" disabled={!token || state.busy} onClick={email}>{state.busy ? "Queuing email…" : "Email to self"}</button></div>{state.message && <p className="preview-note" role="status">{state.message}</p>}</section>;
+  return <section className="report-card"><h3>Save your private report</h3><p>Keep a private copy of this report for your development work and your three-month comparison.</p><div className="upgrade-box__actions"><button className="button button--ghost" onClick={copy}>Copy as text</button><button className="button button--ghost" disabled={!token || state.busy} onClick={email}>{state.busy ? "Queuing email…" : "Email to self"}</button></div>{state.message && <p className="preview-note" role="status">{state.message}</p>}</section>;
 }
 
 function FullReportContent({ report, summary, content, token }) {
@@ -258,6 +323,12 @@ function FullReportContent({ report, summary, content, token }) {
     <FullReportActions report={report} summary={summary} content={content} token={token} />
     <UpgradeReasons items={content.upgradeReasons} />
     <p className="preview-note">Your private link is time-limited. Open the PDF, email it to yourself, copy it as text or print a copy for your records.</p>
+    <section className="v4-thank-you-banner">
+      <p className="eyebrow">Thank you</p>
+      <h3>Thank you for taking the assessment.</h3>
+      <p>If this is helpful, please share it with someone who will benefit from taking it!</p>
+    </section>
+    <ShareHighlights summary={summary} heading="Share your Full Report highlights" />
   </>;
 }
 
@@ -310,6 +381,7 @@ export default function ReportView({ payload, token, onReset }) {
         <div className="upgrade-box"><div><span>One-time payment</span><strong>{price}</strong><small>{report?.reportExperience?.paymentWording || "Secure payment unlocks your private Full Development Report."}</small></div><div className="upgrade-box__actions"><button className="button button--primary" disabled={!checkoutAvailable || checkout.busy} onClick={openCheckout}>{checkout.busy ? "Opening checkout…" : checkoutAvailable ? "Pay by card" : "Full Report checkout coming soon"} {checkoutAvailable && <ArrowRight />}</button>{cashOnDeliveryAvailable && <button className="button button--ghost" disabled={checkout.busy} onClick={openCashOnDelivery}>UAT Test — No Payment</button>}</div></div>
         {cashOnDeliveryAvailable && <p className="preview-note">UAT Test — No Payment is temporarily enabled for client testing. It unlocks the Full Report and queues the normal confirmation/report email with the PDF attachment without charging Stripe.</p>}
         {!checkoutAvailable && !cashOnDeliveryAvailable && <p className="preview-note">Your Lite Report is ready now. Full Report purchasing will open after Atom Global completes its secure payment configuration.</p>}
+        <ShareHighlights summary={summary} heading="Share your Lite Report highlights" />
       </>}
     </section>
     {isMockMode && <p className="preview-note">Preview mode simulates payment. Production unlocks only after a verified Stripe webhook or authorised administrator action.</p>}
