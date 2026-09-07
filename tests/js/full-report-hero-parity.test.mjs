@@ -31,19 +31,34 @@ test("V4 Lite, Full and PDF follow the approved reference result-card compositio
   assert.match(reportView, /<section className="report-hero"><AlignmentGauge score=\{summary\.total\} \/><div><h2>Your alignment pattern<\/h2><p>\{summary\.summary\}<\/p><AlignmentMeter score=\{summary\.total\} \/><\/div><\/section>/);
   assert.match(reportView, /<section className=\{`paid-report \$\{unlocked \? "unlocked" : "locked"\}`\}/);
 
+  // PDF mirrors the website Full Report hierarchy and visual language.
   assert.match(pdf, /\$overallScore = max\(0, min\(250/);
   assert.match(pdf, /\$overallWidth = max\(0, min\(100/);
+  assert.match(pdf, /class=\"brand-row\"/);
+  assert.match(pdf, /GROWTH ALIGNMENT · .* RESULT/);
+  assert.match(pdf, /this result was calculated by the published assessment version from your saved responses/);
   assert.match(pdf, /\.hero-score-cell\{[^}]*text-align:center/);
   assert.match(pdf, /\.score\{[^}]*text-align:center/);
   assert.match(pdf, /\.score span\{[^}]*text-align:center/);
   assert.match(pdf, /class=\"hero-copy\"[\s\S]*<h2>Your alignment pattern<\/h2>[\s\S]*class=\"hero-meter-labels\"[\s\S]*class=\"hero-meter\"/);
   assert.match(pdf, /Head-led<\/td><td>' \. \$overallScore \. '\/250<\/td><td>Heart-led/);
+  assert.match(pdf, /introCards\(\$strengths, \$watchouts\)/);
+  assert.match(pdf, /<p class=\"block-eyebrow\">Complete report<\/p><h2>Your full development report<\/h2>/);
+  assert.match(pdf, /\.executive-block\{[^}]*#CAA34B/);
+  assert.match(pdf, /\.score-breakdown-block\{[^}]*#3D82D8/);
+  assert.match(pdf, /\.roadmap-block\{[^}]*#CAA34B/);
+  assert.match(pdf, /\.retake-block\{[^}]*#7964D8/);
+  assert.match(pdf, /\.coach-block\{[^}]*#CAA34B/);
+  assert.match(pdf, /\.commitment-block\{[^}]*background:#27302F[^}]*color:#fff/);
+  assert.match(pdf, /<p class=\"block-eyebrow\">Make it actionable<\/p>/);
+  assert.match(pdf, /upgradeReasons\(\$content\['upgradeReasons'\] \?\? null\)/);
+  assert.ok(pdf.indexOf("renderRetakeComparison") < pdf.indexOf("executiveSummary($scores"));
+  assert.ok(pdf.indexOf("coachBlock()") < pdf.indexOf("upgradeReasons($content"));
 
   assert.match(main, /report-full-hero-v4\.css";\nimport "\.\/report-commitment-contrast-v4\.css";/);
   assert.match(commitmentCss, /\.v4-report \.v4-commitment > h3,[\s\S]*color:\s*#ffffff\s*!important/);
   assert.match(commitmentCss, /\.v4-report \.v4-commitment > p,[\s\S]*color:\s*#ffffff\s*!important/);
   assert.match(commitmentCss, /\.v4-report \.v4-commitment > \.preview-note,[\s\S]*color:\s*#ffffff\s*!important/);
   assert.match(commitmentCss, /textarea \{[\s\S]*background:\s*#ffffff\s*!important;[\s\S]*color:\s*#2b241d\s*!important/);
-  assert.match(pdf, /\.commitment-block\{[^}]*color:#fff/);
-  assert.match(pdf, /\.commitment-block h3,\.commitment-block p\{color:#fff\}/);
+  assert.match(pdf, /\.commitment-block h3,\.commitment-block p,\.commitment-block strong\{color:#fff\}/);
 });
