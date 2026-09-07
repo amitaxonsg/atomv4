@@ -14,12 +14,14 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Server-verified live application commit** | `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` |
-| **Server-verified live release** | `/var/www/v4.atomglobal.com/releases/20260907025619-0953ae66b5be` |
+| **Server-verified live application commit** | `f7d5823441b64268be9a3e5bead2558965d42de5` |
+| **Deployment status** | **DEPLOYED / LIVE / HEALTHY — 82/82 tests, build passed, Apache release updated, `/api/health` status `ok`** |
 | **Accepted PDF pagination/parity baseline** | `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` |
 | PDF visual UAT | **PASSED — 5-page compact report, visible overall meter, Executive Summary packed onto page 1** |
-| Highlight-only sharing implementation | `243d55f25dd1cd6bfb92e98a3145ac63dd95ad05` — Git only / pending test and deployment |
+| Highlight-only sharing status | **DEPLOYED / LIVE / HEALTHY** |
+| Highlight-only sharing implementation | `243d55f25dd1cd6bfb92e98a3145ac63dd95ad05` |
 | Highlight-only sharing regression guard | `587390ad40ded3d8f8cad90b23934d71b6ae0b70` |
+| Final sharing-scope test alignment / deployed head | `f7d5823441b64268be9a3e5bead2558965d42de5` |
 | Previous PDF meter/space baseline | `09e445536055e67d0145070f2b56672ab5fb5f63` |
 | Reference website/PDF parity baseline | `0b7ff92370d01e6cb2adb0bb9b598bd0c250e9e0` |
 | Commitment contrast/readability baseline | `7e4d89ec30fa13f1b14c2bea938189c89482d7da` |
@@ -35,15 +37,20 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Cron | `/etc/cron.d/growth-alignment-v4` |
 | Web server | Apache + PHP 8.3-FPM |
 
-The 7 September pre-change verification confirmed all three runtime/source markers agree:
+The deployment output for `f7d5823441b64268be9a3e5bead2558965d42de5` confirmed:
 
-```text
-Active release: /var/www/v4.atomglobal.com/releases/20260907025619-0953ae66b5be
-Deployed commit: 0953ae66b5be5e1206df5d4ab37fb6beed4a8571
-Source commit:   0953ae66b5be5e1206df5d4ab37fb6beed4a8571
-```
+- **82/82 JavaScript tests passed**;
+- Vite production build passed;
+- syntax checks passed;
+- Apache release update completed successfully;
+- Stripe checkout reconciliation ran with `0` failures;
+- administrator alert processor completed without failure;
+- email queue processor completed without failure;
+- background processing is scheduled every five minutes and verified healthy;
+- production `/api/health` returned `status: ok` with database, migrations, storage, Stripe, Stripe webhook configuration, email and cron healthy;
+- `feedbackGitHub:false` remains optional and is not a launch blocker.
 
-> Documentation-only commits and Git-only candidates may be newer than the deployed application. `/var/www/v4.atomglobal.com/current` and `/var/www/v4.atomglobal.com/deployed-commit.txt` remain authoritative for the actual live runtime.
+> Documentation-only commits may be newer than the deployed application. `/var/www/v4.atomglobal.com/current` and `/var/www/v4.atomglobal.com/deployed-commit.txt` remain authoritative for the actual live runtime.
 
 ## Accepted Full Report website / PDF parity
 
@@ -92,7 +99,7 @@ Key PDF commits:
 - `af23a2dc867d321005e78d8e4d94acac7b6fb44c` — Dompdf-safe meter fill and compact page spacing
 - `09e445536055e67d0145070f2b56672ab5fb5f63` — guard PDF meter and space usage
 - `8596ff2cd886771f0235bb6d335e888fae231c64` — improve Executive Summary and feature pagination packing
-- `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` — guard accepted PDF pagination packing baseline and current server-verified live application
+- `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` — guard accepted PDF pagination packing baseline
 
 ## Lite / Full overall-result UI
 
@@ -108,7 +115,7 @@ Lite and Full website reports share the same approved result-card structure:
 
 ## Highlight-only sharing and thank-you CTA
 
-V4 has a Git-only candidate that adds the same closing thank-you/share treatment to both Lite and Full website reports.
+The closing thank-you/share treatment is now deployed on both Lite and Full website reports.
 
 Required closing message:
 
@@ -130,8 +137,9 @@ Implementation commits:
 
 - `243d55f25dd1cd6bfb92e98a3145ac63dd95ad05` — add highlight-only share action, Lite/Full thank-you CTA and private Full Report save wording
 - `587390ad40ded3d8f8cad90b23934d71b6ae0b70` — guard that sharing is built only from Lite-safe summary fields and excludes private Full Report data
+- `f7d5823441b64268be9a3e5bead2558965d42de5` — align legacy scope guard with highlights-only sharing and accepted deployed head
 
-This candidate must pass the automated gate and visual Lite/Full UAT before it is marked deployed/live.
+The deployed release passed **82/82 tests** and a successful production build before Apache switched the release.
 
 ## Commitment section
 
@@ -254,18 +262,7 @@ php backend/bin/production-report-flow-smoke-test.php \
 
 Do not add `--send-email` unless intentionally testing live UAT email delivery.
 
-The accepted `0953ae66...` PDF pagination baseline passed:
-
-- **81/81 tests**;
-- Vite production build;
-- `PdfService.php` syntax check;
-- guarded production Lite/Full Report smoke test;
-- PDF generation;
-- temporary test cleanup;
-- clean database after smoke testing;
-- visual PDF UAT.
-
-The highlight-only sharing candidate adds one new regression test, so its expected JavaScript test count is **82**.
+Current expected JavaScript gate is **82 tests**.
 
 ## Standard V4 deployment
 
@@ -300,7 +297,7 @@ curl -fsS https://v4.atomglobal.com/api/health
 Current server-verified application commit:
 
 ```text
-0953ae66b5be5e1206df5d4ab37fb6beed4a8571
+f7d5823441b64268be9a3e5bead2558965d42de5
 ```
 
 ## Approved V4 backup procedure
@@ -351,7 +348,7 @@ growth-alignment-v4-storage.tar.gz  29M
 growth_alignment_v4.sql.gz         1.1M
 ```
 
-The backup also confirms the live release, deployed marker and source all pointed to `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` before new changes.
+The backup confirms the live release, deployed marker and source all pointed to `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` before the highlights-only sharing change set.
 
 Earlier relevant Git safety branches:
 
