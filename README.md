@@ -14,11 +14,11 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Server-verified live application commit** | `f7d5823441b64268be9a3e5bead2558965d42de5` |
+| **Server-verified live application commit** | `3c0f3730cd667e4fb942a4da87fbe90379340f74` |
 | **Accepted PDF pagination/parity baseline** | `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` |
 | PDF visual UAT | **PASSED — 5-page compact report, visible overall meter, Executive Summary packed onto page 1** |
-| Live thank-you / highlights-only sharing baseline | `f7d5823441b64268be9a3e5bead2558965d42de5` |
-| Social platform chooser implementation | `e4adbb94b83ebbb9b197459bf6fdf632a3fb2ba0` — Git only / pending test and deployment |
+| Live thank-you / highlights-only sharing baseline | `3c0f3730cd667e4fb942a4da87fbe90379340f74` |
+| Social platform chooser implementation | `e4adbb94b83ebbb9b197459bf6fdf632a3fb2ba0` — **DEPLOYED / LIVE / HEALTHY** |
 | Social platform chooser regression guard | `95a1850e1d7243cac41aeb3e7caf3f62e5d62b27` |
 | Latest social-share safety branch | `v4-pre-share-platform-menu-20260907-6d27e07` |
 | Commitment contrast/readability baseline | `7e4d89ec30fa13f1b14c2bea938189c89482d7da` |
@@ -34,9 +34,9 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Cron | `/etc/cron.d/growth-alignment-v4` |
 | Web server | Apache + PHP 8.3-FPM |
 
-The `f7d58234...` V4 deployment was confirmed healthy with **82/82 tests**, successful Vite build, successful Apache release switch, healthy five-minute background processing, and `/api/health` returning `status: ok`.
+The `3c0f3730...` V4 deployment was confirmed healthy with **82/82 tests**, successful Vite build, successful Apache release switch, healthy five-minute background processing, and `/api/health` returning `status: ok`. The post-deploy background run also processed two queued email items successfully (`532` and `533`).
 
-> Documentation-only commits and Git-only candidates may be newer than the deployed application. `/var/www/v4.atomglobal.com/current` and `/var/www/v4.atomglobal.com/deployed-commit.txt` remain authoritative for the actual live runtime.
+> Documentation-only commits may be newer than the deployed application. `/var/www/v4.atomglobal.com/current` and `/var/www/v4.atomglobal.com/deployed-commit.txt` remain authoritative for the actual live runtime.
 
 ## Accepted Full Report website / PDF parity
 
@@ -92,7 +92,7 @@ Lite and Full website reports share the same approved result-card structure:
 
 ## Highlight-only sharing and thank-you CTA
 
-The deployed `f7d58234...` baseline adds the same closing thank-you/share treatment to both Lite and Full website reports.
+The deployed `3c0f3730...` baseline adds the same closing thank-you/share treatment to both Lite and Full website reports.
 
 Required closing message:
 
@@ -108,9 +108,9 @@ Privacy rules:
 - the previous Full Report `Copy as text` action remains removed;
 - private Full Report self-delivery remains available through `Email PDF to self`, `Open PDF` and `Print report`.
 
-### Social-platform chooser — Git-only candidate
+### Social-platform chooser — deployed/live
 
-The candidate starting at `e4adbb94b83ebbb9b197459bf6fdf632a3fb2ba0` changes only the sharing presentation/dispatch while preserving the privacy scope above.
+The deployed social-platform chooser preserves the privacy scope above.
 
 Required behavior:
 
@@ -127,11 +127,10 @@ Implementation commits:
 
 - `243d55f25dd1cd6bfb92e98a3145ac63dd95ad05` — initial highlight-only sharing + thank-you CTA
 - `587390ad40ded3d8f8cad90b23934d71b6ae0b70` — initial privacy regression guard
-- `f7d5823441b64268be9a3e5bead2558965d42de5` — stale legacy sharing test corrected; deployed/live baseline
+- `f7d5823441b64268be9a3e5bead2558965d42de5` — stale legacy sharing test corrected; earlier live baseline
 - `e4adbb94b83ebbb9b197459bf6fdf632a3fb2ba0` — remove action-bar share button and add social platform chooser
 - `95a1850e1d7243cac41aeb3e7caf3f62e5d62b27` — guard platform choices and action-bar removal
-
-The social-platform chooser remains **Git only / pending automated gate and deployment** until server output confirms otherwise.
+- `3c0f3730cd667e4fb942a4da87fbe90379340f74` — **server-verified live social-platform chooser baseline**
 
 ## Commitment section
 
@@ -254,7 +253,7 @@ php backend/bin/production-report-flow-smoke-test.php \
 
 Do not add `--send-email` unless intentionally testing live UAT email delivery.
 
-The social-sharing candidate does not change backend/PDF logic. Expected JavaScript gate remains:
+Current JavaScript gate:
 
 ```text
 tests 82
@@ -292,10 +291,10 @@ echo "HEALTH:"
 curl -fsS https://v4.atomglobal.com/api/health
 ```
 
-Current server-verified application commit before this candidate is deployed:
+Current server-verified application commit:
 
 ```text
-f7d5823441b64268be9a3e5bead2558965d42de5
+3c0f3730cd667e4fb942a4da87fbe90379340f74
 ```
 
 ## Approved V4 backup procedure
