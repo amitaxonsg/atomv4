@@ -15,18 +15,15 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
 | **Server-verified live application commit** | `f7d5823441b64268be9a3e5bead2558965d42de5` |
-| **Deployment status** | **DEPLOYED / LIVE / HEALTHY — 82/82 tests, build passed, Apache release updated, `/api/health` status `ok`** |
 | **Accepted PDF pagination/parity baseline** | `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` |
 | PDF visual UAT | **PASSED — 5-page compact report, visible overall meter, Executive Summary packed onto page 1** |
-| Highlight-only sharing status | **DEPLOYED / LIVE / HEALTHY** |
-| Highlight-only sharing implementation | `243d55f25dd1cd6bfb92e98a3145ac63dd95ad05` |
-| Highlight-only sharing regression guard | `587390ad40ded3d8f8cad90b23934d71b6ae0b70` |
-| Final sharing-scope test alignment / deployed head | `f7d5823441b64268be9a3e5bead2558965d42de5` |
-| Previous PDF meter/space baseline | `09e445536055e67d0145070f2b56672ab5fb5f63` |
-| Reference website/PDF parity baseline | `0b7ff92370d01e6cb2adb0bb9b598bd0c250e9e0` |
+| Live thank-you / highlights-only sharing baseline | `f7d5823441b64268be9a3e5bead2558965d42de5` |
+| Social platform chooser implementation | `e4adbb94b83ebbb9b197459bf6fdf632a3fb2ba0` — Git only / pending test and deployment |
+| Social platform chooser regression guard | `95a1850e1d7243cac41aeb3e7caf3f62e5d62b27` |
+| Latest social-share safety branch | `v4-pre-share-platform-menu-20260907-6d27e07` |
 | Commitment contrast/readability baseline | `7e4d89ec30fa13f1b14c2bea938189c89482d7da` |
 | **Latest confirmed full pre-change backup** | `/var/backups/growth-alignment-v4/prechange-20260907T092220Z` |
-| Latest Git safety branch | `v4-prechange-backup-20260907-1720-ab0c8dd` |
+| Earlier Git safety branch | `v4-prechange-backup-20260907-1720-ab0c8dd` |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
 | Releases | `/var/www/v4.atomglobal.com/releases` |
 | Active release symlink | `/var/www/v4.atomglobal.com/current` |
@@ -37,20 +34,9 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Cron | `/etc/cron.d/growth-alignment-v4` |
 | Web server | Apache + PHP 8.3-FPM |
 
-The deployment output for `f7d5823441b64268be9a3e5bead2558965d42de5` confirmed:
+The `f7d58234...` V4 deployment was confirmed healthy with **82/82 tests**, successful Vite build, successful Apache release switch, healthy five-minute background processing, and `/api/health` returning `status: ok`.
 
-- **82/82 JavaScript tests passed**;
-- Vite production build passed;
-- syntax checks passed;
-- Apache release update completed successfully;
-- Stripe checkout reconciliation ran with `0` failures;
-- administrator alert processor completed without failure;
-- email queue processor completed without failure;
-- background processing is scheduled every five minutes and verified healthy;
-- production `/api/health` returned `status: ok` with database, migrations, storage, Stripe, Stripe webhook configuration, email and cron healthy;
-- `feedbackGitHub:false` remains optional and is not a launch blocker.
-
-> Documentation-only commits may be newer than the deployed application. `/var/www/v4.atomglobal.com/current` and `/var/www/v4.atomglobal.com/deployed-commit.txt` remain authoritative for the actual live runtime.
+> Documentation-only commits and Git-only candidates may be newer than the deployed application. `/var/www/v4.atomglobal.com/current` and `/var/www/v4.atomglobal.com/deployed-commit.txt` remain authoritative for the actual live runtime.
 
 ## Accepted Full Report website / PDF parity
 
@@ -63,7 +49,7 @@ Approved parity rules:
 - score is centered inside the left result box;
 - `YOUR ALIGNMENT PATTERN` narrative appears beside the score;
 - Head-led / current `x/250` / Heart-led meter appears below the narrative;
-- PDF overall meter must visibly render its filled portion;
+- PDF overall meter visibly renders its filled portion;
 - Top three strengths and Development observations appear as paired cards;
 - dark `Your full development report` banner is preserved;
 - Executive Summary uses Highest 3 / Lowest 3 with visible proportional bars;
@@ -92,15 +78,6 @@ Approved behavior:
 
 Visual UAT on the accepted PDF produced a compact **5-page** report with the overall meter visible and the Executive Summary beginning on page 1.
 
-Key PDF commits:
-
-- `2e586aed738a685eef9c82c6039f3956c93392ff` — align V4 Full Report PDF more closely with website hierarchy
-- `0b7ff92370d01e6cb2adb0bb9b598bd0c250e9e0` — guard website/PDF parity
-- `af23a2dc867d321005e78d8e4d94acac7b6fb44c` — Dompdf-safe meter fill and compact page spacing
-- `09e445536055e67d0145070f2b56672ab5fb5f63` — guard PDF meter and space usage
-- `8596ff2cd886771f0235bb6d335e888fae231c64` — improve Executive Summary and feature pagination packing
-- `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` — guard accepted PDF pagination packing baseline
-
 ## Lite / Full overall-result UI
 
 Lite and Full website reports share the same approved result-card structure:
@@ -115,31 +92,46 @@ Lite and Full website reports share the same approved result-card structure:
 
 ## Highlight-only sharing and thank-you CTA
 
-The closing thank-you/share treatment is now deployed on both Lite and Full website reports.
+The deployed `f7d58234...` baseline adds the same closing thank-you/share treatment to both Lite and Full website reports.
 
 Required closing message:
 
 > **Thank you for taking the assessment. If this is helpful, please share it with someone who will benefit from taking it!**
 
-Privacy and sharing rules:
+Privacy rules:
 
-- `Share highlights` is available in the report action bar and in the closing thank-you card;
-- sharing uses the native device/browser share sheet when available and falls back to copying the highlight text;
-- only Lite-safe highlights are included: track/result title, profile, overall score, alignment summary, top three strengths and development observations;
+- only Lite-safe highlights may be shared: track/result title, profile, overall score, alignment summary, top three strengths and development observations;
 - the shared call-to-action uses only the public site origin/home page;
 - the current private report URL is never shared;
 - Full Report content is never included in the share payload;
 - PDF/private link, written reflections, methodology, roadmap, commitments, detailed development content and payment/report tokens are excluded;
-- the previous Full Report `Copy as text` action is removed to avoid copying private Full Report content into a shareable payload;
+- the previous Full Report `Copy as text` action remains removed;
 - private Full Report self-delivery remains available through `Email PDF to self`, `Open PDF` and `Print report`.
+
+### Social-platform chooser — Git-only candidate
+
+The candidate starting at `e4adbb94b83ebbb9b197459bf6fdf632a3fb2ba0` changes only the sharing presentation/dispatch while preserving the privacy scope above.
+
+Required behavior:
+
+- the bottom report action bar contains **New assessment**, **Open PDF** when unlocked, and **Print report** only;
+- `Share highlights` appears only inside the closing thank-you card;
+- selecting `Share highlights` reveals **Facebook**, **LinkedIn**, **Instagram**, and **More apps** choices;
+- Facebook opens Facebook's public share endpoint with the public assessment URL and also copies the Lite-safe highlight text for paste fallback;
+- LinkedIn opens LinkedIn's public share endpoint and also copies the Lite-safe highlight text for paste fallback;
+- Instagram uses the operating system/browser native share sheet when available so the user can choose Instagram; if native share is unavailable, V4 copies the highlights and opens Instagram for manual paste;
+- `More apps` uses the native Web Share sheet when available, allowing any compatible installed app; otherwise it copies the highlights for paste;
+- no platform action receives the private report URL or Full Report content.
 
 Implementation commits:
 
-- `243d55f25dd1cd6bfb92e98a3145ac63dd95ad05` — add highlight-only share action, Lite/Full thank-you CTA and private Full Report save wording
-- `587390ad40ded3d8f8cad90b23934d71b6ae0b70` — guard that sharing is built only from Lite-safe summary fields and excludes private Full Report data
-- `f7d5823441b64268be9a3e5bead2558965d42de5` — align legacy scope guard with highlights-only sharing and accepted deployed head
+- `243d55f25dd1cd6bfb92e98a3145ac63dd95ad05` — initial highlight-only sharing + thank-you CTA
+- `587390ad40ded3d8f8cad90b23934d71b6ae0b70` — initial privacy regression guard
+- `f7d5823441b64268be9a3e5bead2558965d42de5` — stale legacy sharing test corrected; deployed/live baseline
+- `e4adbb94b83ebbb9b197459bf6fdf632a3fb2ba0` — remove action-bar share button and add social platform chooser
+- `95a1850e1d7243cac41aeb3e7caf3f62e5d62b27` — guard platform choices and action-bar removal
 
-The deployed release passed **82/82 tests** and a successful production build before Apache switched the release.
+The social-platform chooser remains **Git only / pending automated gate and deployment** until server output confirms otherwise.
 
 ## Commitment section
 
@@ -262,7 +254,13 @@ php backend/bin/production-report-flow-smoke-test.php \
 
 Do not add `--send-email` unless intentionally testing live UAT email delivery.
 
-Current expected JavaScript gate is **82 tests**.
+The social-sharing candidate does not change backend/PDF logic. Expected JavaScript gate remains:
+
+```text
+tests 82
+pass 82
+fail 0
+```
 
 ## Standard V4 deployment
 
@@ -294,7 +292,7 @@ echo "HEALTH:"
 curl -fsS https://v4.atomglobal.com/api/health
 ```
 
-Current server-verified application commit:
+Current server-verified application commit before this candidate is deployed:
 
 ```text
 f7d5823441b64268be9a3e5bead2558965d42de5
@@ -321,20 +319,21 @@ Backup directory:
 /var/backups/growth-alignment-v4/prechange-20260907T092220Z
 ```
 
-Git safety branch created before this change set:
+Git safety branches covering the current sharing changes:
 
 ```text
+v4-pre-share-platform-menu-20260907-6d27e07
 v4-prechange-backup-20260907-1720-ab0c8dd
 ```
 
-The backup was created under strict shell error handling and reached `V4 BACKUP COMPLETE` after both archive validation commands, so the database and storage archives passed `gzip -t`.
+The full backup was created under strict shell error handling and reached `V4 BACKUP COMPLETE` after both archive validation commands, so the database and storage archives passed `gzip -t`.
 
 Confirmed contents include:
 
 ```text
 current-release.txt
 deployed-commit.txt
-growth-alignment-v4              # cron/config marker copy
+growth-alignment-v4
 growth-alignment-v4-storage.tar.gz
 growth_alignment_v4.sql.gz
 source-commit.txt
@@ -348,8 +347,6 @@ growth-alignment-v4-storage.tar.gz  29M
 growth_alignment_v4.sql.gz         1.1M
 ```
 
-The backup confirms the live release, deployed marker and source all pointed to `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` before the highlights-only sharing change set.
-
 Earlier relevant Git safety branches:
 
 ```text
@@ -360,12 +357,6 @@ v4-pre-commitment-contrast-20260904
 v4-pre-lite-contrast-fix-20260904-6559a26
 v4-pre-reference-result-card-20260904
 v4-live-backup-20260904-9e99467
-```
-
-Confirmed older full server backup:
-
-```text
-/var/backups/growth-alignment-v4/prechange-20260903-042350
 ```
 
 Git alone does not contain all live CMS/database configuration.
@@ -388,8 +379,9 @@ Retest at minimum:
 - commitment panel text remains readable;
 - saved commitment persists after reload;
 - regenerated PDF includes saved commitment;
-- `Share highlights` appears on both Lite and Full reports;
-- thank-you CTA appears at the end of both Lite and Full reports;
+- action bar no longer contains `Share highlights`;
+- thank-you card contains the single `Share highlights` button;
+- Facebook, LinkedIn, Instagram and More apps choices appear after selecting it;
 - native share / clipboard fallback contains only Lite-safe highlights;
 - shared text contains the public home page, not the private report URL;
 - private Full Report/PDF/reflections/methodology/roadmap/commitment details are absent from the share payload;
