@@ -185,35 +185,58 @@ function CoachCallToAction({ report }) {
   return <section className="report-card v4-coach"><p className="eyebrow">Optional support</p><h3>{value.coachHeading || "Talk to a Coach"}</h3><p>{value.coachBody || "Turn your report into a focused development plan with an Atom Global coach."}</p><div className="v4-coach__actions">{contacts.map(item => <a className="button button--ghost" href={`mailto:${item.email}?subject=${encodeURIComponent("Growth Alignment coaching")}`} key={item.email}>Email {item.name}</a>)}</div></section>;
 }
 
-function fullReportText(report, summary, content) {
+function highlightShareText(report, summary) {
   const lines = [
-    `Growth Alignment: ${report?.trackName || "Assessment"} — Full Development Report`,
+    `Growth Alignment — ${report?.trackName || "Assessment"}`,
     `Profile: ${summary.profile}`,
     `Overall score: ${summary.total}/250`,
     "",
-    "Summary",
-    textValue(content?.summary || summary.summary),
+    "Your alignment pattern",
+    textValue(summary.summary),
   ];
-  if (Array.isArray(content?.strengths)) lines.push("", "Strengths", ...content.strengths.map(item => `- ${textValue(item)}`));
-  if (Array.isArray(content?.watchouts)) lines.push("", "Challenges and development", ...content.watchouts.map(item => `- ${textValue(item)}`));
-  if (content?.sharpestEdge?.code) lines.push("", `Sharpest Edge: ${v3AreaName(report?.trackKey, content.sharpestEdge.code, content.sharpestEdge.code)} ${content.sharpestEdge.score}/25`, content.sharpestEdge.meaning || "");
-  if (content?.growthEdge?.code) lines.push("", `Growth Edge: ${v3AreaName(report?.trackKey, content.growthEdge.code, content.growthEdge.code)} ${content.growthEdge.score}/25`, content.growthEdge.meaning || "");
-  if (Array.isArray(content?.growth)) lines.push("", "Five practical everyday actions", ...content.growth.slice(0, 5).map((item, index) => `${index + 1}. ${textValue(item)}`));
-  if (Array.isArray(content?.writtenReflections) && content.writtenReflections.length) lines.push("", "Written reflections", ...content.writtenReflections.map(item => `Q${item.questionPosition}: ${item.reflection}`));
-  if (content?.methodology && typeof content.methodology === "object") lines.push("", "Methodology and sourcing", ...Object.entries(content.methodology).map(([key, value]) => `${key}: ${textValue(value)}`));
-  return lines.filter(value => value !== undefined && value !== null).join("\n");
+  const strengths = Array.isArray(summary.strengths) ? summary.strengths.slice(0, 3) : [];
+  const observations = Array.isArray(summary.watchouts) ? summary.watchouts.slice(0, 3) : [];
+  if (strengths.length) lines.push("", "Top strengths", ...strengths.map(item => `- ${textValue(item)}`));
+  if (observations.length) lines.push("", "Development observations", ...observations.map(item => `- ${textValue(item)}`));
+  if (typeof window !== "undefined" && window.location?.origin) lines.push("", `Take the Growth Alignment assessment: ${window.location.origin}/`);
+  return lines.join("\n");
 }
 
-function FullReportActions({ report, summary, content, token }) {
-  const [state, setState] = React.useState({ message: "", busy: false });
-  const copy = async () => {
+async function shareHighlights(report, summary) {
+  const text = highlightShareText(report, summary);
+  if (navigator.share) {
+    await navigator.share({ title: "Growth Alignment highlights", text });
+    return "Highlights shared.";
+  }
+  await navigator.clipboard.writeText(text);
+  return "Highlights copied — paste them into your message or social post.";
+}
+
+function ShareHighlightsButton({ report, summary, className = "button button--ghost" }) {
+  const [label, setLabel] = React.useState("Share highlights");
+  const share = async () => {
     try {
-      await navigator.clipboard.writeText(fullReportText(report, summary, content));
-      setState({ message: "Report copied as text.", busy: false });
-    } catch {
-      setState({ message: "Copy is unavailable in this browser. Use Print report instead.", busy: false });
+      const message = await shareHighlights(report, summary);
+      setLabel(message.startsWith("Highlights copied") ? "Highlights copied" : "Share highlights");
+    } catch (error) {
+      if (error?.name !== "AbortError") setLabel("Share unavailable");
     }
   };
+  return <button className={className} type="button" onClick={share}>{label}</button>;
+}
+
+function ThankYouShare({ report, summary }) {
+  return <section className="report-card v4-coach v4-thank-you-share">
+    <p className="eyebrow">Thank you</p>
+    <h3>Thank you for taking the assessment.</h3>
+    <p>If this is helpful, please share it with someone who will benefit from taking it!</p>
+    <p className="preview-note"><strong>Privacy:</strong> Share highlights sends only your result title, overall score, alignment summary, top strengths and development observations. Your private Full Report, PDF, private link, reflections and detailed development content are not included.</p>
+    <ShareHighlightsButton report={report} summary={summary} className="button button--primary" />
+  </section>;
+}
+
+function FullReportActions({ report, token }) {
+  const [state, setState] = React.useState({ message: "", busy: false });
   const email = async () => {
     if (!token || state.busy) return;
     setState({ message: "", busy: true });
@@ -226,7 +249,7 @@ function FullReportActions({ report, summary, content, token }) {
       setState({ message: error.message, busy: false });
     }
   };
-  return <section className="report-card"><h3>Save or share your report</h3><p>Keep a copy of this report for your development work and your three-month comparison.</p><div className="upgrade-box__actions"><button className="button button--ghost" onClick={copy}>Copy as text</button><button className="button button--ghost" disabled={!token || state.busy} onClick={email}>{state.busy ? "Queuing email…" : "Email to self"}</button></div>{state.message && <p className="preview-note" role="status">{state.message}</p>}</section>;
+  return <section className="report-card"><h3>Save your full report</h3><p>Your Full Development Report is private. Email the PDF to yourself for your development work and three-month comparison.</p><div className="upgrade-box__actions"><button className="button button--ghost" disabled={!token || state.busy} onClick={email}>{state.busy ? "Queuing email…" : "Email PDF to self"}</button></div>{state.message && <p className="preview-note" role="status">{state.message}</p>}</section>;
 }
 
 function FullReportContent({ report, summary, content, token }) {
@@ -256,9 +279,9 @@ function FullReportContent({ report, summary, content, token }) {
     <DevelopmentCommitment report={report} token={token} />
     <RetakePlan report={report} />
     <CoachCallToAction report={report} />
-    <FullReportActions report={report} summary={summary} content={content} token={token} />
+    <FullReportActions report={report} token={token} />
     <UpgradeReasons items={content.upgradeReasons} />
-    <p className="preview-note">Your private link is time-limited. Open the PDF, email it to yourself, copy it as text or print a copy for your records.</p>
+    <p className="preview-note">Your private link is time-limited. Open the PDF, email it to yourself or print a copy for your records.</p>
   </>;
 }
 
@@ -293,7 +316,7 @@ export default function ReportView({ payload, token, onReset }) {
     } catch (error) { setCheckout({ busy: false, error: error.message }); }
   };
 
-  const actions = <>{onReset ? <button className="button button--ghost" onClick={onReset}>Start again</button> : <a className="button button--ghost" href="/">New assessment</a>}{unlocked && token && <a className="button button--ghost" href={`/api/reports/${encodeURIComponent(token)}/pdf`} target="_blank" rel="noreferrer">Open PDF</a>}<button className="button button--primary" onClick={() => window.print()}>Print report</button></>;
+  const actions = <>{onReset ? <button className="button button--ghost" onClick={onReset}>Start again</button> : <a className="button button--ghost" href="/">New assessment</a>}{unlocked && token && <a className="button button--ghost" href={`/api/reports/${encodeURIComponent(token)}/pdf`} target="_blank" rel="noreferrer">Open PDF</a>}<ShareHighlightsButton report={report} summary={summary} /><button className="button button--primary" onClick={() => window.print()}>Print report</button></>;
 
   const reportClass = report?.trackKey === "personal" ? "v4-report--personal" : "v4-report--professional";
   return <StageShell stageKey="report" current={4} actions={actions}>
@@ -313,6 +336,7 @@ export default function ReportView({ payload, token, onReset }) {
         {!checkoutAvailable && !cashOnDeliveryAvailable && <p className="preview-note">Your Lite Report is ready now. Full Report purchasing will open after Atom Global completes its secure payment configuration.</p>}
       </>}
     </section>
+    <ThankYouShare report={report} summary={summary} />
     {isMockMode && <p className="preview-note">Preview mode simulates payment. Production unlocks only after a verified Stripe webhook or authorised administrator action.</p>}
     </div>
   </StageShell>;
