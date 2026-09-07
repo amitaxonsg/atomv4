@@ -6,7 +6,7 @@
 
 Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Global Consulting, including questionnaire, CMS/Admin, Lite/Full reports, Stripe payments, UAT no-payment control, PDF/email delivery, analytics, affiliates, commitments and audit history.
 
-## Current V4 baseline — 4 September 2026
+## Current V4 baseline — 7 September 2026
 
 | Item | Current V4 value |
 |---|---|
@@ -15,6 +15,7 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
 | **Server-verified live application commit** | `7e4d89ec30fa13f1b14c2bea938189c89482d7da` |
+| Last operational documentation verification | **7 September 2026 — V4 Git/README rechecked; no application code changed** |
 | Lite/Full reference result-card status | **DEPLOYED / LIVE / HEALTHY** |
 | Reference result-card / PDF parity baseline | `6559a26bf78ef40f36b94a8d27ff3d09830948ee` |
 | Lite contrast/readability baseline | `f05f2adaae488d3c947f49acfae96e6dce12e1d5` |
