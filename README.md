@@ -14,16 +14,12 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Server-verified live application commit** | `7e4d89ec30fa13f1b14c2bea938189c89482d7da` |
-| Last operational documentation verification | **7 September 2026 — V4 Git/README rechecked; no application code changed** |
-| Lite/Full reference result-card status | **DEPLOYED / LIVE / HEALTHY** |
-| Reference result-card / PDF parity baseline | `6559a26bf78ef40f36b94a8d27ff3d09830948ee` |
-| Lite contrast/readability baseline | `f05f2adaae488d3c947f49acfae96e6dce12e1d5` |
-| Commitment contrast/readability fix | `7e4d89ec30fa13f1b14c2bea938189c89482d7da` |
-| Pre-commitment-contrast safety branch | `v4-pre-commitment-contrast-20260904` |
-| Pre-Lite-contrast safety branch | `v4-pre-lite-contrast-fix-20260904-6559a26` |
-| Pre-reference-result-card safety branch | `v4-pre-reference-result-card-20260904` |
-| Earlier live/payment safety branch | `v4-live-backup-20260904-9e99467` |
+| **Last explicitly server-verified live application commit** | `09e445536055e67d0145070f2b56672ab5fb5f63` |
+| **Accepted PDF pagination/parity baseline** | `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` |
+| PDF visual UAT | **PASSED — 5-page compact report, visible overall meter, Executive Summary packed onto page 1** |
+| Previous PDF meter/space baseline | `09e445536055e67d0145070f2b56672ab5fb5f63` |
+| Reference website/PDF parity baseline | `0b7ff92370d01e6cb2adb0bb9b598bd0c250e9e0` |
+| Commitment contrast/readability baseline | `7e4d89ec30fa13f1b14c2bea938189c89482d7da` |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
 | Releases | `/var/www/v4.atomglobal.com/releases` |
 | Active release symlink | `/var/www/v4.atomglobal.com/current` |
@@ -34,132 +30,122 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Cron | `/etc/cron.d/growth-alignment-v4` |
 | Web server | Apache + PHP 8.3-FPM |
 
-The `7e4d89ec...` release was deployed successfully through the V4 Apache deployer. The deployment output confirmed:
+> Documentation-only commits may be newer than the deployed application. `/var/www/v4.atomglobal.com/current` and `/var/www/v4.atomglobal.com/deployed-commit.txt` remain authoritative for the actual live runtime.
 
-- **81/81 frontend tests passed**;
-- Vite production build passed;
-- PHP syntax check passed;
-- Apache release switch completed successfully;
-- Stripe reconciliation background job ran with `0` failures;
-- administrator alert processor completed without failure;
-- email queue processor completed without failure;
-- background processing is scheduled every five minutes and verified healthy;
-- production `/api/health` returned `status: ok` with database, migrations, storage, Stripe, Stripe webhook configuration, email and cron healthy;
-- `feedbackGitHub:false` remains optional and is not a launch blocker.
+## Accepted Full Report website / PDF parity
 
-> Documentation-only commits may be newer than the deployed application. The authoritative live application is the target of `/var/www/v4.atomglobal.com/current`; `/var/www/v4.atomglobal.com/deployed-commit.txt` should match the application commit encoded in that active release.
+The website Full Report is the visual reference for the generated Full Report PDF.
 
-## Approved Lite, Full and PDF overall-result UI
+Approved parity rules:
 
-The Lite Report and Full Report website use the same approved reference-card composition. The generated Full Report PDF mirrors the same overall result hierarchy.
+- same participant/profile title hierarchy;
+- same `x / OUT OF 250` overall score semantics;
+- score is centered inside the left result box;
+- `YOUR ALIGNMENT PATTERN` narrative appears beside the score;
+- Head-led / current `x/250` / Heart-led meter appears below the narrative;
+- PDF overall meter must visibly render its filled portion;
+- Top three strengths and Development observations appear as paired cards;
+- dark `Your full development report` banner is preserved;
+- Executive Summary uses Highest 3 / Lowest 3 with visible proportional bars;
+- 10-area breakdown uses bars only — no radar;
+- report sections use the same editorial card/accent language as the website;
+- commitment section remains dark with high-contrast text;
+- retake, coach and `Use this report to` sections preserve the website hierarchy;
+- PDF naturally paginates for A4 and does not contain interactive website buttons.
 
-Required deployed layout:
+### Accepted PDF pagination / space usage
 
-- overall result shown clearly as `x` with **OUT OF 250**;
-- score and `OUT OF 250` centered horizontally and vertically inside the dedicated left score box;
-- `YOUR ALIGNMENT PATTERN` in the right narrative area;
-- supporting alignment text directly below the title;
-- Head-led ↔ Heart-led meter below the supporting text in the same narrative area;
-- meter labels show `Head-led`, current `x/250`, and `Heart-led`;
-- dark premium background with explicit readable white/gold contrast;
-- Lite has a hard dark fallback so white text cannot become unreadable if advanced gradient styling is unavailable or overridden;
-- mobile stacks cleanly without losing contrast or hierarchy;
-- Personal and Professional tracks share the same structural rule.
+The accepted baseline `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` improves Dompdf pagination so the report uses A4 space efficiently without shrinking content into unreadable text.
 
-Key result-card commits:
+Approved behavior:
 
-- `a01e6dafafd68f03cdc274fbfb14b52eea9161fe` — match Lite/Full website result card to approved reference
-- `6c38ed57752f264f342989414ca72a1a34975a2d` — guard reference-card composition
-- `6559a26bf78ef40f36b94a8d27ff3d09830948ee` — match generated Full Report PDF to approved reference
-- `251d151a842f2df4b3a10b9e45282c8cedda98ed` — explicit Lite dark fallback/high-contrast styling
-- `f05f2adaae488d3c947f49acfae96e6dce12e1d5` — guard Lite contrast/readability
+- A4 margins are compact but readable;
+- the hero/result block remains intact;
+- the overall meter uses a Dompdf-safe solid fill instead of a CSS gradient that can disappear in PDF rendering;
+- Executive Summary is row-splittable at safe boundaries instead of being forced as one large indivisible block;
+- 10-area score rows remain intact;
+- roadmap, profile spectrum, methodology and other large sections may flow across pages;
+- individual cards remain together where practical;
+- `Use this report to` can break at safe row boundaries;
+- empty deep-dive headings are not emitted when no deep-dive content exists;
+- headings remain attached to the content they introduce where practical.
 
-## Commitment section — approved contrast behavior
+Visual UAT on the accepted PDF produced a compact **5-page** report with the overall meter visible and the Executive Summary beginning on page 1.
 
-The Full Report development commitment section uses a dark panel. All text in that panel must remain readable regardless of other report heading styles.
+Key PDF commits:
 
-Approved browser behavior:
+- `2e586aed738a685eef9c82c6039f3956c93392ff` — align V4 Full Report PDF more closely with website hierarchy
+- `0b7ff92370d01e6cb2adb0bb9b598bd0c250e9e0` — guard website/PDF parity
+- `af23a2dc867d321005e78d8e4d94acac7b6fb44c` — Dompdf-safe meter fill and compact page spacing
+- `09e445536055e67d0145070f2b56672ab5fb5f63` — guard PDF meter and space usage; last explicitly server-verified live PDF release
+- `8596ff2cd886771f0235bb6d335e888fae231c64` — improve Executive Summary and feature pagination packing
+- `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` — guard accepted PDF pagination packing baseline
 
-- `MAKE IT ACTIONABLE` is white/high contrast;
-- `My 90-day development commitment` is white/high contrast;
-- instruction/body text is white/high contrast;
-- saved/check-in status text is white/high contrast;
-- saved commitment text is white/high contrast;
-- textarea remains white with dark readable input text;
-- placeholder remains clearly readable;
-- button, layout, persistence, wording and business logic are unchanged.
+## Lite / Full overall-result UI
 
-The commitment contrast guard is intentionally loaded after the other report styles so older heading rules cannot override it.
+Lite and Full website reports share the same approved result-card structure:
 
-Approved PDF behavior:
+- dark premium card;
+- centered overall score with `OUT OF 250`;
+- readable white/gold contrast;
+- alignment narrative beside the score on desktop;
+- centered meter underneath the narrative;
+- mobile stacks cleanly;
+- Lite keeps an explicit dark fallback so white text never becomes unreadable.
 
-- the commitment block remains dark;
-- commitment heading and paragraph text remain explicitly white/high contrast;
-- saved commitment and suggested check-in continue to render in the generated Full Report PDF.
+## Commitment section
 
-Implementation:
+The Full Report development commitment is persistent server-side functionality.
 
-- `d9d2b769d9305d940ab289e91f412d18f221c60e` — add V4 commitment contrast stylesheet
-- `0ddcd74e854ce2f858ee96e0ac9ba150622010a2` — load commitment contrast stylesheet last
-- `7e4d89ec30fa13f1b14c2bea938189c89482d7da` — guard web/PDF commitment contrast; accepted live release
+When the participant selects **Save my commitment**:
 
-## Development commitment persistence
+- text is stored in `report_commitments`;
+- it is linked to the `generated_report_id`;
+- check-in date is stored;
+- reopening the same private Full Report retrieves it;
+- PDF generation reads the same commitment data and includes it when generated or regenerated after the save.
 
-When a participant selects **Save my commitment**:
+Approved contrast:
 
-- commitment text is stored in `report_commitments`;
-- it is linked to the specific `generated_report_id`;
-- the check-in date is stored with it;
-- reopening the same private Full Report retrieves the saved commitment;
-- PDF generation reads the same commitment table and includes the saved commitment/check-in date when generated or regenerated after the save.
+- `MAKE IT ACTIONABLE` is high contrast;
+- `My 90-day development commitment` is high contrast;
+- body/status/saved commitment text is readable on the dark panel;
+- textarea remains white with dark text;
+- persistence and business logic are unchanged.
 
-The commitment is server-side data, not merely browser/local state.
-
-## Approved 10-area score breakdown
+## Approved 10-area scoring semantics
 
 The radar visual is not part of approved V4.
 
-Approved semantics:
-
-- 10 areas, bars only, no radar;
+- 10 areas, bars only;
 - each area score is 5–25;
 - `5 = more Head-led`;
 - `15 = balanced`;
 - `25 = more Heart-led`;
 - normalization is `(value - 5) / 20`;
 - browser and PDF use the same meaning;
-- no A–J markers;
-- Executive Summary Highest 3 / Lowest 3 also uses visible proportional bars.
+- Executive Summary Highest 3 / Lowest 3 also uses proportional bars.
 
 Do not reintroduce the radar.
 
-## Approved Sept 4 payment reliability state
+## Payment reliability state
 
-The real Pay-by-Card flow has been tested with live Stripe transactions.
+The signed Stripe webhook remains the primary fulfilment path. V4 also has direct Stripe reconciliation to protect users when webhook delivery is delayed or missed.
 
-Approved behavior:
+Approved flow:
 
 1. Stripe Checkout receives payment.
-2. Signed Stripe webhook remains the primary fulfilment path.
-3. If webhook delivery is delayed/missed, V4 retrieves the exact Checkout Session directly from Stripe.
-4. V4 marks paid only when Stripe reports `payment_status = paid` and metadata matches the assessment session with `payment_purpose = full_report`.
-5. Payment details are stored, including amount, currency, Payment Intent and paid timestamp.
-6. Full Report is unlocked.
-7. Secure report token/URL is stored.
-8. Customer confirmation and `paid_report_ready` emails are queued idempotently.
-9. PDF is generated and attached to the Full Report email.
-10. Administrator `payment_paid` notification is recorded.
-11. Scheduled reconciliation protects customers if the success page is closed or webhook delivery is missed.
+2. V4 verifies the exact Checkout Session and `payment_status = paid`.
+3. Checkout metadata must match the assessment session and `payment_purpose = full_report`.
+4. Payment is stored with amount, currency, Payment Intent and paid timestamp.
+5. Full Report unlocks.
+6. Secure report token/URL is stored.
+7. Customer payment confirmation and `paid_report_ready` emails are queued idempotently.
+8. Full Report PDF is generated and attached to email.
+9. Administrator `payment_paid` notification is recorded.
+10. Scheduled reconciliation protects the flow if webhook delivery is missed.
 
-The payment success screen shows **Please don’t close this page**, percentage progress, and automatically opens the Full Report when fulfilment reaches 100%.
-
-### Live burn-in evidence
-
-Payment ID `44` was recovered from `checkout_started` to `paid` by verified Stripe reconciliation; report unlock, PDF generation, PDF email with provider message ID, and administrator notification were verified.
-
-Payment ID `45` also reached `paid`, stored its Payment Intent, unlocked the Full Report, created a secure report URL, queued the PDF Full Report email and recorded the administrator notification.
-
-The tested Checkout Sessions did not appear in `stripe_webhook_events`, so Stripe Dashboard endpoint/delivery still warrants operational review. The direct Stripe reconciliation and scheduled fallback protect the customer flow meanwhile.
+Real payment IDs `44` and `45` were used during burn-in verification. The tested sessions did not appear in `stripe_webhook_events`, so Stripe Dashboard webhook delivery still warrants operational review; reconciliation protects the customer flow meanwhile.
 
 ## Current participant journey
 
@@ -190,37 +176,11 @@ Journey:
 
 ## Admin / CMS wiring
 
-V4 Admin is connected to the production API/database for Dashboard, Participants/history, Questionnaire experience/content, Assessments, Content stages/media, Branding, Reports/PDF, Payments/UAT, Email, Affiliates, Analytics, SEO/AEO/GEO, Settings/integrations, Admin users/permissions, Audit logs and Feedback/help.
+V4 Admin is connected to the production API/database for Dashboard, Participants/history, Questionnaire, Assessments, Content/media, Branding, Reports/PDF, Payments/UAT, Email, Affiliates, Analytics, SEO/AEO/GEO, Settings/integrations, Admin users/permissions, Audit logs and Feedback/help.
 
 CMS/database state is authoritative.
 
-Admin uses `system.cash_on_delivery_enabled` as the authoritative UAT no-payment override. When disabled, `UAT Test — No Payment` must be absent. When explicitly enabled for controlled testing, the UAT no-payment path may appear.
-
-## Approved visual/CMS state
-
-- desktop split layout: visual panel left, application content right;
-- Atom Global public logo in the right/content panel;
-- landing stage `version` intentionally uses `/media/stages/reflection-portrait.png` when no CMS media assignment exists;
-- inner-stage CMS/content images remain authoritative;
-- mobile responsive presentation and iOS-safe controls;
-- Lite and Full Reports share the approved reference result-card structure;
-- Lite result card retains a dark readable fallback;
-- Full Report website and PDF use the same overall score/reference hierarchy;
-- commitment section uses explicit high-contrast text on its dark panel;
-- Executive Summary uses visible score bars;
-- 10-area breakdown uses progress bars only — no radar.
-
-Critical landing-stage state:
-
-```text
-stage_key: version
-desktop_media_id: NULL
-mobile_media_id: NULL
-focal_x: 52.00
-focal_y: 50.00
-```
-
-Do not introduce obsolete hard-coded image fallbacks or compensate for valid CMS state with unrelated frontend overrides.
+Admin uses `system.cash_on_delivery_enabled` as the authoritative UAT no-payment override.
 
 ## Standard V4 pre-deployment gate
 
@@ -244,7 +204,7 @@ php -l backend/bin/reconcile-stripe-checkouts.php
 php -l backend/bin/cron.php
 ```
 
-For report/PDF backend changes, run:
+For report/PDF backend changes:
 
 ```bash
 php backend/bin/production-report-flow-smoke-test.php \
@@ -254,7 +214,16 @@ php backend/bin/production-report-flow-smoke-test.php \
 
 Do not add `--send-email` unless intentionally testing live UAT email delivery.
 
-CSS-only presentation changes still require `npm test` and `npm run build` before deployment.
+The accepted `0953ae66...` PDF pagination candidate passed:
+
+- **81/81 tests**;
+- Vite production build;
+- `PdfService.php` syntax check;
+- guarded production Lite/Full Report smoke test;
+- PDF generation;
+- temporary test cleanup;
+- clean database after smoke testing;
+- visual PDF UAT.
 
 ## Standard V4 deployment
 
@@ -286,11 +255,7 @@ echo "HEALTH:"
 curl -fsS https://v4.atomglobal.com/api/health
 ```
 
-Current server-verified application commit:
-
-```text
-7e4d89ec30fa13f1b14c2bea938189c89482d7da
-```
+Do not mark a candidate as server-verified live until the active release / deployed marker is explicitly confirmed.
 
 ## Approved V4 backup procedure
 
@@ -307,11 +272,12 @@ Before a meaningful production change:
 Current relevant Git safety branches:
 
 ```text
+v4-pre-pdf-pagination-pack-20260907-09e4455
+v4-pre-pdf-meter-space-fix-20260907-0b7ff92
+v4-pre-pdf-website-parity-20260907-9d8cb31
 v4-pre-commitment-contrast-20260904
 v4-pre-lite-contrast-fix-20260904-6559a26
 v4-pre-reference-result-card-20260904
-v4-pre-lite-hero-parity-20260904-0608dbc
-v4-pre-full-report-meter-20260904-ec93906
 v4-live-backup-20260904-9e99467
 ```
 
@@ -332,19 +298,19 @@ Retest at minimum:
 - autosave/resume;
 - Lite/Full Report lock;
 - Lite result card remains dark/readable;
-- score + `OUT OF 250` remain centered in the left score box;
-- Full Report/PDF overall-result hierarchy matches;
-- Head-led / `x/250` / Heart-led meter is readable;
-- commitment panel heading/body/status text is readable on dark background;
-- commitment textarea remains white with dark text;
+- score + `OUT OF 250` remain centered;
+- Head-led / `x/250` / Heart-led meter is readable on website and PDF;
+- Full Report website/PDF hierarchy matches;
+- PDF uses A4 space efficiently without excessive blank areas;
+- Executive Summary bars are visible;
+- all 10 area bars are visible and proportional;
+- commitment panel text remains readable;
 - saved commitment persists after reload;
-- regenerated PDF includes saved commitment with readable text;
+- regenerated PDF includes saved commitment;
 - Pay by Card flow and reconciliation fallback;
 - secure Full Report token;
 - PDF/email delivery;
 - administrator payment notification;
-- Executive Summary bars;
-- 10-area bars with no radar;
 - mobile report layout;
 - CMS image/logo/content edits.
 
