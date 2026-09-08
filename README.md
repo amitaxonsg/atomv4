@@ -2,9 +2,9 @@
 
 > **V4 ONLY — CURRENT SOURCE OF TRUTH**
 >
-> This README describes the approved V4 application at `https://v4.atomglobal.com/`. Do not use V5, V3, another repository, or an older preview as a deployment, database, CMS, scoring, payment, report, or visual source of truth for V4 work.
+> This README describes the approved V4 application at `https://v4.atomglobal.com/`. Do not use V5, V3, another repository, or an older preview as a deployment, database, CMS, scoring, payment, report, visual, or rollback source for V4 work.
 
-Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Global Consulting, including questionnaire, CMS/Admin, Lite/Full reports, Stripe payments, UAT no-payment control, PDF/email delivery, analytics, affiliates, commitments and audit history.
+Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Global Consulting, including questionnaire, CMS/Admin, Lite/Full reports, Stripe payments, UAT no-payment control, PDF/email delivery, analytics, affiliates, commitments, retakes, sharing and audit history.
 
 ## Current V4 baseline — 8 September 2026
 
@@ -14,14 +14,18 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Server-verified live application commit** | `4f19c110141020e3ab18dcad272e0a231587ebb0` |
-| Live Share Highlights modal | **DEPLOYED / LIVE / HEALTHY — template-style compact UI** |
-| Previous in-page modal baseline | `d9a3fa42192fd5f716459d79ef5a37f6acce0383` |
+| **Server-verified live application commit** | `0b541e491905245f27ffd541ec82051c831f0d31` |
+| Live application state | **DEPLOYED / LIVE / HEALTHY** |
+| Current JavaScript gate | **82 tests / 82 pass / 0 fail** |
+| Public Lite Report sharing | **LIVE — signed `/share/lite/` URL, Lite-only data** |
+| X sharing | **LIVE — weighted 280-character calculation with assessment CTA/link preserved** |
+| Facebook sharing | **LIVE — guided copy/paste flow** |
+| LinkedIn sharing | **LIVE — guided copy/paste flow** |
+| WhatsApp sharing | **LIVE — automatic Lite-safe highlights** |
 | Accepted PDF pagination/parity baseline | `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` |
-| PDF visual UAT | **PASSED — compact 5-page report, visible overall meter, Executive Summary packed onto page 1** |
-| Commitment contrast/readability baseline | `7e4d89ec30fa13f1b14c2bea938189c89482d7da` |
+| PDF visual UAT | **PASSED — compact 5-page report, visible overall meter, Executive Summary on page 1** |
 | Latest confirmed full pre-change backup | `/var/backups/growth-alignment-v4/pre-share-modal-20260908T024637Z` |
-| Latest share-modal safety branch | `v4-pre-share-modal-template-20260908-c09cc2e` |
+| Required next-change full-backup target | `/var/backups/growth-alignment-v4/pre-next-change-20260908-public-lite-share-live` |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
 | Releases | `/var/www/v4.atomglobal.com/releases` |
 | Active release symlink | `/var/www/v4.atomglobal.com/current` |
@@ -32,13 +36,13 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Cron | `/etc/cron.d/growth-alignment-v4` |
 | Web server | Apache + PHP 8.3-FPM |
 
-The `4f19c110...` V4 deployment was confirmed healthy with **82/82 tests**, successful Vite build, PHP syntax check, successful Apache release switch, Stripe reconciliation with `0` failures, administrator alert processing with `0` failures, email queue processing with `0` failures, healthy five-minute background processing, and `/api/health` returning `status: ok`.
+The `0b541e49...` V4 deployment was server-confirmed healthy on 8 September 2026 with **82/82 tests**, successful Vite build, PHP syntax checks for the public Lite Report backend changes, successful Apache release switch, Stripe reconciliation with `0` failures, administrator alert processing with `0` failures, email queue processing with `0` failures, healthy five-minute background processing, and `/api/health` returning `status: ok`.
 
 > Documentation-only commits may be newer than the deployed application. `/var/www/v4.atomglobal.com/current` and `/var/www/v4.atomglobal.com/deployed-commit.txt` remain authoritative for the actual live runtime.
 
 ## Lite / Full overall-result UI
 
-Lite and Full website reports share the same approved result-card structure:
+Lite and Full website reports share the approved result-card structure:
 
 - dark premium result card;
 - centered overall score with `OUT OF 250`;
@@ -48,81 +52,148 @@ Lite and Full website reports share the same approved result-card structure:
 - mobile stacks cleanly;
 - Lite keeps an explicit dark fallback so white text never becomes unreadable.
 
+Do not reintroduce the old radar visual.
+
 ## Highlight-only sharing and thank-you CTA
 
-Both Lite and Full website reports end with the same thank-you/share section:
+The participant's normal Lite/Full report ends with the thank-you/share section:
 
 > **Thank you for taking the assessment. If this is helpful, please share it with someone who will benefit from taking it!**
 
-Privacy rules are mandatory:
+### Mandatory privacy rules
 
-- only Lite-safe highlights may be shared: track/result title, profile, overall score, alignment summary, top three strengths and development observations;
-- the shared call-to-action uses only the public site origin/home page;
-- the current private report URL is never shared;
-- Full Report content is never included in the share payload;
-- PDF/private link, written reflections, methodology, roadmap, commitments, detailed development content and payment/report tokens are excluded;
-- the previous Full Report `Copy as text` action remains removed;
-- private Full Report self-delivery remains available through `Email PDF to self`, `Open PDF` and `Print report`.
+The sharing feature must preserve these invariants:
+
+- share only Lite-safe result information;
+- allowed highlight data: track/result title, profile, overall score, alignment summary, top three strengths and development observations;
+- never share `paid_report_json`, paid content, Full Report content, PDF path/link, commitment, roadmap, methodology, written reflections, detailed development content, participant email, participant name, private report token, private `/report/<token>` URL, or `/api/reports/<token>` URL;
+- Full Report `Copy as text` remains removed;
+- private Full Report self-delivery remains through `Email PDF to self`, `Open PDF` and `Print report`.
 
 ### Share Highlights modal — current live behavior
 
-The bottom report action bar contains only:
+`Share highlights` appears in the closing thank-you card. It opens an accessible in-page modal with:
 
-- **New assessment**;
-- **Open PDF** when the report is unlocked;
-- **Print report**.
+- title `Share with Friends`;
+- read-only **Share your link** field;
+- `Copy link` action;
+- Facebook;
+- X;
+- WhatsApp;
+- LinkedIn;
+- no Instagram;
+- no More/native-share button;
+- Escape close;
+- backdrop close;
+- focus trapping while open and focus restoration on close;
+- background scroll lock;
+- print exclusion.
 
-`Share highlights` appears only in the closing thank-you card. Selecting it opens an **in-page modal overlay** on top of the report rather than expanding the platform choices inline.
+### Public Lite Report share link
 
-Approved modal behavior:
+The **Share your link** field must point to the participant's public Lite Report, not the V4 homepage and not the private Full Report URL.
 
-- compact white card inspired by the approved reference template;
-- simple title / close `×` header;
-- one clean row of circular share choices for Facebook, Instagram, LinkedIn and More;
-- clean copy-link area beneath the social row;
-- dimmed backdrop with centered dialog on desktop;
-- mobile remains compact and responsive;
-- Escape closes the dialog;
-- clicking the backdrop closes the dialog;
-- keyboard focus stays inside the dialog while open and returns to the trigger on close;
-- background page scrolling is locked while the modal is open;
-- modal is excluded from print output;
-- public assessment link is shown read-only;
-- `Copy highlights` continues to copy Lite-safe highlights only;
-- platform buttons retain accessible labels;
-- no modal/share action receives the private report URL or Full Report content.
+Current URL form:
 
-Sharing behavior remains:
+```text
+https://v4.atomglobal.com/share/lite/<report-id>.<signed-hmac>
+```
 
-- Facebook opens Facebook's public share endpoint with the public assessment URL and copies the Lite-safe highlights for paste fallback;
-- LinkedIn opens LinkedIn's public share endpoint and copies the Lite-safe highlights for paste fallback;
-- Instagram uses the operating system/browser native share sheet when available; otherwise the highlights are copied and Instagram is opened for manual paste;
-- **More** uses the native Web Share sheet when available and otherwise copies the highlights for pasting into any compatible app.
+The signature is generated server-side using the V4 application key and the report ID. The corresponding public API route is:
 
-Key sharing commits:
+```text
+GET /api/public/reports/lite/{token}
+```
+
+The public Lite endpoint is intentionally separate from the private report-token endpoint. It returns only the free/Lite report JSON and the minimum public report metadata needed to render the Lite Report. It explicitly returns:
+
+```text
+paid_report_json = null
+is_unlocked = false
+pdf_available = false
+checkoutAvailable = false
+cashOnDeliveryAvailable = false
+sharedLite = true
+```
+
+The public Lite query does not return participant name, participant email, private secure-token hash, private report URL or paid report content.
+
+When a recipient opens the shared Lite Report:
+
+- they see the Lite profile, score, alignment pattern, top strengths and development observations;
+- private Full Report content is not available;
+- they do not receive the original participant's payment controls;
+- the page offers a CTA to take their own Growth Alignment assessment.
+
+### Platform-specific share behavior
+
+**Facebook**
+
+Facebook's public share endpoint does not reliably prefill the user's post text. V4 therefore:
+
+1. copies the Lite-safe highlights to the clipboard;
+2. displays the `Highlights copied for Facebook` guidance panel;
+3. opens Facebook only after the participant selects `Open Facebook`;
+4. instructs the participant to paste into `What's on your mind?` using Ctrl+V / Cmd+V.
+
+The Facebook URL points to the safe public Lite Report URL.
+
+**LinkedIn**
+
+LinkedIn uses the same guided approach:
+
+1. copy Lite-safe highlights;
+2. show `Highlights copied for LinkedIn`;
+3. select `Open LinkedIn`;
+4. paste the copied highlights into the LinkedIn post field.
+
+The LinkedIn URL points to the safe public Lite Report URL.
+
+**WhatsApp**
+
+WhatsApp opens automatically with the full Lite-safe highlight text. The text includes the public assessment CTA and does not include private Full Report information.
+
+**X**
+
+X automatically opens an intent post. The X formatter is separate from the other platforms and uses X-compatible weighted character counting:
+
+- maximum weighted length: `280`;
+- URL weight: `23` characters after t.co shortening;
+- Unicode characters are weighted using the supported X/twitter-text ranges;
+- the post includes the track heading, profile, score and as much alignment summary as safely fits;
+- the assessment CTA/link is always reserved and preserved;
+- the same optimized X text is copied to clipboard as fallback.
+
+X continues to promote the assessment homepage:
+
+```text
+Take the Growth Alignment assessment: https://v4.atomglobal.com/
+```
+
+The public Lite Report link in the modal is separate from that X assessment CTA.
+
+### Current sharing commits
 
 - `243d55f25dd1cd6bfb92e98a3145ac63dd95ad05` — initial highlight-only sharing and thank-you CTA
 - `587390ad40ded3d8f8cad90b23934d71b6ae0b70` — privacy regression guard
-- `f7d5823441b64268be9a3e5bead2558965d42de5` — legacy sharing test corrected
-- `e4adbb94b83ebbb9b197459bf6fdf632a3fb2ba0` — remove action-bar Share button and add platform chooser
-- `95a1850e1d7243cac41aeb3e7caf3f62e5d62b27` — guard platform choices/action-bar removal
-- `3c0f3730cd667e4fb942a4da87fbe90379340f74` — server-verified text-button platform chooser baseline
-- `06c6588513e2ce72cdab179da2ee12c6bdc12627` — compact icon presentation for Facebook/LinkedIn/Instagram and `More`
-- `57dd98f5d55f4fc526c42e6b8ed5b035bb67f802` — server-verified compact icon UI baseline
-- `3570b2109de5457e75f72c2b95d12986e078bab3` — replace inline platform row with accessible in-page Share Highlights modal
-- `5c01af3fa9a0a3a8dbe1214ab7e59b65ebc21b9b` — modal styling, responsive behavior and print exclusion
-- `d9a3fa42192fd5f716459d79ef5a37f6acce0383` — server-verified first in-page Share Highlights modal baseline
-- `1ba6a02c82971c07f6973d2a680e77d3cf42d342` — restyle modal to approved compact template visual
-- `4f19c110141020e3ab18dcad272e0a231587ebb0` — regression guard and **server-verified live template-style Share Highlights modal baseline**
+- `e4adbb94b83ebbb9b197459bf6fdf632a3fb2ba0` — remove action-bar Share and add share chooser
+- `57dd98f5d55f4fc526c42e6b8ed5b035bb67f802` — server-verified compact icon baseline
+- `3570b2109de5457e75f72c2b95d12986e078bab3` — accessible in-page modal
+- `7e2e7381d5833cbf6dc70ce101a5e0f67e364aa4` — final modal/icon specificity guard
+- `79885c07567f2aec1226e4ea3a907b02b2c4e29b` — Facebook guided share flow
+- `d22fa8c4905ca724b325b9f7ae9cefd4ac14bc14` — LinkedIn guided share flow
+- `29aae36c1352294b80b7dc290edbbded911476ad` — X-specific 280-character optimizer
+- `72f47f985827c1946e3840eda14fd97e91462242` — X weighted-character limit fix
+- `0b541e491905245f27ffd541ec82051c831f0d31` — secure public Lite Report share links; **current live application baseline**
 
 ## Accepted Full Report website / PDF parity
 
-The website Full Report is the visual reference for the generated Full Report PDF.
+The website Full Report remains the visual reference for the generated Full Report PDF.
 
 Approved parity rules:
 
 - same participant/profile title hierarchy;
-- same `x / OUT OF 250` overall score semantics;
+- same `x / OUT OF 250` overall-score semantics;
 - score centered inside the left result box;
 - `YOUR ALIGNMENT PATTERN` beside the score;
 - Head-led / current `x/250` / Heart-led meter below the narrative;
@@ -131,14 +202,17 @@ Approved parity rules:
 - dark `Your full development report` banner is preserved;
 - Executive Summary uses Highest 3 / Lowest 3 with visible proportional bars;
 - 10-area breakdown uses bars only — no radar;
-- report sections use the same editorial card/accent language as the website;
 - commitment section remains dark with high-contrast text;
 - retake, coach and `Use this report to` sections preserve the website hierarchy;
 - PDF naturally paginates for A4 and does not contain interactive website buttons.
 
 ### Accepted PDF pagination / space usage
 
-The accepted baseline `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` uses A4 space efficiently without shrinking content into unreadable text.
+Accepted baseline:
+
+```text
+0953ae66b5be5e1206df5d4ab37fb6beed4a8571
+```
 
 Approved behavior:
 
@@ -161,7 +235,7 @@ The Full Report development commitment is persistent server-side functionality.
 When the participant selects **Save my commitment**:
 
 - text is stored in `report_commitments`;
-- it is linked to the `generated_report_id`;
+- it is linked to `generated_report_id`;
 - check-in date is stored;
 - reopening the same private Full Report retrieves it;
 - PDF generation reads the same commitment data and includes it when generated or regenerated after the save.
@@ -200,13 +274,13 @@ Approved flow:
 3. Checkout metadata must match the assessment session and `payment_purpose = full_report`.
 4. Payment is stored with amount, currency, Payment Intent and paid timestamp.
 5. Full Report unlocks.
-6. Secure report token/URL is stored.
+6. Secure private report token/URL is stored.
 7. Customer payment confirmation and `paid_report_ready` emails are queued idempotently.
 8. Full Report PDF is generated and attached to email.
 9. Administrator `payment_paid` notification is recorded.
 10. Scheduled reconciliation protects the flow if webhook delivery is missed.
 
-Real payment IDs `44` and `45` were used during burn-in verification. The tested sessions did not appear in `stripe_webhook_events`, so Stripe Dashboard webhook delivery still warrants operational review; reconciliation protects the customer flow meanwhile.
+Real payment IDs `44` and `45` were used during burn-in verification. Reconciliation remains the customer-protection fallback if Stripe webhook delivery is delayed or missed.
 
 ## Current participant journey
 
@@ -229,11 +303,12 @@ Journey:
 6. autosave/resume;
 7. completion/scoring;
 8. Lite Report;
-9. Stripe checkout or explicitly enabled UAT no-payment route;
-10. payment verification/reconciliation;
-11. unlocked private Full Report;
-12. PDF/email delivery;
-13. optional development commitment and later retest.
+9. optional Lite-safe sharing;
+10. Stripe checkout or explicitly enabled UAT no-payment route;
+11. payment verification/reconciliation;
+12. unlocked private Full Report;
+13. PDF/email delivery;
+14. optional development commitment and later retest.
 
 ## Admin / CMS wiring
 
@@ -258,6 +333,8 @@ git rev-parse HEAD
 npm test
 npm run build
 
+php -l backend/public/index.php
+php -l backend/src/Services/ReportService.php
 php -l backend/src/Services/PdfService.php
 php -l backend/src/Payments/StripeCheckoutReconciler.php
 php -l backend/src/route-bundle.php
@@ -313,10 +390,10 @@ echo "HEALTH:"
 curl -fsS https://v4.atomglobal.com/api/health
 ```
 
-Current server-verified application commit:
+Current server-verified live application commit:
 
 ```text
-4f19c110141020e3ab18dcad272e0a231587ebb0
+0b541e491905245f27ffd541ec82051c831f0d31
 ```
 
 ## Approved V4 backup procedure
@@ -324,53 +401,70 @@ Current server-verified application commit:
 Before a meaningful production change:
 
 1. create a Git safety branch from the current V4 branch head;
-2. preserve V4 database/CMS state with the deployment backup or an explicit validated dump;
-3. preserve the V4 environment, active-release marker, deployed commit marker and persistent storage when taking a full pre-change backup;
-4. confirm the backup path before changing production;
-5. keep V4 backups under `/var/backups/growth-alignment-v4`;
-6. never treat an empty backup directory as valid;
-7. verify compressed database/storage backups with `gzip -t` and inspect the storage archive with `tar -tzf` when created manually;
-8. never use V5/V3 as a V4 rollback source.
+2. preserve the V4 database/CMS state with an explicit validated dump or the deployment backup;
+3. preserve the V4 environment file;
+4. preserve the active-release path;
+5. preserve the deployed application commit marker;
+6. preserve the current source commit marker;
+7. preserve the persistent V4 storage tree;
+8. keep V4 backups under `/var/backups/growth-alignment-v4`;
+9. never treat an empty or partially written backup directory as valid;
+10. verify the compressed database with `gzip -t`;
+11. verify the storage archive with `tar -tzf`;
+12. never use V5 or V3 as a V4 rollback source.
 
-### Confirmed pre-share-modal full backup — 8 September 2026
+### Latest confirmed full backup
+
+The last fully confirmed pre-change backup remains:
 
 ```text
 /var/backups/growth-alignment-v4/pre-share-modal-20260908T024637Z
 ```
 
-Confirmed backup contents include:
+It contains the database dump, persistent storage, V4 environment, cron/config marker and release/source/deployed commit markers.
+
+### Required next-change backup baseline
+
+After this documentation sync and **before any further V4 production change**, create and validate this full backup directory:
 
 ```text
+/var/backups/growth-alignment-v4/pre-next-change-20260908-public-lite-share-live
+```
+
+The backup must capture:
+
+```text
+growth_alignment_v4.sql.gz
+growth-alignment-v4-storage.tar.gz
+v4.env
+growth-alignment-v4
 current-release.txt
 deployed-commit.txt
-growth-alignment-v4
-growth-alignment-v4-storage.tar.gz
-growth_alignment_v4.sql.gz
 source-commit.txt
-v4.env
 ```
 
-At backup time, live release/source/deployed marker all pointed to:
+The deployed application marker in that backup must remain:
 
 ```text
-57dd98f5d55f4fc526c42e6b8ed5b035bb67f802
+0b541e491905245f27ffd541ec82051c831f0d31
 ```
 
-Relevant Git safety branches:
+The `source-commit.txt` value may be a later documentation-only Git commit; this is expected and must not be confused with the deployed runtime commit.
+
+### Relevant Git safety branches
 
 ```text
+v4-pre-readme-live-sync-20260908-0b541e4
+v4-pre-public-lite-share-link-20260908-72f47f9
+v4-pre-x-weighted-length-fix-20260908-29aae36
+v4-pre-linkedin-copy-flow-20260908-79885c0
+v4-pre-facebook-copy-flow-20260908-7e2e738
+v4-pre-share-ui-icon-fix-20260908-e0f8a75
 v4-pre-share-modal-template-20260908-c09cc2e
 v4-pre-share-modal-20260908-7151c7b
 v4-pre-share-icon-ui-20260908-2acf40c
 v4-pre-share-platform-menu-20260907-6d27e07
 v4-prechange-backup-20260907-1720-ab0c8dd
-v4-pre-pdf-pagination-pack-20260907-09e4455
-v4-pre-pdf-meter-space-fix-20260907-0b7ff92
-v4-pre-pdf-website-parity-20260907-9d8cb31
-v4-pre-commitment-contrast-20260904
-v4-pre-lite-contrast-fix-20260904-6559a26
-v4-pre-reference-result-card-20260904
-v4-live-backup-20260904-9e99467
 ```
 
 Git alone does not contain all live CMS/database configuration.
@@ -395,18 +489,21 @@ Retest at minimum:
 - regenerated PDF includes saved commitment;
 - bottom action bar contains no Share button;
 - thank-you card contains the single `Share highlights` button;
-- clicking `Share highlights` opens the in-page modal rather than expanding inline controls;
-- modal matches the approved compact white-card template;
-- social choices appear as one row of circular icons;
-- copy-link area appears beneath the social row;
-- modal can close by `×`, Escape and backdrop click;
-- modal restores focus to the Share trigger after close;
-- public assessment link is shown, not the private report link;
-- `Copy highlights` copies only Lite-safe highlights;
-- native share / clipboard fallback contains only Lite-safe highlights;
-- private Full Report/PDF/reflections/methodology/roadmap/commitment details are absent from the share payload;
+- Share modal contains Facebook, X, WhatsApp and LinkedIn only;
+- no Instagram or More action is present;
+- Facebook guided-copy flow works;
+- LinkedIn guided-copy flow works;
+- WhatsApp receives Lite-safe highlight text;
+- X remains within its weighted 280-character limit;
+- X assessment CTA/link is preserved;
+- **Share your link** is a signed `/share/lite/` URL, not the homepage and not `/report/<private-token>`;
+- the signed Lite link opens in an incognito/private browser;
+- the shared Lite view contains only Lite-safe result content;
+- shared Lite API does not expose participant name/email, private token, PDF or paid content;
+- shared Lite viewer cannot purchase/unlock the original participant's Full Report;
+- public shared view offers a CTA to take a new assessment;
 - Pay by Card flow and reconciliation fallback;
-- secure Full Report token;
+- secure private Full Report token;
 - PDF/email delivery;
 - administrator payment notification;
 - mobile report layout;
@@ -418,14 +515,15 @@ Retest at minimum:
 
 Before any V4 production change:
 
-1. start from the current V4 branch;
-2. back up Git + database/CMS state;
-3. make the smallest V4-only change;
-4. run the complete automated gate;
-5. review the diff;
-6. deploy with the V4 Apache deployer;
-7. verify active release, deployed commit marker and `/api/health`;
-8. perform browser/mobile/PDF UAT;
-9. update this README when the accepted baseline changes.
+1. start from the current V4 production branch;
+2. create a safety branch;
+3. create and validate the full V4 backup described above;
+4. make the smallest V4-only change;
+5. run the complete automated gate;
+6. review the diff;
+7. deploy with the V4 Apache deployer;
+8. verify active release, deployed commit marker and `/api/health`;
+9. perform browser/mobile/PDF UAT as relevant;
+10. update this README when the accepted baseline changes.
 
 The V4 branch, production runtime, database/CMS state and this README are the authoritative operational references.
