@@ -211,32 +211,80 @@ function highlightSharePayload(report, summary) {
   return { title: "Growth Alignment highlights", text: highlightShareText(report, summary), url: publicShareUrl() };
 }
 
+function xCharacterWeight(character) {
+  const codePoint = character.codePointAt(0);
+
+  // X/twitter-text v3 weighted ranges.
+  if (
+    (codePoint >= 0 && codePoint <= 4351)
+    || (codePoint >= 8192 && codePoint <= 8205)
+    || (codePoint >= 8208 && codePoint <= 8223)
+    || (codePoint >= 8242 && codePoint <= 8247)
+  ) return 1;
+
+  return 2;
+}
+
+function xWeightedLength(text) {
+  return Array.from(text).reduce(
+    (total, character) => total + xCharacterWeight(character),
+    0,
+  );
+}
+
+function xTakeWeighted(text, maximumWeight) {
+  let result = "";
+  let used = 0;
+
+  for (const character of Array.from(text)) {
+    const weight = xCharacterWeight(character);
+    if (used + weight > maximumWeight) break;
+    result += character;
+    used += weight;
+  }
+
+  return result;
+}
+
 function xShareText(report, summary) {
+  const xMaxLength = 280;
+  const xUrlLength = 23;
   const url = publicShareUrl();
+
   const heading = `Growth Alignment — ${report?.trackName || "Assessment"}`;
   const profileLine = `${summary.profile} · ${summary.total}/250`;
-  const callToAction = `Take the Growth Alignment assessment: ${url}`;
 
-  // Standard X posts allow 280 characters.
-  // X counts a URL as 23 characters after t.co shortening.
-  const xUrlLength = 23;
-  const rawLimit = 280 + Math.max(0, url.length - xUrlLength);
   const prefix = `${heading}\n${profileLine}\n\n`;
-  const suffix = `\n\n${callToAction}`;
-  const summaryText = textValue(summary.summary).replace(/\s+/g, " ").trim();
-  const available = Math.max(0, rawLimit - prefix.length - suffix.length);
+  const ctaPrefix = `\n\nTake the Growth Alignment assessment: `;
+
+  const summaryText = textValue(summary.summary)
+    .normalize("NFC")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  // X replaces the real URL with a t.co URL worth 23 weighted characters.
+  const fixedWeight =
+    xWeightedLength(prefix)
+    + xWeightedLength(ctaPrefix)
+    + xUrlLength;
+
+  const availableForSummary = Math.max(0, xMaxLength - fixedWeight);
 
   let excerpt = summaryText;
 
-  if (excerpt.length > available) {
-    if (available <= 1) {
-      excerpt = "";
-    } else {
-      excerpt = `${excerpt.slice(0, available - 1).trimEnd()}…`;
+  if (xWeightedLength(excerpt) > availableForSummary) {
+    const ellipsis = "…";
+    const ellipsisWeight = xWeightedLength(ellipsis);
+    const textBudget = Math.max(0, availableForSummary - ellipsisWeight);
+
+    excerpt = xTakeWeighted(summaryText, textBudget).trimEnd();
+
+    if (excerpt && availableForSummary >= ellipsisWeight) {
+      excerpt += ellipsis;
     }
   }
 
-  return `${prefix}${excerpt}${suffix}`;
+  return `${prefix}${excerpt}${ctaPrefix}${url}`;
 }
 
 async function copyHighlightText(text) {

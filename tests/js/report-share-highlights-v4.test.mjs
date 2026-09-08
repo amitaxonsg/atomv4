@@ -38,9 +38,13 @@ test("V4 shares only Lite-safe report highlights and keeps the Full Report priva
   assert.match(reportView, /Open LinkedIn/);
   assert.match(reportView, /LinkedIn cannot pre-fill the post text/);
   assert.match(reportView, /https:\/\/x\.com\/intent\/post/);
+  assert.match(reportView, /function xCharacterWeight\(character\)/);
+  assert.match(reportView, /function xWeightedLength\(text\)/);
+  assert.match(reportView, /function xTakeWeighted\(text, maximumWeight\)/);
   assert.match(reportView, /function xShareText\(report, summary\)/);
+  assert.match(reportView, /const xMaxLength = 280/);
   assert.match(reportView, /const xUrlLength = 23/);
-  assert.match(reportView, /const rawLimit = 280/);
+  assert.match(reportView, /availableForSummary/);
   assert.match(reportView, /Take the Growth Alignment assessment:/);
   assert.match(reportView, /const xText = xShareText\(report, summary\)/);
   assert.match(reportView, /encodeURIComponent\(xText\)/);
