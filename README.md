@@ -14,14 +14,14 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Server-verified live application commit** | `57dd98f5d55f4fc526c42e6b8ed5b035bb67f802` |
-| Live social-share icon UI | **DEPLOYED / LIVE / HEALTHY** |
-| Previous social chooser baseline | `3c0f3730cd667e4fb942a4da87fbe90379340f74` |
+| **Server-verified live application commit** | `d9a3fa42192fd5f716459d79ef5a37f6acce0383` |
+| Live Share Highlights modal | **DEPLOYED / LIVE / HEALTHY** |
+| Previous compact share-icon baseline | `57dd98f5d55f4fc526c42e6b8ed5b035bb67f802` |
 | Accepted PDF pagination/parity baseline | `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` |
 | PDF visual UAT | **PASSED — compact 5-page report, visible overall meter, Executive Summary packed onto page 1** |
 | Commitment contrast/readability baseline | `7e4d89ec30fa13f1b14c2bea938189c89482d7da` |
-| Latest confirmed full pre-change backup | `/var/backups/growth-alignment-v4/prechange-20260907T092220Z` |
-| Latest share-icon safety branch | `v4-pre-share-icon-ui-20260908-2acf40c` |
+| Latest confirmed full pre-change backup | `/var/backups/growth-alignment-v4/pre-share-modal-20260908T024637Z` |
+| Latest share-modal safety branch | `v4-pre-share-modal-20260908-7151c7b` |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
 | Releases | `/var/www/v4.atomglobal.com/releases` |
 | Active release symlink | `/var/www/v4.atomglobal.com/current` |
@@ -32,7 +32,7 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Cron | `/etc/cron.d/growth-alignment-v4` |
 | Web server | Apache + PHP 8.3-FPM |
 
-The `57dd98f5...` V4 deployment was confirmed healthy with **82/82 tests**, successful Vite build, PHP syntax check, successful Apache release switch, Stripe reconciliation with `0` failures, administrator alert processing with `0` failures, email queue processing with `0` failures, healthy five-minute background processing, and `/api/health` returning `status: ok`.
+The `d9a3fa42...` V4 deployment was confirmed healthy with **82/82 tests**, successful Vite build, PHP syntax check, successful Apache release switch, Stripe reconciliation with `0` failures, administrator alert processing with `0` failures, email queue processing with `0` failures, healthy five-minute background processing, and `/api/health` returning `status: ok`.
 
 > Documentation-only commits may be newer than the deployed application. `/var/www/v4.atomglobal.com/current` and `/var/www/v4.atomglobal.com/deployed-commit.txt` remain authoritative for the actual live runtime.
 
@@ -64,7 +64,7 @@ Privacy rules are mandatory:
 - the previous Full Report `Copy as text` action remains removed;
 - private Full Report self-delivery remains available through `Email PDF to self`, `Open PDF` and `Print report`.
 
-### Social share UI — current live behavior
+### Share Highlights modal — current live behavior
 
 The bottom report action bar contains only:
 
@@ -72,22 +72,31 @@ The bottom report action bar contains only:
 - **Open PDF** when the report is unlocked;
 - **Print report**.
 
-`Share highlights` appears only in the closing thank-you card. Selecting it reveals a compact share row:
+`Share highlights` appears only in the closing thank-you card. Selecting it opens an **in-page modal overlay** on top of the report rather than expanding the platform choices inline.
 
-- Facebook — **small icon only**;
-- LinkedIn — **small icon only**;
-- Instagram — **small icon only**;
-- **More** — text button.
+Approved modal behavior:
 
-The icon buttons retain accessible labels for assistive technology while hiding the platform names visually.
+- dimmed backdrop with centered dialog on desktop;
+- mobile presentation behaves like a compact bottom sheet;
+- close `×` button;
+- Escape closes the dialog;
+- clicking the backdrop closes the dialog;
+- keyboard focus stays inside the dialog while open and returns to the trigger on close;
+- background page scrolling is locked while the modal is open;
+- modal is excluded from print output;
+- public assessment link is shown read-only;
+- `Copy highlights` copies the Lite-safe highlights only;
+- Facebook, LinkedIn and Instagram render as compact icon choices;
+- **More** remains the text choice for the native share sheet/fallback;
+- platform buttons retain accessible labels;
+- no modal/share action receives the private report URL or Full Report content.
 
-Sharing behavior:
+Sharing behavior remains:
 
 - Facebook opens Facebook's public share endpoint with the public assessment URL and copies the Lite-safe highlights for paste fallback;
 - LinkedIn opens LinkedIn's public share endpoint and copies the Lite-safe highlights for paste fallback;
 - Instagram uses the operating system/browser native share sheet when available; otherwise the highlights are copied and Instagram is opened for manual paste;
-- **More** uses the native Web Share sheet when available and otherwise copies the highlights for pasting into any compatible app;
-- no share action receives the private report URL or private Full Report content.
+- **More** uses the native Web Share sheet when available and otherwise copies the highlights for pasting into any compatible app.
 
 Key sharing commits:
 
@@ -97,8 +106,11 @@ Key sharing commits:
 - `e4adbb94b83ebbb9b197459bf6fdf632a3fb2ba0` — remove action-bar Share button and add platform chooser
 - `95a1850e1d7243cac41aeb3e7caf3f62e5d62b27` — guard platform choices/action-bar removal
 - `3c0f3730cd667e4fb942a4da87fbe90379340f74` — server-verified text-button platform chooser baseline
-- `06c6588513e2ce72cdab179da2ee12c6bdc12627` — compact icon presentation for Facebook/LinkedIn/Instagram and `More` label
-- `57dd98f5d55f4fc526c42e6b8ed5b035bb67f802` — regression guard and **server-verified live icon UI baseline**
+- `06c6588513e2ce72cdab179da2ee12c6bdc12627` — compact icon presentation for Facebook/LinkedIn/Instagram and `More`
+- `57dd98f5d55f4fc526c42e6b8ed5b035bb67f802` — server-verified compact icon UI baseline
+- `3570b2109de5457e75f72c2b95d12986e078bab3` — replace inline platform row with accessible in-page Share Highlights modal
+- `5c01af3fa9a0a3a8dbe1214ab7e59b65ebc21b9b` — modal styling, responsive bottom-sheet behavior and print exclusion
+- `d9a3fa42192fd5f716459d79ef5a37f6acce0383` — regression guard and **server-verified live Share Highlights modal baseline**
 
 ## Accepted Full Report website / PDF parity
 
@@ -301,7 +313,7 @@ curl -fsS https://v4.atomglobal.com/api/health
 Current server-verified application commit:
 
 ```text
-57dd98f5d55f4fc526c42e6b8ed5b035bb67f802
+d9a3fa42192fd5f716459d79ef5a37f6acce0383
 ```
 
 ## Approved V4 backup procedure
@@ -314,18 +326,37 @@ Before a meaningful production change:
 4. confirm the backup path before changing production;
 5. keep V4 backups under `/var/backups/growth-alignment-v4`;
 6. never treat an empty backup directory as valid;
-7. verify compressed database/storage backups with `gzip -t` when created manually;
+7. verify compressed database/storage backups with `gzip -t` and inspect the storage archive with `tar -tzf` when created manually;
 8. never use V5/V3 as a V4 rollback source.
 
-### Confirmed full pre-change backup — 7 September 2026
+### Confirmed pre-share-modal full backup — 8 September 2026
 
 ```text
-/var/backups/growth-alignment-v4/prechange-20260907T092220Z
+/var/backups/growth-alignment-v4/pre-share-modal-20260908T024637Z
+```
+
+Confirmed backup contents include:
+
+```text
+current-release.txt
+deployed-commit.txt
+growth-alignment-v4
+growth-alignment-v4-storage.tar.gz
+growth_alignment_v4.sql.gz
+source-commit.txt
+v4.env
+```
+
+At backup time, live release/source/deployed marker all pointed to:
+
+```text
+57dd98f5d55f4fc526c42e6b8ed5b035bb67f802
 ```
 
 Relevant Git safety branches:
 
 ```text
+v4-pre-share-modal-20260908-7151c7b
 v4-pre-share-icon-ui-20260908-2acf40c
 v4-pre-share-platform-menu-20260907-6d27e07
 v4-prechange-backup-20260907-1720-ab0c8dd
@@ -360,11 +391,14 @@ Retest at minimum:
 - regenerated PDF includes saved commitment;
 - bottom action bar contains no Share button;
 - thank-you card contains the single `Share highlights` button;
-- Facebook, LinkedIn and Instagram render as small icon buttons;
-- **More** renders as the only text option in the platform row;
-- icon buttons retain accessible platform labels;
+- clicking `Share highlights` opens the in-page modal rather than expanding inline controls;
+- modal can close by `×`, Escape and backdrop click;
+- modal restores focus to the Share trigger after close;
+- public assessment link is shown, not the private report link;
+- `Copy highlights` copies only Lite-safe highlights;
+- Facebook, LinkedIn and Instagram render as compact icon choices;
+- **More** renders as the text option;
 - native share / clipboard fallback contains only Lite-safe highlights;
-- shared text contains the public home page, not the private report URL;
 - private Full Report/PDF/reflections/methodology/roadmap/commitment details are absent from the share payload;
 - Pay by Card flow and reconciliation fallback;
 - secure Full Report token;
