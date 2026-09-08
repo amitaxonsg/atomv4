@@ -1,7 +1,7 @@
 Current approved V4 live application commit:
-0b541e491905245f27ffd541ec82051c831f0d31
+a1d3c7a76c5d7745e2f9099e9459dc6de03d2dc6
 
-Accepted on 8 September 2026 after 82/82 frontend tests, successful Vite production build, PHP syntax validation for the public Lite Report share-link backend changes, successful Apache deployment, and healthy production checks.
+Accepted on 8 September 2026 after 82/82 frontend tests, successful Vite production build, successful Apache deployment, and healthy production checks.
 
 Current live sharing baseline:
 - Share Highlights modal uses Facebook, X, WhatsApp and LinkedIn.
@@ -10,6 +10,13 @@ Current live sharing baseline:
 - X uses X-compatible weighted 280-character calculation and preserves the assessment CTA/link.
 - "Share your link" uses a signed public Lite Report URL under /share/lite/ rather than the homepage or the private /report/<token> URL.
 - The public Lite Report endpoint returns Lite/free-report data only; paid_report_json is null and private Full Report/PDF/token data is not exposed.
+
+Current Lite Report print baseline:
+- Approved browser Print Report output is a clean one-page Lite Report.
+- It preserves the profile/result title, overall score, alignment pattern, Head-led/Heart-led meter, top three strengths and development observations.
+- Payment/UAT controls, Full Report upgrade UI, Share highlights, Start again, Print report and questionnaire side/navigation UI are excluded from print.
+- Accepted implementation commit: a1d3c7a76c5d7745e2f9099e9459dc6de03d2dc6.
+- Detailed acceptance marker: docs/V4-LITE-REPORT-PRINT-BASELINE-20260908.md.
 
 Production URL: https://v4.atomglobal.com/
 Admin URL: https://v4.atomglobal.com/admin
