@@ -24,11 +24,18 @@ test("V4 shares only Lite-safe report highlights and keeps the Full Report priva
   assert.doesNotMatch(builder, /writtenReflections|methodology|roadmap|commitment|private link|pdf/i);
 
   assert.match(reportView, /https:\/\/www\.facebook\.com\/sharer\/sharer\.php/);
+  assert.doesNotMatch(reportView, /facebook\.com\/sharer\/sharer\.php[^`]*quote=/);
+  assert.match(reportView, /prepareFacebook/);
+  assert.match(reportView, /facebookReady/);
+  assert.match(reportView, /Highlights copied for Facebook/);
+  assert.match(reportView, /Open Facebook/);
+  assert.match(reportView, /What’s on your mind\?/);
+  assert.match(reportView, /Ctrl\+V/);
   assert.match(reportView, /https:\/\/www\.linkedin\.com\/sharing\/share-offsite\//);
   assert.match(reportView, /https:\/\/x\.com\/intent\/post/);
   assert.match(reportView, /https:\/\/wa\.me\//);
   assert.match(reportView, /navigator\.clipboard\?\.writeText/);
-  assert.match(reportView, /aria-label="Share to Facebook"/);
+  assert.match(reportView, /aria-label="Prepare Facebook share"/);
   assert.match(reportView, /aria-label="Share to X"/);
   assert.match(reportView, /aria-label="Share to WhatsApp"/);
   assert.match(reportView, /aria-label="Share to LinkedIn"/);

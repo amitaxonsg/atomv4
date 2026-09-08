@@ -217,3 +217,37 @@
     background-size: 50px 50px !important;
   }
 }
+
+/* V4 Facebook guided share flow */
+.v4-facebook-share-ready {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #dfe7f5;
+  border-radius: 14px;
+  background: #f7f9fd;
+  text-align: left;
+}
+
+.v4-facebook-share-ready > strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #172033;
+  font-size: 14px;
+}
+
+.v4-facebook-share-ready p {
+  margin: 0 0 12px;
+  color: #596273;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.v4-facebook-share-ready .button {
+  width: 100%;
+}
+
+@media (max-width: 560px) {
+  .v4-facebook-share-ready {
+    padding: 14px;
+  }
+}

@@ -225,9 +225,8 @@ function openShareWindow(url) {
 async function shareHighlightsTo(network, report, summary) {
   const payload = highlightSharePayload(report, summary);
   if (network === "facebook") {
-    copyHighlightText(payload.text).catch(() => {});
-    openShareWindow(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(payload.url)}&quote=${encodeURIComponent(payload.text)}`);
-    return "Facebook share opened. Highlights were also copied in case Facebook asks you to paste them.";
+    openShareWindow(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(payload.url)}`);
+    return "Facebook opened.";
   }
   if (network === "x") {
     copyHighlightText(payload.text).catch(() => {});
@@ -250,6 +249,7 @@ async function shareHighlightsTo(network, report, summary) {
 function ShareHighlightsButton({ report, summary, className = "button button--primary" }) {
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState("");
+  const [facebookReady, setFacebookReady] = React.useState(false);
   const dialogRef = React.useRef(null);
   const closeRef = React.useRef(null);
   const previousFocusRef = React.useRef(null);
@@ -290,6 +290,7 @@ function ShareHighlightsButton({ report, summary, className = "button button--pr
 
   const close = () => {
     setMessage("");
+    setFacebookReady(false);
     setOpen(false);
   };
   const share = async network => {
@@ -298,6 +299,23 @@ function ShareHighlightsButton({ report, summary, className = "button button--pr
     } catch (error) {
       if (error?.name !== "AbortError") setMessage("Sharing is unavailable in this browser. You can still copy the highlights and paste them into the app.");
     }
+  };
+
+  const prepareFacebook = async () => {
+    try {
+      const copied = await copyHighlightText(highlightShareText(report, summary));
+      setFacebookReady(true);
+      setMessage(copied
+        ? "Highlights copied. Open Facebook, click “What’s on your mind?”, paste with Ctrl+V / ⌘V, then Share."
+        : "Facebook cannot pre-fill the post text. Copy your highlights first, then paste them into the Facebook post box.");
+    } catch {
+      setFacebookReady(true);
+      setMessage("Facebook cannot pre-fill the post text. Copy your highlights first, then paste them into the Facebook post box.");
+    }
+  };
+
+  const openFacebook = () => {
+    shareHighlightsTo("facebook", report, summary).catch(() => {});
   };
   const copyLink = async () => {
     try {
@@ -323,11 +341,16 @@ function ShareHighlightsButton({ report, summary, className = "button button--pr
         </div>
         <p className="v4-share-modal__label">Share to</p>
         <div className="upgrade-box__actions v4-share-modal__platforms" role="group" aria-label="Share highlights to a platform">
-          <button className="button button--ghost v4-social-facebook" type="button" aria-label="Share to Facebook" onClick={() => share("facebook")}>Facebook</button>
+          <button className="button button--ghost v4-social-facebook" type="button" aria-label="Prepare Facebook share" onClick={prepareFacebook}>Facebook</button>
           <button className="button button--ghost v4-social-x" type="button" aria-label="Share to X" onClick={() => share("x")}>X</button>
           <button className="button button--ghost v4-social-whatsapp" type="button" aria-label="Share to WhatsApp" onClick={() => share("whatsapp")}>WhatsApp</button>
           <button className="button button--ghost v4-social-linkedin" type="button" aria-label="Share to LinkedIn" onClick={() => share("linkedin")}>LinkedIn</button>
         </div>
+        {facebookReady && <div className="v4-facebook-share-ready">
+          <strong>Highlights copied for Facebook</strong>
+          <p>Facebook does not allow websites to fill the post box automatically. Click <strong>Open Facebook</strong>, then paste into “What’s on your mind?” using <strong>Ctrl+V</strong> or <strong>⌘V</strong>.</p>
+          <button className="button button--primary" type="button" onClick={openFacebook}>Open Facebook</button>
+        </div>}
         {message && <p className="preview-note v4-share-modal__status" role="status">{message}</p>}
       </section>
     </div>}
