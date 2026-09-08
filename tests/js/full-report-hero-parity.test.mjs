@@ -5,6 +5,7 @@ import test from "node:test";
 const main = fs.readFileSync("src/main.jsx", "utf8");
 const heroCss = fs.readFileSync("src/report-full-hero-v4.css", "utf8");
 const commitmentCss = fs.readFileSync("src/report-commitment-contrast-v4.css", "utf8");
+const printCss = fs.readFileSync("src/report-print-v4.css", "utf8");
 const reportView = fs.readFileSync("src/components/assessment/ReportView.jsx", "utf8");
 const pdf = fs.readFileSync("backend/src/Services/PdfService.php", "utf8");
 
@@ -30,6 +31,19 @@ test("V4 Lite, Full and PDF follow the approved reference result-card compositio
   assert.match(heroCss, /\.v4-meter__track[\s\S]*background-color:\s*#62636b\s*!important/);
   assert.match(reportView, /<section className="report-hero"><AlignmentGauge score=\{summary\.total\} \/><div><h2>Your alignment pattern<\/h2><p>\{summary\.summary\}<\/p><AlignmentMeter score=\{summary\.total\} \/><\/div><\/section>/);
   assert.match(reportView, /<section className=\{`paid-report \$\{unlocked \? "unlocked" : "locked"\}`\}/);
+
+  // Browser Print Report for locked Lite is a content-parity print view, not a screenshot of controls/layout.
+  assert.match(main, /share-modal-final-v4\.css";\nimport "\.\/report-print-v4\.css";/);
+  assert.match(printCss, /V4 browser Print Report — Lite Report print parity/);
+  assert.match(printCss, /@media print/);
+  assert.match(printCss, /@page[\s\S]*size:\s*A4 portrait/);
+  assert.match(printCss, /:has\(\.v4-report \.paid-report\.locked\)/);
+  assert.match(printCss, /> \.latest-visual-panel[\s\S]*display:\s*none\s*!important/);
+  assert.match(printCss, /> \.paid-report\.locked,[\s\S]*> \.v4-thank-you-share,[\s\S]*\.latest-page-actions/);
+  assert.match(printCss, /> \.report-hero[\s\S]*background-color:\s*#252832\s*!important/);
+  assert.match(printCss, /> \.report-columns[\s\S]*grid-template-columns:\s*1fr 1fr\s*!important/);
+  assert.match(printCss, /-webkit-print-color-adjust:\s*exact\s*!important/);
+  assert.doesNotMatch(printCss, /paid-report\.unlocked[\s\S]*display:\s*none/);
 
   // PDF mirrors the website Full Report hierarchy and visual language.
   assert.match(pdf, /\$overallScore = max\(0, min\(250/);
