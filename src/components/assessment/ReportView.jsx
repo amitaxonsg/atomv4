@@ -185,9 +185,13 @@ function CoachCallToAction({ report }) {
   return <section className="report-card v4-coach"><p className="eyebrow">Optional support</p><h3>{value.coachHeading || "Talk to a Coach"}</h3><p>{value.coachBody || "Turn your report into a focused development plan with an Atom Global coach."}</p><div className="v4-coach__actions">{contacts.map(item => <a className="button button--ghost" href={`mailto:${item.email}?subject=${encodeURIComponent("Growth Alignment coaching")}`} key={item.email}>Email {item.name}</a>)}</div></section>;
 }
 
-function publicShareUrl() {
+function assessmentUrl() {
   if (typeof window !== "undefined" && window.location?.origin) return `${window.location.origin}/`;
   return "https://v4.atomglobal.com/";
+}
+
+function publicShareUrl(report) {
+  return report?.publicLiteUrl || assessmentUrl();
 }
 
 function highlightShareText(report, summary) {
@@ -203,12 +207,12 @@ function highlightShareText(report, summary) {
   const observations = Array.isArray(summary.watchouts) ? summary.watchouts.slice(0, 3) : [];
   if (strengths.length) lines.push("", "Top strengths", ...strengths.map(item => `- ${textValue(item)}`));
   if (observations.length) lines.push("", "Development observations", ...observations.map(item => `- ${textValue(item)}`));
-  lines.push("", `Take the Growth Alignment assessment: ${publicShareUrl()}`);
+  lines.push("", `Take the Growth Alignment assessment: ${assessmentUrl()}`);
   return lines.join("\n");
 }
 
 function highlightSharePayload(report, summary) {
-  return { title: "Growth Alignment highlights", text: highlightShareText(report, summary), url: publicShareUrl() };
+  return { title: "Growth Alignment highlights", text: highlightShareText(report, summary), url: publicShareUrl(report) };
 }
 
 function xCharacterWeight(character) {
@@ -249,7 +253,7 @@ function xTakeWeighted(text, maximumWeight) {
 function xShareText(report, summary) {
   const xMaxLength = 280;
   const xUrlLength = 23;
-  const url = publicShareUrl();
+  const url = assessmentUrl();
 
   const heading = `Growth Alignment — ${report?.trackName || "Assessment"}`;
   const profileLine = `${summary.profile} · ${summary.total}/250`;
@@ -418,8 +422,8 @@ function ShareHighlightsButton({ report, summary, className = "button button--pr
 
   const copyLink = async () => {
     try {
-      const copied = await copyHighlightText(publicShareUrl());
-      setMessage(copied ? "Public assessment link copied." : "Copy is unavailable in this browser.");
+      const copied = await copyHighlightText(publicShareUrl(report));
+      setMessage(copied ? "Lite Report link copied." : "Copy is unavailable in this browser.");
     } catch {
       setMessage("Copy is unavailable in this browser.");
     }
@@ -436,7 +440,7 @@ function ShareHighlightsButton({ report, summary, className = "button button--pr
         <p className="v4-share-modal__description" id="v4-share-modal-description">Share your Growth Alignment highlights with friends. Your private Full Report stays private.</p>
         <div className="v4-share-modal__link">
           <span>Share your link</span>
-          <div><input type="text" readOnly value={publicShareUrl()} aria-label="Public assessment link" /><button className="button button--ghost" type="button" onClick={copyLink}>Copy link</button></div>
+          <div><input type="text" readOnly value={publicShareUrl(report)} aria-label="Public Lite Report link" /><button className="button button--ghost" type="button" onClick={copyLink}>Copy link</button></div>
         </div>
         <p className="v4-share-modal__label">Share to</p>
         <div className="upgrade-box__actions v4-share-modal__platforms" role="group" aria-label="Share highlights to a platform">
@@ -526,8 +530,9 @@ export default function ReportView({ payload, token, onReset }) {
   const summary = reportSummary(report);
   const paidContent = report?.paid?.content || report?.paid || null;
   const unlocked = Boolean(report?.is_unlocked);
-  const checkoutAvailable = isMockMode || Boolean(report?.checkoutAvailable);
-  const cashOnDeliveryAvailable = Boolean(report?.cashOnDeliveryAvailable);
+  const sharedLite = Boolean(report?.sharedLite);
+  const checkoutAvailable = !sharedLite && (isMockMode || Boolean(report?.checkoutAvailable));
+  const cashOnDeliveryAvailable = !sharedLite && Boolean(report?.cashOnDeliveryAvailable);
   const upgradePreview = report?.free?.upgradePreview || [];
   const [checkout, setCheckout] = React.useState({ busy: false, error: "" });
   const price = new Intl.NumberFormat(undefined, { style: "currency", currency: report?.currency || "USD" }).format(Number(report?.priceMinor || 0) / 100);
@@ -558,21 +563,32 @@ export default function ReportView({ payload, token, onReset }) {
   return <StageShell stageKey="report" current={4} actions={actions}>
     <div className={`v4-report ${reportClass}`}>
     <p className="eyebrow">Growth Alignment · {report?.trackName || "Assessment"} result</p><h1>{summary.profile}</h1>
-    <p className="lead">{report?.participantName ? `${report.participantName}, this` : "This"} result was calculated by the published assessment version from your saved responses.</p>
+    <p className="lead">{sharedLite
+      ? "This shared Lite Report contains only the result information selected for public sharing. Private Full Report content is not included."
+      : `${report?.participantName ? `${report.participantName}, this` : "This"} result was calculated by the published assessment version from your saved responses.`}</p>
     <section className="report-hero"><AlignmentGauge score={summary.total} /><div><h2>Your alignment pattern</h2><p>{summary.summary}</p><AlignmentMeter score={summary.total} /></div></section>
     <div className="report-columns"><section className="report-card"><h2>Top three strengths</h2><ul>{summary.strengths.slice(0, 3).map(item => <li key={item}><Check />{item}</li>)}</ul></section><section className="report-card"><h2>Development observations</h2><ul>{summary.watchouts.map(item => <li key={item}><span>—</span>{item}</li>)}</ul></section></div>
     <section className={`paid-report ${unlocked ? "unlocked" : "locked"}`}>
-      <div className="paid-heading"><div><p className="eyebrow">Complete report</p><h2>{unlocked ? "Your full development report" : "This is the short version"}</h2></div>{!unlocked && <span className="lock-badge"><Lock /> Locked</span>}</div>
+      <div className="paid-heading"><div><p className="eyebrow">Complete report</p><h2>{sharedLite ? "Shared Lite Report" : unlocked ? "Your full development report" : "This is the short version"}</h2></div>{!unlocked && !sharedLite && <span className="lock-badge"><Lock /> Locked</span>}</div>
       {unlocked ? <FullReportContent report={report} summary={summary} content={paidContent} token={token} /> : <>
         <p>Your Full Report goes deeper into the patterns behind this result and turns them into practical development guidance.</p><UpgradeReasons items={upgradePreview} locked />
         {!upgradePreview.length && <div className="locked-preview"><div><h3>10-area score breakdown and deep dive</h3><p>Compare how your pattern shifts across decisions, relationships, conflict and pressure.</p></div><div><h3>Practical development roadmap</h3><p>Receive tailored actions, working-style guidance and track-specific development insights.</p></div></div>}
         {checkout.error && <p className="form-error" role="alert">{checkout.error}</p>}
-        <div className="upgrade-box"><div><span>One-time payment</span><strong>{price}</strong><small>{report?.reportExperience?.paymentWording || "Secure payment unlocks your private Full Development Report."}</small></div><div className="upgrade-box__actions"><button className="button button--primary" disabled={!checkoutAvailable || checkout.busy} onClick={openCheckout}>{checkout.busy ? "Opening checkout…" : checkoutAvailable ? "Pay by card" : "Full Report checkout coming soon"} {checkoutAvailable && <ArrowRight />}</button>{cashOnDeliveryAvailable && <button className="button button--ghost" disabled={checkout.busy} onClick={openCashOnDelivery}>UAT Test — No Payment</button>}</div></div>
+        {sharedLite
+          ? <div className="upgrade-box"><div><span>Discover your own result</span><strong>Growth Alignment</strong><small>Complete the assessment to receive your own Lite Report and personal Growth Alignment profile.</small></div><div className="upgrade-box__actions"><a className="button button--primary" href="/">Take the assessment <ArrowRight /></a></div></div>
+          : <div className="upgrade-box"><div><span>One-time payment</span><strong>{price}</strong><small>{report?.reportExperience?.paymentWording || "Secure payment unlocks your private Full Development Report."}</small></div><div className="upgrade-box__actions"><button className="button button--primary" disabled={!checkoutAvailable || checkout.busy} onClick={openCheckout}>{checkout.busy ? "Opening checkout…" : checkoutAvailable ? "Pay by card" : "Full Report checkout coming soon"} {checkoutAvailable && <ArrowRight />}</button>{cashOnDeliveryAvailable && <button className="button button--ghost" disabled={checkout.busy} onClick={openCashOnDelivery}>UAT Test — No Payment</button>}</div></div>}
         {cashOnDeliveryAvailable && <p className="preview-note">UAT Test — No Payment is temporarily enabled for client testing. It unlocks the Full Report and queues the normal confirmation/report email with the PDF attachment without charging Stripe.</p>}
-        {!checkoutAvailable && !cashOnDeliveryAvailable && <p className="preview-note">Your Lite Report is ready now. Full Report purchasing will open after Atom Global completes its secure payment configuration.</p>}
+        {!sharedLite && !checkoutAvailable && !cashOnDeliveryAvailable && <p className="preview-note">Your Lite Report is ready now. Full Report purchasing will open after Atom Global completes its secure payment configuration.</p>}
       </>}
     </section>
-    <ThankYouShare report={report} summary={summary} />
+    {sharedLite
+      ? <section className="report-card v4-coach">
+          <p className="eyebrow">Your turn</p>
+          <h3>Discover your own Growth Alignment</h3>
+          <p>Take the assessment to receive your own Lite Report and see how you balance head and heart.</p>
+          <a className="button button--primary" href="/">Take the Growth Alignment assessment</a>
+        </section>
+      : <ThankYouShare report={report} summary={summary} />}
     {isMockMode && <p className="preview-note">Preview mode simulates payment. Production unlocks only after a verified Stripe webhook or authorised administrator action.</p>}
     </div>
   </StageShell>;

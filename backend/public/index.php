@@ -60,6 +60,11 @@ $router->add('GET', '/api/reports/{token}', function (Request $request, array $p
     $report = $container['reports']->byToken($params['token']);
     return $report ? Response::json($report) : Response::error('Report not found or expired.', 404);
 });
+
+$router->add('GET', '/api/public/reports/lite/{token}', function (Request $request, array $params) use ($container) {
+    $report = $container['reports']->byPublicLiteToken($params['token']);
+    return $report ? Response::json($report) : Response::error('Shared Lite Report not found.', 404);
+});
 $router->add('POST', '/api/payments/checkout', function (Request $request) use ($container, $config) {
     $stripe = new StripeService($container['db'], $container['settings'], $container['reports'], $config);
     return Response::json($stripe->checkout((int) ($request->body['sessionId'] ?? 0), (string) ($request->body['track'] ?? ''), $request->body['affiliateCode'] ?? null));

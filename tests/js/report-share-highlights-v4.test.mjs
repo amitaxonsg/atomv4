@@ -6,6 +6,10 @@ const reportView = fs.readFileSync("src/components/assessment/ReportView.jsx", "
 const heroCss = fs.readFileSync("src/report-full-hero-v4.css", "utf8");
 const finalShareCss = fs.readFileSync("src/share-modal-final-v4.css", "utf8");
 const mainEntry = fs.readFileSync("src/main.jsx", "utf8");
+const appProduction = fs.readFileSync("src/components/AssessmentAppProduction.jsx", "utf8");
+const apiClient = fs.readFileSync("src/api/client.js", "utf8");
+const reportService = fs.readFileSync("backend/src/Services/ReportService.php", "utf8");
+const backendRoutes = fs.readFileSync("backend/public/index.php", "utf8");
 
 test("V4 shares only Lite-safe report highlights and keeps the Full Report private", () => {
   const start = reportView.indexOf("function highlightShareText(report, summary)");
@@ -18,7 +22,7 @@ test("V4 shares only Lite-safe report highlights and keeps the Full Report priva
   assert.match(builder, /textValue\(summary\.summary\)/);
   assert.match(builder, /summary\.strengths/);
   assert.match(builder, /summary\.watchouts/);
-  assert.match(builder, /publicShareUrl\(\)/);
+  assert.match(builder, /assessmentUrl\(\)/);
 
   assert.doesNotMatch(builder, /paidContent|report\?\.paid|content\?|token|\/api\/reports\//);
   assert.doesNotMatch(builder, /writtenReflections|methodology|roadmap|commitment|private link|pdf/i);
@@ -73,8 +77,28 @@ test("V4 shares only Lite-safe report highlights and keeps the Full Report priva
   assert.match(reportView, /role="dialog" aria-modal="true"/);
   assert.match(reportView, /aria-labelledby="v4-share-modal-title"/);
   assert.match(reportView, /aria-label="Close share dialog"/);
-  assert.match(reportView, /Public assessment link/);
+  assert.match(reportView, /Public Lite Report link/);
   assert.match(reportView, /Copy link/);
+  assert.match(reportView, /function publicShareUrl\(report\)/);
+  assert.match(reportView, /report\?\.publicLiteUrl/);
+  assert.match(reportView, /value=\{publicShareUrl\(report\)\}/);
+  assert.match(reportView, /Lite Report link copied/);
+  assert.match(reportView, /sharedLite/);
+
+  assert.match(appProduction, /function SharedLiteReport\(\{ token \}\)/);
+  assert.match(appProduction, /path\.startsWith\("\/share\/lite\/"\)/);
+  assert.match(apiClient, /getPublicLiteReport: token => request\(`\/public\/reports\/lite\//);
+
+  assert.match(backendRoutes, /\/api\/public\/reports\/lite\/\{token\}/);
+  assert.match(reportService, /public function byPublicLiteToken\(string \$token\)/);
+  assert.match(reportService, /private function publicLiteSignature\(int \$reportId\)/);
+  assert.match(reportService, /v4-public-lite-report:/);
+
+  const publicLiteStart = reportService.indexOf("public function byPublicLiteToken");
+  const publicLiteEnd = reportService.indexOf("public function pdfByToken", publicLiteStart);
+  const publicLiteScope = reportService.slice(publicLiteStart, publicLiteEnd);
+  assert.ok(publicLiteStart >= 0 && publicLiteEnd > publicLiteStart, "public Lite report service must exist");
+  assert.doesNotMatch(publicLiteScope, /paid_report_json FROM|participantEmail|participantName|secure_token_hash/);
   assert.match(reportView, /event\.key === "Escape"/);
   assert.match(reportView, /document\.body\.style\.overflow = "hidden"/);
   assert.match(reportView, /previousFocusRef\.current\?\.focus\?\.\(\)/);

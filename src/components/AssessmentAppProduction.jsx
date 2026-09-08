@@ -149,6 +149,39 @@ function RemoteReport({ token }) {
   return <ReportView payload={state.report} token={token} />;
 }
 
+function SharedLiteReport({ token }) {
+  const [state, setState] = React.useState({ loading: true, report: null, error: "" });
+
+  React.useEffect(() => {
+    let active = true;
+
+    api.getPublicLiteReport(token)
+      .then(report => {
+        if (active) setState({ loading: false, report, error: "" });
+      })
+      .catch(error => {
+        if (active) setState({ loading: false, report: null, error: error.message });
+      });
+
+    return () => { active = false; };
+  }, [token]);
+
+  if (state.loading) {
+    return <StageShell><p className="lead">Loading shared Lite Report…</p></StageShell>;
+  }
+
+  if (state.error) {
+    return <StageShell>
+      <p className="eyebrow">Shared Lite Report</p>
+      <h1>Link unavailable</h1>
+      <p className="lead">This shared Lite Report link is invalid or has been revoked.</p>
+      <a className="button button--primary" href="/">Take the Growth Alignment assessment</a>
+    </StageShell>;
+  }
+
+  return <ReportView payload={state.report} />;
+}
+
 function attributionFromLocation() {
   const params = new URLSearchParams(window.location.search);
   return {
@@ -206,6 +239,7 @@ export default function AssessmentAppProduction() {
   if (path.startsWith("/admin")) return <AdminApp />;
   if (path === "/payment/success") return <PaymentStatus />;
   if (path === "/payment/cancelled") return <PaymentStatus cancelled />;
+  if (path.startsWith("/share/lite/")) return <SharedLiteReport token={path.split("/").filter(Boolean).at(-1)} />;
   if (path.startsWith("/report/")) return <RemoteReport token={path.split("/").filter(Boolean).at(-1)} />;
 
   const [stage, setStage] = React.useState("select");

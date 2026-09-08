@@ -84,9 +84,66 @@ final class ReportService
             $row['retakeRecommendedAt'] = $this->recommendedRetakeAt((string) ($row['completedAt'] ?? ''));
             $row['commitment'] = $this->commitment((int) $row['id']);
             $row['reportExperience'] = $this->reportExperience();
+            $publicLiteUrl = $this->publicLiteUrl((int) $row['id']);
+            if ($publicLiteUrl !== '') $row['publicLiteUrl'] = $publicLiteUrl;
             $this->db->execute('UPDATE generated_reports SET view_count = view_count + 1, last_viewed_at = NOW() WHERE id = ?', [$row['id']]);
         }
         return $row;
+    }
+
+    public function byPublicLiteToken(string $token): ?array
+    {
+        if (!preg_match('/^([1-9][0-9]*)\\.([a-f0-9]{64})$/', $token, $matches)) return null;
+
+        $reportId = (int) $matches[1];
+        $signature = (string) $matches[2];
+        $expected = $this->publicLiteSignature($reportId);
+
+        if ($expected === '' || !hash_equals($expected, $signature)) return null;
+
+        $row = $this->db->fetch(
+            'SELECT gr.id, gr.free_report_json, t.track_key trackKey, t.name trackName
+             FROM generated_reports gr
+             JOIN survey_sessions s ON s.id = gr.survey_session_id
+             JOIN assessment_tracks t ON t.id = s.track_id
+             WHERE gr.id = ? AND gr.revoked_at IS NULL
+             LIMIT 1',
+            [$reportId]
+        );
+
+        if (!$row) return null;
+
+        return [
+            'id' => (int) $row['id'],
+            'trackKey' => (string) $row['trackKey'],
+            'trackName' => (string) $row['trackName'],
+            'is_unlocked' => false,
+            'pdf_available' => false,
+            'free_report_json' => (string) $row['free_report_json'],
+            'paid_report_json' => null,
+            'checkoutAvailable' => false,
+            'cashOnDeliveryAvailable' => false,
+            'sharedLite' => true,
+            'publicLiteUrl' => $this->publicLiteUrl((int) $row['id']),
+        ];
+    }
+
+    private function publicLiteSignature(int $reportId): string
+    {
+        $key = trim((string) ($this->config['key'] ?? ''));
+        if ($key === '' || $reportId < 1) return '';
+
+        return hash_hmac('sha256', 'v4-public-lite-report:' . $reportId, $key);
+    }
+
+    private function publicLiteUrl(int $reportId): string
+    {
+        $base = rtrim((string) ($this->config['url'] ?? ''), '/');
+        $signature = $this->publicLiteSignature($reportId);
+
+        if ($base === '' || $signature === '') return '';
+
+        return $base . '/share/lite/' . $reportId . '.' . $signature;
     }
 
     public function pdfByToken(string $token): ?string
