@@ -26,9 +26,10 @@ test("V4 shares only Lite-safe report highlights and keeps the Full Report priva
   assert.match(reportView, /https:\/\/www\.instagram\.com\//);
   assert.match(reportView, /navigator\.share\(payload\)/);
   assert.match(reportView, /navigator\.clipboard\?\.writeText/);
-  assert.match(reportView, />Facebook<\/button>/);
-  assert.match(reportView, />LinkedIn<\/button>/);
-  assert.match(reportView, />Instagram<\/button>/);
+  assert.match(reportView, /aria-label="Share to Facebook"/);
+  assert.match(reportView, /aria-label="Share to LinkedIn"/);
+  assert.match(reportView, /aria-label="Share to Instagram"/);
+  assert.match(reportView, /aria-label="More sharing options"/);
   assert.match(reportView, />More apps<\/button>/);
   assert.match(reportView, /Share highlights/);
   assert.match(reportView, /Thank you for taking the assessment\./);
@@ -44,13 +45,22 @@ test("V4 shares only Lite-safe report highlights and keeps the Full Report priva
   assert.match(actions, /Open PDF/);
   assert.match(actions, /Print report/);
 
-  assert.match(heroCss, /V4 social share menu/);
-  assert.match(heroCss, /upgrade-box__actions > button:nth-child\(-n\+3\)/);
-  assert.match(heroCss, /button:nth-child\(1\)::before/);
-  assert.match(heroCss, /button:nth-child\(2\)::before/);
-  assert.match(heroCss, /button:nth-child\(3\)::before/);
-  assert.match(heroCss, /width:\s*42px/);
-  assert.match(heroCss, /content:\s*"More"/);
+  assert.match(reportView, /className="v4-share-modal__backdrop"/);
+  assert.match(reportView, /role="dialog" aria-modal="true"/);
+  assert.match(reportView, /aria-labelledby="v4-share-modal-title"/);
+  assert.match(reportView, /aria-label="Close share dialog"/);
+  assert.match(reportView, /Public assessment link/);
+  assert.match(reportView, /Copy highlights/);
+  assert.match(reportView, /event\.key === "Escape"/);
+  assert.match(reportView, /document\.body\.style\.overflow = "hidden"/);
+  assert.match(reportView, /previousFocusRef\.current\?\.focus\?\.\(\)/);
+  assert.match(reportView, /event\.target === event\.currentTarget/);
+
+  assert.match(heroCss, /\.v4-share-modal__backdrop\s*\{/);
+  assert.match(heroCss, /position:\s*fixed/);
+  assert.match(heroCss, /\.v4-share-modal\s*\{/);
+  assert.match(heroCss, /\.v4-share-modal__close\s*\{/);
+  assert.match(heroCss, /@media print[\s\S]*\.v4-share-modal__backdrop/);
 
   assert.doesNotMatch(reportView, /function fullReportText|Copy as text|Report copied as text/);
   assert.match(reportView, /<h3>Save your full report<\/h3>/);
