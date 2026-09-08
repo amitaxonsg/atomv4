@@ -3,6 +3,7 @@ import fs from "node:fs";
 import test from "node:test";
 
 const reportView = fs.readFileSync("src/components/assessment/ReportView.jsx", "utf8");
+const heroCss = fs.readFileSync("src/report-full-hero-v4.css", "utf8");
 
 test("V4 shares only Lite-safe report highlights and keeps the Full Report private", () => {
   const start = reportView.indexOf("function highlightShareText(report, summary)");
@@ -42,6 +43,14 @@ test("V4 shares only Lite-safe report highlights and keeps the Full Report priva
   assert.doesNotMatch(actions, /ShareHighlightsButton/, "bottom action bar must not contain Share highlights");
   assert.match(actions, /Open PDF/);
   assert.match(actions, /Print report/);
+
+  assert.match(heroCss, /V4 social share menu/);
+  assert.match(heroCss, /upgrade-box__actions > button:nth-child\(-n\+3\)/);
+  assert.match(heroCss, /button:nth-child\(1\)::before/);
+  assert.match(heroCss, /button:nth-child\(2\)::before/);
+  assert.match(heroCss, /button:nth-child\(3\)::before/);
+  assert.match(heroCss, /width:\s*42px/);
+  assert.match(heroCss, /content:\s*"More"/);
 
   assert.doesNotMatch(reportView, /function fullReportText|Copy as text|Report copied as text/);
   assert.match(reportView, /<h3>Save your full report<\/h3>/);
