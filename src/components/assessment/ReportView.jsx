@@ -238,9 +238,8 @@ async function shareHighlightsTo(network, report, summary) {
     return "WhatsApp share opened with your highlights.";
   }
   if (network === "linkedin") {
-    copyHighlightText(payload.text).catch(() => {});
     openShareWindow(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(payload.url)}`);
-    return "LinkedIn share opened. Highlights were also copied so you can paste them into your post.";
+    return "LinkedIn opened.";
   }
   await copyHighlightText(payload.text);
   return "Highlights copied — paste them into any social app or message.";
@@ -250,6 +249,7 @@ function ShareHighlightsButton({ report, summary, className = "button button--pr
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [facebookReady, setFacebookReady] = React.useState(false);
+  const [linkedinReady, setLinkedinReady] = React.useState(false);
   const dialogRef = React.useRef(null);
   const closeRef = React.useRef(null);
   const previousFocusRef = React.useRef(null);
@@ -291,6 +291,7 @@ function ShareHighlightsButton({ report, summary, className = "button button--pr
   const close = () => {
     setMessage("");
     setFacebookReady(false);
+    setLinkedinReady(false);
     setOpen(false);
   };
   const share = async network => {
@@ -305,6 +306,7 @@ function ShareHighlightsButton({ report, summary, className = "button button--pr
     try {
       const copied = await copyHighlightText(highlightShareText(report, summary));
       setFacebookReady(true);
+      setLinkedinReady(false);
       setMessage(copied
         ? "Highlights copied. Open Facebook, click “What’s on your mind?”, paste with Ctrl+V / ⌘V, then Share."
         : "Facebook cannot pre-fill the post text. Copy your highlights first, then paste them into the Facebook post box.");
@@ -317,6 +319,26 @@ function ShareHighlightsButton({ report, summary, className = "button button--pr
   const openFacebook = () => {
     shareHighlightsTo("facebook", report, summary).catch(() => {});
   };
+
+  const prepareLinkedIn = async () => {
+    try {
+      const copied = await copyHighlightText(highlightShareText(report, summary));
+      setLinkedinReady(true);
+      setFacebookReady(false);
+      setMessage(copied
+        ? "Highlights copied. Open LinkedIn, click the post text box, paste with Ctrl+V / ⌘V, then Post."
+        : "LinkedIn cannot pre-fill the post text. Copy your highlights first, then paste them into the LinkedIn post box.");
+    } catch {
+      setLinkedinReady(true);
+      setFacebookReady(false);
+      setMessage("LinkedIn cannot pre-fill the post text. Copy your highlights first, then paste them into the LinkedIn post box.");
+    }
+  };
+
+  const openLinkedIn = () => {
+    shareHighlightsTo("linkedin", report, summary).catch(() => {});
+  };
+
   const copyLink = async () => {
     try {
       const copied = await copyHighlightText(publicShareUrl());
@@ -344,12 +366,17 @@ function ShareHighlightsButton({ report, summary, className = "button button--pr
           <button className="button button--ghost v4-social-facebook" type="button" aria-label="Prepare Facebook share" onClick={prepareFacebook}>Facebook</button>
           <button className="button button--ghost v4-social-x" type="button" aria-label="Share to X" onClick={() => share("x")}>X</button>
           <button className="button button--ghost v4-social-whatsapp" type="button" aria-label="Share to WhatsApp" onClick={() => share("whatsapp")}>WhatsApp</button>
-          <button className="button button--ghost v4-social-linkedin" type="button" aria-label="Share to LinkedIn" onClick={() => share("linkedin")}>LinkedIn</button>
+          <button className="button button--ghost v4-social-linkedin" type="button" aria-label="Prepare LinkedIn share" onClick={prepareLinkedIn}>LinkedIn</button>
         </div>
         {facebookReady && <div className="v4-facebook-share-ready">
           <strong>Highlights copied for Facebook</strong>
           <p>Facebook does not allow websites to fill the post box automatically. Click <strong>Open Facebook</strong>, then paste into “What’s on your mind?” using <strong>Ctrl+V</strong> or <strong>⌘V</strong>.</p>
           <button className="button button--primary" type="button" onClick={openFacebook}>Open Facebook</button>
+        </div>}
+        {linkedinReady && <div className="v4-linkedin-share-ready">
+          <strong>Highlights copied for LinkedIn</strong>
+          <p>LinkedIn does not allow websites to fill the post text automatically. Click <strong>Open LinkedIn</strong>, then paste into the LinkedIn post box using <strong>Ctrl+V</strong> or <strong>⌘V</strong>.</p>
+          <button className="button button--primary" type="button" onClick={openLinkedIn}>Open LinkedIn</button>
         </div>}
         {message && <p className="preview-note v4-share-modal__status" role="status">{message}</p>}
       </section>

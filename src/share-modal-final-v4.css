@@ -251,3 +251,37 @@
     padding: 14px;
   }
 }
+
+/* V4 LinkedIn guided share flow */
+.v4-linkedin-share-ready {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #d9e8f5;
+  border-radius: 14px;
+  background: #f5f9fc;
+  text-align: left;
+}
+
+.v4-linkedin-share-ready > strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #172033;
+  font-size: 14px;
+}
+
+.v4-linkedin-share-ready p {
+  margin: 0 0 12px;
+  color: #596273;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.v4-linkedin-share-ready .button {
+  width: 100%;
+}
+
+@media (max-width: 560px) {
+  .v4-linkedin-share-ready {
+    padding: 14px;
+  }
+}
