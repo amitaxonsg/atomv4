@@ -1,4 +1,17 @@
 Current approved V4 live application commit:
-7bf9eeb0106c14b5be7f341a3ccacef0d1d0985c
+0b541e491905245f27ffd541ec82051c831f0d31
 
-Accepted on 3 September 2026 after 74/74 frontend tests, successful Vite production build, successful Apache deployment and healthy production checks.
+Accepted on 8 September 2026 after 82/82 frontend tests, successful Vite production build, PHP syntax validation for the public Lite Report share-link backend changes, successful Apache deployment, and healthy production checks.
+
+Current live sharing baseline:
+- Share Highlights modal uses Facebook, X, WhatsApp and LinkedIn.
+- Facebook and LinkedIn use guided copy/paste flows because their public share endpoints do not reliably prefill post text.
+- WhatsApp opens with Lite-safe highlights automatically.
+- X uses X-compatible weighted 280-character calculation and preserves the assessment CTA/link.
+- "Share your link" uses a signed public Lite Report URL under /share/lite/ rather than the homepage or the private /report/<token> URL.
+- The public Lite Report endpoint returns Lite/free-report data only; paid_report_json is null and private Full Report/PDF/token data is not exposed.
+
+Production URL: https://v4.atomglobal.com/
+Admin URL: https://v4.atomglobal.com/admin
+Branch: production-readiness-v4-mobile-final-20260902
+Web server: Apache + PHP 8.3-FPM
