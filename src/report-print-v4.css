@@ -1,0 +1,288 @@
+/* V4 browser Print Report — Lite Report print parity.
+   Applies only when the current report is the locked Lite Report.
+   Keeps the Lite result itself and removes interactive/payment/navigation UI from print. */
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 11mm 12mm;
+  }
+
+  html,
+  body,
+  #root {
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Remove the split-screen assessment shell from the printed Lite Report. */
+  .latest-questionnaire-shell:has(.v4-report .paid-report.locked) {
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .latest-questionnaire-shell:has(.v4-report .paid-report.locked) > .latest-visual-panel {
+    display: none !important;
+  }
+
+  .latest-questionnaire-shell:has(.v4-report .paid-report.locked) > .latest-questionnaire-content,
+  .latest-questionnaire-shell:has(.v4-report .paid-report.locked) .latest-questionnaire-page {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  /* Keep the Atom Global report branding, but make it compact. */
+  .latest-questionnaire-shell:has(.v4-report .paid-report.locked) .latest-public-brand {
+    display: inline-flex !important;
+    margin: 0 0 6mm !important;
+  }
+
+  .latest-questionnaire-shell:has(.v4-report .paid-report.locked) .latest-public-brand img {
+    width: auto !important;
+    max-width: 46mm !important;
+    max-height: 16mm !important;
+  }
+
+  /* Print only the Lite Report content — no checkout, share controls or page actions. */
+  .v4-report:has(.paid-report.locked) > .paid-report.locked,
+  .v4-report:has(.paid-report.locked) > .v4-thank-you-share,
+  .latest-questionnaire-shell:has(.v4-report .paid-report.locked) .latest-page-actions,
+  .latest-questionnaire-shell:has(.v4-report .paid-report.locked) .v4-share-modal__backdrop,
+  .latest-questionnaire-shell:has(.v4-report .paid-report.locked) button,
+  .latest-questionnaire-shell:has(.v4-report .paid-report.locked) .button {
+    display: none !important;
+  }
+
+  .v4-report:has(.paid-report.locked) {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .eyebrow:first-child {
+    margin: 0 0 2.5mm !important;
+    color: #b54b3d !important;
+    font-size: 9pt !important;
+    letter-spacing: .12em !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > h1 {
+    max-width: none !important;
+    margin: 0 0 2.5mm !important;
+    color: #211c16 !important;
+    font-size: 29pt !important;
+    line-height: 1.03 !important;
+    break-after: avoid !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .lead {
+    max-width: none !important;
+    margin: 0 0 5mm !important;
+    color: #51483f !important;
+    font-size: 9.5pt !important;
+    line-height: 1.45 !important;
+  }
+
+  /* Keep the approved Lite hero composition readable in print. */
+  .v4-report:has(.paid-report.locked) > .report-hero {
+    display: grid !important;
+    grid-template-columns: 38mm minmax(0, 1fr) !important;
+    gap: 7mm !important;
+    align-items: center !important;
+    margin: 0 0 6mm !important;
+    padding: 7mm !important;
+    overflow: hidden !important;
+    border: 1px solid #d8b978 !important;
+    border-radius: 5mm !important;
+    background-color: #252832 !important;
+    background-image: linear-gradient(118deg, #1f2331 0%, #282938 52%, #4b2628 100%) !important;
+    box-shadow: none !important;
+    color: #ffffff !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-hero::after {
+    display: none !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-hero > .gauge {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-height: 30mm !important;
+    margin: 0 !important;
+    padding: 5mm 3mm !important;
+    border: 1px solid #d8b978 !important;
+    border-radius: 4mm !important;
+    background: #2a2b36 !important;
+    box-shadow: none !important;
+    text-align: center !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-hero > .gauge .gauge__arc,
+  .v4-report:has(.paid-report.locked) > .report-hero > .gauge .gauge__labels {
+    display: none !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-hero > .gauge strong {
+    color: #ffffff !important;
+    font-size: 28pt !important;
+    line-height: 1 !important;
+    text-align: center !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-hero > .gauge > span {
+    margin-top: 2mm !important;
+    color: #f7efe2 !important;
+    font-size: 7.5pt !important;
+    text-align: center !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-hero > div:not(.gauge) {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-hero h2 {
+    margin: 0 0 2mm !important;
+    color: #f2d78f !important;
+    font-size: 9pt !important;
+    letter-spacing: .08em !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-hero p {
+    margin: 0 !important;
+    color: #ffffff !important;
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-hero .v4-meter {
+    width: 100% !important;
+    margin: 5mm 0 0 !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-hero .v4-meter__labels {
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important;
+    gap: 3mm !important;
+    color: #eee7dc !important;
+    font-size: 6.5pt !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-hero .v4-meter__labels strong {
+    color: #ffffff !important;
+    font-size: 7pt !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-hero .v4-meter__labels span:first-child {
+    text-align: left !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-hero .v4-meter__labels span:last-child {
+    text-align: right !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-hero .v4-meter__track {
+    height: 3mm !important;
+    margin-top: 2mm !important;
+    overflow: hidden !important;
+    border: 1px solid #777983 !important;
+    background: #62636b !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-hero .v4-meter__track > span {
+    display: block !important;
+    height: 100% !important;
+    background: #d8568c !important;
+  }
+
+  /* Strengths and observations are the final Lite Report sections. */
+  .v4-report:has(.paid-report.locked) > .report-columns {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 5mm !important;
+    margin: 0 !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-columns > .report-card {
+    margin: 0 !important;
+    padding: 5mm !important;
+    border: 1px solid #ded5ca !important;
+    border-top: 3px solid #b54b3d !important;
+    border-radius: 4mm !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-columns > .report-card:first-child {
+    border-top-color: #2f9e69 !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-columns h2 {
+    margin: 0 0 3mm !important;
+    color: #211c16 !important;
+    font-size: 14pt !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-columns ul {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-columns li {
+    min-height: 0 !important;
+    margin: 0 0 2.5mm !important;
+    padding: 3mm 3.5mm !important;
+    border: 1px solid #ebe4dc !important;
+    border-radius: 2.5mm !important;
+    background: #faf8f5 !important;
+    box-shadow: none !important;
+    color: #332c25 !important;
+    font-size: 9pt !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .report-columns li:last-child {
+    margin-bottom: 0 !important;
+  }
+}
