@@ -636,3 +636,251 @@
     width: 42px;
   }
 }
+
+
+/* ==========================================================
+   V4 SHARE MODAL — FRIENDS TEMPLATE / VECTOR SOCIAL ICONS
+   Final visual override.
+   ========================================================== */
+
+.v4-share-modal {
+  width: min(470px, calc(100vw - 32px));
+  padding: 34px 34px 30px;
+  overflow: visible;
+  border: 1px solid #e9e9e9;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(25, 25, 25, .16);
+}
+
+.v4-share-modal::before {
+  content: "";
+  order: 0;
+  align-self: center;
+  width: 72px;
+  height: 72px;
+  margin: -72px 0 18px;
+  border-radius: 50%;
+  background:
+    #f7f8ff
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23454b55' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M25 39l-4 4a10 10 0 01-14-14l11-11a10 10 0 0114 0'/%3E%3Cpath d='M39 25l4-4a10 10 0 0114 14L46 46a10 10 0 01-14 0'/%3E%3Cpath d='M23 41l18-18'/%3E%3C/g%3E%3C/svg%3E")
+    center / 40px 40px no-repeat;
+  box-shadow: 0 10px 28px rgba(74, 78, 100, .10);
+}
+
+.v4-share-modal__header {
+  order: 1;
+  margin: 0 0 8px;
+  align-items: center;
+}
+
+.v4-share-modal__header > div {
+  flex: 1;
+}
+
+.v4-share-modal__header h3 {
+  margin: 0;
+  color: #111;
+  font-size: 29px;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.v4-share-modal__close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  background: #fff;
+  color: #3e4248;
+}
+
+.v4-share-modal__description {
+  order: 2;
+  max-width: 310px;
+  margin: 0 auto 30px;
+  padding: 0;
+  border: 0;
+  color: #6b6870;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.v4-share-modal__link {
+  order: 3;
+  margin-bottom: 26px;
+}
+
+.v4-share-modal__link > span {
+  display: block;
+  margin: 0 0 10px;
+  color: #171717;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.v4-share-modal__link > span::before {
+  content: none;
+}
+
+.v4-share-modal__link > div {
+  min-height: 52px;
+  border: 0;
+  border-radius: 12px;
+  background: #f7f8fc;
+  box-shadow: none;
+}
+
+.v4-share-modal__link > div::before {
+  content: "🔗";
+  left: 14px;
+  color: #5f6470;
+  font-size: 15px;
+}
+
+.v4-share-modal__link input {
+  padding: 13px 12px 13px 42px;
+  color: #33343a;
+  font-size: 13px;
+}
+
+.v4-share-modal__link .button {
+  width: 50px;
+  min-width: 50px;
+  background: transparent;
+  border-left: 0;
+}
+
+.v4-share-modal__link .button::before {
+  content: "⧉";
+  color: #363b44;
+  font-size: 21px;
+}
+
+.v4-share-modal__label {
+  order: 4;
+  margin: 0 0 14px;
+  color: #171717;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.v4-share-modal__label::before {
+  content: "Share to";
+  font-size: 14px;
+}
+
+.v4-share-modal__platforms {
+  order: 5;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  width: 100%;
+  margin: 0;
+  align-items: start;
+}
+
+/* Reset previous button/pill treatment. */
+.v4-thank-you-share .v4-share-highlights .v4-share-modal__platforms > button,
+.v4-thank-you-share .v4-share-highlights .v4-share-modal__platforms > button:nth-child(1),
+.v4-thank-you-share .v4-share-highlights .v4-share-modal__platforms > button:nth-child(2),
+.v4-thank-you-share .v4-share-highlights .v4-share-modal__platforms > button:nth-child(3),
+.v4-thank-you-share .v4-share-highlights .v4-share-modal__platforms > button:nth-child(4) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #4d4b50;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.25;
+  gap: 7px;
+}
+
+/* Large vector logo surface. */
+.v4-thank-you-share .v4-share-highlights .v4-share-modal__platforms > button::before {
+  content: "";
+  display: block;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  border-radius: 50%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 52px 52px;
+  box-shadow: 0 3px 10px rgba(20, 23, 30, .14);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.v4-thank-you-share .v4-share-highlights .v4-share-modal__platforms > button:hover::before,
+.v4-thank-you-share .v4-share-highlights .v4-share-modal__platforms > button:focus-visible::before {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 6px 16px rgba(20, 23, 30, .20);
+}
+
+/* Facebook — enhanced vector version of supplied icon. */
+.v4-share-modal__platforms .v4-social-facebook::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='b' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop stop-color='%2343a6f3'/%3E%3Cstop offset='1' stop-color='%230066c8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='32' cy='32' r='31' fill='url(%23b)'/%3E%3Cpath d='M37.5 57V35h7.2l1.1-8.4h-8.3v-5.4c0-2.4.7-4.1 4.2-4.1h4.5V9.6c-.8-.1-3.5-.3-6.6-.3-6.6 0-11.1 4-11.1 11.4v5.9H21V35h7.5v22z' fill='%23fff'/%3E%3C/svg%3E");
+}
+
+/* X — crisp black vector circle. */
+.v4-share-modal__platforms .v4-social-x::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='31' fill='%23000'/%3E%3Cpath d='M18 16h9.5l7.3 9.7L43 16h5l-10.9 13 11.9 19h-9.4l-8.1-10.8L22.5 48h-5.1l11.8-14.2zM25 20l17.2 24H41L23.8 20z' fill='%23fff'/%3E%3C/svg%3E");
+}
+
+/* WhatsApp — enhanced vector version of supplied icon. */
+.v4-share-modal__platforms .v4-social-whatsapp::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='31' fill='%2325D366'/%3E%3Cpath fill='%23fff' d='M32 14a17.5 17.5 0 00-15.3 26L14 50l10.3-2.7A17.5 17.5 0 1032 14zm0 31.8c-2.7 0-5.2-.7-7.4-2l-.5-.3-6.1 1.6 1.6-5.9-.3-.6A14.1 14.1 0 1132 45.8zm7.8-10.5c-.4-.2-2.5-1.2-2.9-1.4-.4-.1-.7-.2-1 .2-.3.4-1.1 1.4-1.4 1.7-.2.3-.5.3-.9.1-2.6-1.3-4.3-2.4-6-5.3-.5-.8.5-.8 1.3-2.6.1-.3.1-.6 0-.8-.1-.2-1-2.4-1.4-3.3-.4-.9-.8-.8-1-.8h-.9c-.3 0-.8.1-1.2.6-.4.4-1.6 1.6-1.6 3.9s1.7 4.5 1.9 4.8c.2.3 3.3 5 8 7 3 1.3 4.2 1.4 5.7 1.2.9-.1 2.5-1 2.8-2 .4-1 .4-1.9.3-2.1-.2-.2-.6-.3-1.7-.8z'/%3E%3C/svg%3E");
+}
+
+/* LinkedIn — enhanced vector version of supplied icon. */
+.v4-share-modal__platforms .v4-social-linkedin::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='l' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop stop-color='%232b83c6'/%3E%3Cstop offset='1' stop-color='%23005c9e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='32' cy='32' r='31' fill='url(%23l)'/%3E%3Crect x='15' y='26' width='7' height='23' rx='1' fill='%23fff'/%3E%3Ccircle cx='18.5' cy='18.5' r='4' fill='%23fff'/%3E%3Cpath d='M27 26h6.7v3.2h.1c1-1.8 3.4-4.3 7-4.3 7.4 0 8.8 4.9 8.8 11.3V49h-7V37.7c0-2.7-.1-6.1-3.8-6.1-3.8 0-4.4 2.9-4.4 5.9V49H27z' fill='%23fff'/%3E%3C/svg%3E");
+}
+
+.v4-share-modal__status {
+  order: 6;
+  margin: 16px 0 0;
+}
+
+@media (max-width: 560px) {
+  .v4-share-modal {
+    width: min(440px, calc(100vw - 24px));
+    padding: 30px 22px 24px;
+  }
+
+  .v4-share-modal::before {
+    width: 62px;
+    height: 62px;
+    margin-top: -62px;
+    background-size: 34px 34px;
+  }
+
+  .v4-share-modal__header h3 {
+    font-size: 25px;
+  }
+
+  .v4-share-modal__platforms {
+    gap: 8px;
+  }
+
+  .v4-thank-you-share .v4-share-highlights .v4-share-modal__platforms > button::before {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+    background-size: 48px 48px;
+  }
+}

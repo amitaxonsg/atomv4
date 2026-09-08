@@ -23,14 +23,14 @@ test("V4 shares only Lite-safe report highlights and keeps the Full Report priva
 
   assert.match(reportView, /https:\/\/www\.facebook\.com\/sharer\/sharer\.php/);
   assert.match(reportView, /https:\/\/www\.linkedin\.com\/sharing\/share-offsite\//);
-  assert.match(reportView, /https:\/\/www\.instagram\.com\//);
-  assert.match(reportView, /navigator\.share\(payload\)/);
+  assert.match(reportView, /https:\/\/x\.com\/intent\/post/);
+  assert.match(reportView, /https:\/\/wa\.me\//);
   assert.match(reportView, /navigator\.clipboard\?\.writeText/);
   assert.match(reportView, /aria-label="Share to Facebook"/);
+  assert.match(reportView, /aria-label="Share to X"/);
+  assert.match(reportView, /aria-label="Share to WhatsApp"/);
   assert.match(reportView, /aria-label="Share to LinkedIn"/);
-  assert.match(reportView, /aria-label="Share to Instagram"/);
-  assert.match(reportView, /aria-label="More sharing options"/);
-  assert.match(reportView, />More apps<\/button>/);
+  assert.doesNotMatch(reportView, /Share to Instagram|More sharing options|>More apps<\/button>/);
   assert.match(reportView, /Share highlights/);
   assert.match(reportView, /Thank you for taking the assessment\./);
   assert.match(reportView, /If this is helpful, please share it with someone who will benefit from taking it!/);
@@ -50,7 +50,7 @@ test("V4 shares only Lite-safe report highlights and keeps the Full Report priva
   assert.match(reportView, /aria-labelledby="v4-share-modal-title"/);
   assert.match(reportView, /aria-label="Close share dialog"/);
   assert.match(reportView, /Public assessment link/);
-  assert.match(reportView, /Copy highlights/);
+  assert.match(reportView, /Copy link/);
   assert.match(reportView, /event\.key === "Escape"/);
   assert.match(reportView, /document\.body\.style\.overflow = "hidden"/);
   assert.match(reportView, /previousFocusRef\.current\?\.focus\?\.\(\)/);
@@ -68,9 +68,12 @@ test("V4 shares only Lite-safe report highlights and keeps the Full Report priva
   assert.match(heroCss, /\.v4-share-modal__link > span::before\s*\{[\s\S]*Copy link/);
   assert.match(heroCss, /\.v4-share-modal__link > div\s*\{[\s\S]*box-shadow:/);
   assert.match(heroCss, /\.v4-share-modal__platforms > button:nth-child\(-n\+3\)[\s\S]*border-radius:\s*50%/);
-  assert.match(heroCss, /%234267B2/);
-  assert.match(heroCss, /%230A66C2/);
-  assert.match(heroCss, /radialGradient/);
+  assert.match(heroCss, /v4-social-facebook/);
+  assert.match(heroCss, /v4-social-x/);
+  assert.match(heroCss, /v4-social-whatsapp/);
+  assert.match(heroCss, /v4-social-linkedin/);
+  assert.match(heroCss, /%2325D366/);
+  assert.match(heroCss, /background-size:\s*52px 52px/);
   assert.match(heroCss, /\.v4-share-modal__close\s*\{/);
   assert.match(heroCss, /@media print[\s\S]*\.v4-share-modal__backdrop/);
 

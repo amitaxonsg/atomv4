@@ -229,23 +229,19 @@ async function shareHighlightsTo(network, report, summary) {
     openShareWindow(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(payload.url)}&quote=${encodeURIComponent(payload.text)}`);
     return "Facebook share opened. Highlights were also copied in case Facebook asks you to paste them.";
   }
+  if (network === "x") {
+    copyHighlightText(payload.text).catch(() => {});
+    openShareWindow(`https://x.com/intent/post?text=${encodeURIComponent(payload.text)}`);
+    return "X share opened. Highlights were also copied for paste fallback.";
+  }
+  if (network === "whatsapp") {
+    openShareWindow(`https://wa.me/?text=${encodeURIComponent(payload.text)}`);
+    return "WhatsApp share opened with your highlights.";
+  }
   if (network === "linkedin") {
     copyHighlightText(payload.text).catch(() => {});
     openShareWindow(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(payload.url)}`);
     return "LinkedIn share opened. Highlights were also copied so you can paste them into your post.";
-  }
-  if (network === "instagram") {
-    if (navigator.share) {
-      await navigator.share(payload);
-      return "Choose Instagram in the share sheet to send your highlights.";
-    }
-    await copyHighlightText(payload.text);
-    openShareWindow("https://www.instagram.com/");
-    return "Highlights copied. Paste them into Instagram.";
-  }
-  if (navigator.share) {
-    await navigator.share(payload);
-    return "Highlights shared.";
   }
   await copyHighlightText(payload.text);
   return "Highlights copied — paste them into any social app or message.";
@@ -303,10 +299,10 @@ function ShareHighlightsButton({ report, summary, className = "button button--pr
       if (error?.name !== "AbortError") setMessage("Sharing is unavailable in this browser. You can still copy the highlights and paste them into the app.");
     }
   };
-  const copy = async () => {
+  const copyLink = async () => {
     try {
-      const copied = await copyHighlightText(highlightShareText(report, summary));
-      setMessage(copied ? "Highlights copied — paste them into any social app or message." : "Copy is unavailable in this browser.");
+      const copied = await copyHighlightText(publicShareUrl());
+      setMessage(copied ? "Public assessment link copied." : "Copy is unavailable in this browser.");
     } catch {
       setMessage("Copy is unavailable in this browser.");
     }
@@ -317,20 +313,20 @@ function ShareHighlightsButton({ report, summary, className = "button button--pr
     {open && <div className="v4-share-modal__backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) close(); }}>
       <section className="v4-share-modal" role="dialog" aria-modal="true" aria-labelledby="v4-share-modal-title" aria-describedby="v4-share-modal-description" ref={dialogRef}>
         <header className="v4-share-modal__header">
-          <div><p className="eyebrow">Share</p><h3 id="v4-share-modal-title">Share highlights</h3></div>
+          <div><p className="eyebrow">Share</p><h3 id="v4-share-modal-title">Share with Friends</h3></div>
           <button className="v4-share-modal__close" type="button" aria-label="Close share dialog" onClick={close} ref={closeRef}>×</button>
         </header>
-        <p className="v4-share-modal__description" id="v4-share-modal-description">Only your result highlights and the public assessment link will be shared. Your private Full Report stays private.</p>
+        <p className="v4-share-modal__description" id="v4-share-modal-description">Share your Growth Alignment highlights with friends. Your private Full Report stays private.</p>
         <div className="v4-share-modal__link">
-          <span>Public assessment link</span>
-          <div><input type="text" readOnly value={publicShareUrl()} aria-label="Public assessment link" /><button className="button button--ghost" type="button" onClick={copy}>Copy highlights</button></div>
+          <span>Share your link</span>
+          <div><input type="text" readOnly value={publicShareUrl()} aria-label="Public assessment link" /><button className="button button--ghost" type="button" onClick={copyLink}>Copy link</button></div>
         </div>
         <p className="v4-share-modal__label">Share to</p>
         <div className="upgrade-box__actions v4-share-modal__platforms" role="group" aria-label="Share highlights to a platform">
-          <button className="button button--ghost" type="button" aria-label="Share to Facebook" onClick={() => share("facebook")}>Facebook</button>
-          <button className="button button--ghost" type="button" aria-label="Share to LinkedIn" onClick={() => share("linkedin")}>LinkedIn</button>
-          <button className="button button--ghost" type="button" aria-label="Share to Instagram" onClick={() => share("instagram")}>Instagram</button>
-          <button className="button button--ghost" type="button" aria-label="More sharing options" onClick={() => share("more")}>More apps</button>
+          <button className="button button--ghost v4-social-facebook" type="button" aria-label="Share to Facebook" onClick={() => share("facebook")}>Facebook</button>
+          <button className="button button--ghost v4-social-x" type="button" aria-label="Share to X" onClick={() => share("x")}>X</button>
+          <button className="button button--ghost v4-social-whatsapp" type="button" aria-label="Share to WhatsApp" onClick={() => share("whatsapp")}>WhatsApp</button>
+          <button className="button button--ghost v4-social-linkedin" type="button" aria-label="Share to LinkedIn" onClick={() => share("linkedin")}>LinkedIn</button>
         </div>
         {message && <p className="preview-note v4-share-modal__status" role="status">{message}</p>}
       </section>
