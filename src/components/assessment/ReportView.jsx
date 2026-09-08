@@ -254,6 +254,48 @@ async function shareHighlightsTo(network, report, summary) {
 function ShareHighlightsButton({ report, summary, className = "button button--primary" }) {
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState("");
+  const dialogRef = React.useRef(null);
+  const closeRef = React.useRef(null);
+  const previousFocusRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!open) return undefined;
+    previousFocusRef.current = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    const onKeyDown = event => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setOpen(false);
+        return;
+      }
+      if (event.key !== "Tab" || !dialogRef.current) return;
+      const focusable = [...dialogRef.current.querySelectorAll('button:not([disabled]),input:not([disabled]),[href],[tabindex]:not([tabindex="-1"])')]
+        .filter(node => node.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", onKeyDown);
+    window.requestAnimationFrame(() => closeRef.current?.focus());
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+      previousFocusRef.current?.focus?.();
+    };
+  }, [open]);
+
+  const close = () => {
+    setMessage("");
+    setOpen(false);
+  };
   const share = async network => {
     try {
       setMessage(await shareHighlightsTo(network, report, summary));
@@ -261,15 +303,38 @@ function ShareHighlightsButton({ report, summary, className = "button button--pr
       if (error?.name !== "AbortError") setMessage("Sharing is unavailable in this browser. You can still copy the highlights and paste them into the app.");
     }
   };
+  const copy = async () => {
+    try {
+      const copied = await copyHighlightText(highlightShareText(report, summary));
+      setMessage(copied ? "Highlights copied — paste them into any social app or message." : "Copy is unavailable in this browser.");
+    } catch {
+      setMessage("Copy is unavailable in this browser.");
+    }
+  };
+
   return <div className="v4-share-highlights">
-    <button className={className} type="button" aria-expanded={open} onClick={() => setOpen(value => !value)}>Share highlights</button>
-    {open && <div className="upgrade-box__actions" role="group" aria-label="Share highlights to a platform">
-      <button className="button button--ghost" type="button" onClick={() => share("facebook")}>Facebook</button>
-      <button className="button button--ghost" type="button" onClick={() => share("linkedin")}>LinkedIn</button>
-      <button className="button button--ghost" type="button" onClick={() => share("instagram")}>Instagram</button>
-      <button className="button button--ghost" type="button" onClick={() => share("more")}>More apps</button>
+    <button className={className} type="button" aria-haspopup="dialog" aria-expanded={open} onClick={() => { setMessage(""); setOpen(true); }}>Share highlights</button>
+    {open && <div className="v4-share-modal__backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) close(); }}>
+      <section className="v4-share-modal" role="dialog" aria-modal="true" aria-labelledby="v4-share-modal-title" aria-describedby="v4-share-modal-description" ref={dialogRef}>
+        <header className="v4-share-modal__header">
+          <div><p className="eyebrow">Share</p><h3 id="v4-share-modal-title">Share highlights</h3></div>
+          <button className="v4-share-modal__close" type="button" aria-label="Close share dialog" onClick={close} ref={closeRef}>×</button>
+        </header>
+        <p className="v4-share-modal__description" id="v4-share-modal-description">Only your result highlights and the public assessment link will be shared. Your private Full Report stays private.</p>
+        <div className="v4-share-modal__link">
+          <span>Public assessment link</span>
+          <div><input type="text" readOnly value={publicShareUrl()} aria-label="Public assessment link" /><button className="button button--ghost" type="button" onClick={copy}>Copy highlights</button></div>
+        </div>
+        <p className="v4-share-modal__label">Share to</p>
+        <div className="upgrade-box__actions v4-share-modal__platforms" role="group" aria-label="Share highlights to a platform">
+          <button className="button button--ghost" type="button" aria-label="Share to Facebook" onClick={() => share("facebook")}>Facebook</button>
+          <button className="button button--ghost" type="button" aria-label="Share to LinkedIn" onClick={() => share("linkedin")}>LinkedIn</button>
+          <button className="button button--ghost" type="button" aria-label="Share to Instagram" onClick={() => share("instagram")}>Instagram</button>
+          <button className="button button--ghost" type="button" aria-label="More sharing options" onClick={() => share("more")}>More apps</button>
+        </div>
+        {message && <p className="preview-note v4-share-modal__status" role="status">{message}</p>}
+      </section>
     </div>}
-    {message && <p className="preview-note" role="status">{message}</p>}
   </div>;
 }
 
