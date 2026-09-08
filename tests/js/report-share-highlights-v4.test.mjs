@@ -59,6 +59,18 @@ test("V4 shares only Lite-safe report highlights and keeps the Full Report priva
   assert.match(heroCss, /\.v4-share-modal__backdrop\s*\{/);
   assert.match(heroCss, /position:\s*fixed/);
   assert.match(heroCss, /\.v4-share-modal\s*\{/);
+  assert.match(heroCss, /width:\s*min\(370px, calc\(100vw - 32px\)\)/);
+  assert.match(heroCss, /border-radius:\s*12px/);
+  assert.match(heroCss, /\.v4-share-modal__header \.eyebrow\s*\{[\s\S]*display:\s*none/);
+  assert.match(heroCss, /\.v4-share-modal__label::before\s*\{[\s\S]*Share the link via/);
+  assert.match(heroCss, /\.v4-share-modal__platforms\s*\{[\s\S]*order:\s*3/);
+  assert.match(heroCss, /\.v4-share-modal__link\s*\{[\s\S]*order:\s*4/);
+  assert.match(heroCss, /\.v4-share-modal__link > span::before\s*\{[\s\S]*Copy link/);
+  assert.match(heroCss, /\.v4-share-modal__link > div\s*\{[\s\S]*box-shadow:/);
+  assert.match(heroCss, /\.v4-share-modal__platforms > button:nth-child\(-n\+3\)[\s\S]*border-radius:\s*50%/);
+  assert.match(heroCss, /%234267B2/);
+  assert.match(heroCss, /%230A66C2/);
+  assert.match(heroCss, /radialGradient/);
   assert.match(heroCss, /\.v4-share-modal__close\s*\{/);
   assert.match(heroCss, /@media print[\s\S]*\.v4-share-modal__backdrop/);
 
