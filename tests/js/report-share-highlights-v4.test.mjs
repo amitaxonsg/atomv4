@@ -4,6 +4,8 @@ import test from "node:test";
 
 const reportView = fs.readFileSync("src/components/assessment/ReportView.jsx", "utf8");
 const heroCss = fs.readFileSync("src/report-full-hero-v4.css", "utf8");
+const finalShareCss = fs.readFileSync("src/share-modal-final-v4.css", "utf8");
+const mainEntry = fs.readFileSync("src/main.jsx", "utf8");
 
 test("V4 shares only Lite-safe report highlights and keeps the Full Report private", () => {
   const start = reportView.indexOf("function highlightShareText(report, summary)");
@@ -59,23 +61,19 @@ test("V4 shares only Lite-safe report highlights and keeps the Full Report priva
   assert.match(heroCss, /\.v4-share-modal__backdrop\s*\{/);
   assert.match(heroCss, /position:\s*fixed/);
   assert.match(heroCss, /\.v4-share-modal\s*\{/);
-  assert.match(heroCss, /width:\s*min\(370px, calc\(100vw - 32px\)\)/);
-  assert.match(heroCss, /border-radius:\s*12px/);
-  assert.match(heroCss, /\.v4-share-modal__header \.eyebrow\s*\{[\s\S]*display:\s*none/);
-  assert.match(heroCss, /\.v4-share-modal__label::before\s*\{[\s\S]*Share the link via/);
-  assert.match(heroCss, /\.v4-share-modal__platforms\s*\{[\s\S]*order:\s*3/);
-  assert.match(heroCss, /\.v4-share-modal__link\s*\{[\s\S]*order:\s*4/);
-  assert.match(heroCss, /\.v4-share-modal__link > span::before\s*\{[\s\S]*Copy link/);
-  assert.match(heroCss, /\.v4-share-modal__link > div\s*\{[\s\S]*box-shadow:/);
-  assert.match(heroCss, /\.v4-share-modal__platforms > button:nth-child\(-n\+3\)[\s\S]*border-radius:\s*50%/);
-  assert.match(heroCss, /v4-social-facebook/);
-  assert.match(heroCss, /v4-social-x/);
-  assert.match(heroCss, /v4-social-whatsapp/);
-  assert.match(heroCss, /v4-social-linkedin/);
-  assert.match(heroCss, /%2325D366/);
-  assert.match(heroCss, /background-size:\s*52px 52px/);
   assert.match(heroCss, /\.v4-share-modal__close\s*\{/);
   assert.match(heroCss, /@media print[\s\S]*\.v4-share-modal__backdrop/);
+
+  assert.match(mainEntry, /import "\.\/share-modal-final-v4\.css";/);
+  assert.match(finalShareCss, /\.v4-share-modal__label::before\s*\{[\s\S]*content:\s*none\s*!important/);
+  assert.match(finalShareCss, /grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/);
+  assert.match(finalShareCss, /> \.v4-social-facebook::before/);
+  assert.match(finalShareCss, /> \.v4-social-x::before/);
+  assert.match(finalShareCss, /> \.v4-social-whatsapp::before/);
+  assert.match(finalShareCss, /> \.v4-social-linkedin::before/);
+  assert.match(finalShareCss, /%2325D366/);
+  assert.match(finalShareCss, /background-size:\s*56px 56px\s*!important/);
+  assert.doesNotMatch(finalShareCss, /Instagram|More apps|content:\s*"More"/);
 
   assert.doesNotMatch(reportView, /function fullReportText|Copy as text|Report copied as text/);
   assert.match(reportView, /<h3>Save your full report<\/h3>/);
