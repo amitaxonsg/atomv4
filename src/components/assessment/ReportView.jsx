@@ -557,7 +557,19 @@ export default function ReportView({ payload, token, onReset }) {
     } catch (error) { setCheckout({ busy: false, error: error.message }); }
   };
 
-  const actions = <>{onReset ? <button className="button button--ghost" onClick={onReset}>Start again</button> : <a className="button button--ghost" href="/">New assessment</a>}{unlocked && token && <a className="button button--ghost" href={`/api/reports/${encodeURIComponent(token)}/pdf`} target="_blank" rel="noreferrer">Open PDF</a>}<button className="button button--primary" onClick={() => window.print()}>Print report</button></>;
+  const fullReportPdfUrl = unlocked && token
+    ? `/api/reports/${encodeURIComponent(token)}/pdf`
+    : "";
+
+  const actions = <>
+    {onReset
+      ? <button className="button button--ghost" onClick={onReset}>Start again</button>
+      : <a className="button button--ghost" href="/">New assessment</a>}
+    {fullReportPdfUrl && <a className="button button--ghost" href={fullReportPdfUrl} target="_blank" rel="noreferrer">Open PDF</a>}
+    {fullReportPdfUrl
+      ? <a className="button button--primary" href={fullReportPdfUrl} target="_blank" rel="noreferrer">Print report</a>
+      : <button className="button button--primary" onClick={() => window.print()}>Print report</button>}
+  </>;
 
   const reportClass = report?.trackKey === "personal" ? "v4-report--personal" : "v4-report--professional";
   return <StageShell stageKey="report" current={4} actions={actions}>

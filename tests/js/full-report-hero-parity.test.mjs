@@ -8,6 +8,7 @@ const commitmentCss = fs.readFileSync("src/report-commitment-contrast-v4.css", "
 const printCss = fs.readFileSync("src/report-print-v4.css", "utf8");
 const reportView = fs.readFileSync("src/components/assessment/ReportView.jsx", "utf8");
 const pdf = fs.readFileSync("backend/src/Services/PdfService.php", "utf8");
+const extraRoutes = fs.readFileSync("backend/src/extra-routes.php", "utf8");
 
 test("V4 Lite, Full and PDF follow the approved reference result-card composition", () => {
   assert.match(main, /report-full-hero-v4\.css/);
@@ -44,6 +45,14 @@ test("V4 Lite, Full and PDF follow the approved reference result-card compositio
   assert.match(printCss, /> \.report-columns[\s\S]*grid-template-columns:\s*1fr 1fr\s*!important/);
   assert.match(printCss, /-webkit-print-color-adjust:\s*exact\s*!important/);
   assert.doesNotMatch(printCss, /paid-report\.unlocked[\s\S]*display:\s*none/);
+
+  // Full Report Print must use the exact server-generated PDF used by email.
+  assert.match(reportView, /const fullReportPdfUrl = unlocked && token/);
+  assert.match(reportView, /fullReportPdfUrl[\s\S]*>Print report<\/a>/);
+  assert.match(reportView, /onClick=\{\(\) => window\.print\(\)\}>Print report<\/button>/);
+  assert.match(extraRoutes, /GET', '\/api\/reports\/\{token\}\/pdf/);
+  assert.match(extraRoutes, /\$container\['pdf'\]->generate\(\(int\) \$report\['id'\]\)/);
+  assert.match(extraRoutes, /Content-Disposition: inline; filename="growth-alignment-full-development-report\.pdf"/);
 
   // PDF mirrors the website Full Report hierarchy and visual language.
   assert.match(pdf, /\$overallScore = max\(0, min\(250/);
