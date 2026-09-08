@@ -211,6 +211,34 @@ function highlightSharePayload(report, summary) {
   return { title: "Growth Alignment highlights", text: highlightShareText(report, summary), url: publicShareUrl() };
 }
 
+function xShareText(report, summary) {
+  const url = publicShareUrl();
+  const heading = `Growth Alignment — ${report?.trackName || "Assessment"}`;
+  const profileLine = `${summary.profile} · ${summary.total}/250`;
+  const callToAction = `Take the Growth Alignment assessment: ${url}`;
+
+  // Standard X posts allow 280 characters.
+  // X counts a URL as 23 characters after t.co shortening.
+  const xUrlLength = 23;
+  const rawLimit = 280 + Math.max(0, url.length - xUrlLength);
+  const prefix = `${heading}\n${profileLine}\n\n`;
+  const suffix = `\n\n${callToAction}`;
+  const summaryText = textValue(summary.summary).replace(/\s+/g, " ").trim();
+  const available = Math.max(0, rawLimit - prefix.length - suffix.length);
+
+  let excerpt = summaryText;
+
+  if (excerpt.length > available) {
+    if (available <= 1) {
+      excerpt = "";
+    } else {
+      excerpt = `${excerpt.slice(0, available - 1).trimEnd()}…`;
+    }
+  }
+
+  return `${prefix}${excerpt}${suffix}`;
+}
+
 async function copyHighlightText(text) {
   if (!navigator.clipboard?.writeText) return false;
   await navigator.clipboard.writeText(text);
@@ -229,9 +257,10 @@ async function shareHighlightsTo(network, report, summary) {
     return "Facebook opened.";
   }
   if (network === "x") {
-    copyHighlightText(payload.text).catch(() => {});
-    openShareWindow(`https://x.com/intent/post?text=${encodeURIComponent(payload.text)}`);
-    return "X share opened. Highlights were also copied for paste fallback.";
+    const xText = xShareText(report, summary);
+    copyHighlightText(xText).catch(() => {});
+    openShareWindow(`https://x.com/intent/post?text=${encodeURIComponent(xText)}`);
+    return "X share opened with an optimized post and assessment link.";
   }
   if (network === "whatsapp") {
     openShareWindow(`https://wa.me/?text=${encodeURIComponent(payload.text)}`);
