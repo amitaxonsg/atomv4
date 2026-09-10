@@ -6,7 +6,7 @@
 
 Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Global Consulting, including questionnaire, CMS/Admin, Lite/Full reports, Stripe payments, UAT no-payment control, PDF/email delivery, analytics, affiliates, commitments, retakes, sharing and audit history.
 
-## Current V4 baseline — 8 September 2026
+## Current V4 baseline — 10 September 2026
 
 | Item | Current V4 value |
 |---|---|
@@ -14,7 +14,7 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | Admin URL | `https://v4.atomglobal.com/admin` |
 | Repository | `amitaxonsg/atomv4` |
 | Working/deployment branch | `production-readiness-v4-mobile-final-20260902` |
-| **Server-verified live application commit** | `0b541e491905245f27ffd541ec82051c831f0d31` |
+| **Server-verified live application commit** | `113c7128656c502509f122a8d6c2bd2aa6250dd0` |
 | Live application state | **DEPLOYED / LIVE / HEALTHY** |
 | Current JavaScript gate | **82 tests / 82 pass / 0 fail** |
 | Public Lite Report sharing | **LIVE — signed `/share/lite/` URL, Lite-only data** |
@@ -24,8 +24,8 @@ Self-hosted React/Vite, PHP 8.3-FPM and MariaDB assessment platform for Atom Glo
 | WhatsApp sharing | **LIVE — automatic Lite-safe highlights** |
 | Accepted PDF pagination/parity baseline | `0953ae66b5be5e1206df5d4ab37fb6beed4a8571` |
 | PDF visual UAT | **PASSED — compact 5-page report, visible overall meter, Executive Summary on page 1** |
-| Latest confirmed full pre-change backup | `/var/backups/growth-alignment-v4/pre-share-modal-20260908T024637Z` |
-| Required next-change full-backup target | `/var/backups/growth-alignment-v4/pre-next-change-20260908-public-lite-share-live` |
+| Latest confirmed full checkpoint backup | `/var/backups/growth-alignment-v4/checkpoint-20260910T110514Z-113c712` |
+| Next-change backup rule | Create a fresh full backup before the next material V4 change. |
 | Source checkout | `/srv/v4.atomglobal.com/source` |
 | Releases | `/var/www/v4.atomglobal.com/releases` |
 | Active release symlink | `/var/www/v4.atomglobal.com/current` |
