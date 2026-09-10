@@ -164,7 +164,7 @@ export function ParticipantDetails({ track, remoteExperience, participant, setPa
 
   return <LatestPage width="480" className="latest-intake-page" stageKey="participant">
     <button className="latest-text-back" onClick={onBack}>← Back</button>
-    <h1>Before you begin</h1>
+    <h1>Begin your journey…</h1>
     <p className="latest-copy latest-copy--last">A few details so your report can be sent to you and personalised correctly. Nothing here is identifying beyond your name and email — the rest is broad categories only.</p>
     {error && <p className="form-error" role="alert">{error}</p>}
 
