@@ -25,7 +25,7 @@ SET setting_value =
     updated_at = NOW()
 WHERE is_encrypted = 0
   AND (
-       setting_value LIKE CONCAT('%Head%', CHAR(92), 'u2013Heart Alignment%')
+       INSTR(setting_value, CONCAT('Head', CHAR(92), 'u2013Heart Alignment')) > 0
     OR setting_value LIKE '%Head–Heart Alignment%'
     OR setting_value LIKE '%Head-Heart Alignment%'
   );
