@@ -9,7 +9,7 @@ $settings = $container['settings'];
 const V3_PUBLIC_QUESTION_COUNT = 40;
 const V3_PUBLIC_SECTION_COUNT = 10;
 const V3_STAGE_IMAGE = '/media/stages/sunil-head-heart-v3.webp';
-const V3_STAGE_ALT = 'A translucent blue head with a heart representing Head–Heart Alignment';
+const V3_STAGE_ALT = 'A translucent blue head with a heart representing Growth Alignment';
 
 $areaNames = [
     'personal' => [

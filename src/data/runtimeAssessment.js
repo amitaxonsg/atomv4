@@ -152,7 +152,7 @@ export function reportSummary(report) {
   const free = report?.free || {};
   const summary = free.summary || {};
   return {
-    profile: free.profile || "Head–Heart Alignment",
+    profile: free.profile || "Growth Alignment",
     total: Number(free.total || 0),
     summary: typeof summary === "string" ? summary : summary.summary || "",
     strengths: Array.isArray(summary.strengths) ? summary.strengths : [],

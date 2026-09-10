@@ -26,10 +26,10 @@ const levelOptions = [
 ];
 
 export const landingDefaults = {
-  title: "Head–Heart Alignment",
+  title: "Growth Alignment",
   primaryCopy: "Every choice you make is cast by two votes: what you feel and what you reason. This assessment maps which one you actually hand the deciding vote to — not which one you wish you did.",
   secondaryCopy: "You'll answer 40 statements across 10 areas of life, get an instant free result, and can unlock a full in-depth report. Choose the version that fits you:",
-  cardTitlePrefix: "Head–Heart Alignment:",
+  cardTitlePrefix: "Growth Alignment:",
   showBrandName: true,
   hideSectionTitles: true,
   halfwayTitle: "Hey, you’re halfway there!",

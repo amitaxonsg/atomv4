@@ -4,16 +4,36 @@ import fs from "node:fs";
 
 const read = path => fs.readFileSync(new URL(path, import.meta.url), "utf8");
 
-test("V4 keeps Growth Alignment product identity while the public fallback matches the live CMS title", () => {
+test("V4 keeps Growth Alignment product identity while removing the retired product name", () => {
   const html = read("../../index.html");
   const manifest = read("../../public/manifest.json");
   const experience = read("../../src/data/assessmentExperience.js");
+  const mockData = read("../../src/api/mockData.js");
+  const pdf = read("../../backend/src/Services/PdfService.php");
+  const terminologyMigration = read("../../database/migrations/017_v4_growth_alignment_terminology.sql");
+
+  const retiredProductName = /Head(?:–|-)Heart Alignment/;
+
   assert.match(html, /Growth Alignment Assessment/);
   assert.match(manifest, /Growth Alignment/);
-  assert.match(experience, /title: "Head–Heart Alignment"/);
+  assert.match(experience, /title: "Growth Alignment"/);
+  assert.match(experience, /cardTitlePrefix: "Growth Alignment:"/);
   assert.match(experience, /introHeadline: "Growth Alignment: Personal"/);
   assert.match(experience, /heartLabel: "Heart"/);
   assert.match(experience, /headLabel: "Head"/);
+
+  assert.doesNotMatch(html, retiredProductName);
+  assert.doesNotMatch(manifest, retiredProductName);
+  assert.doesNotMatch(experience, retiredProductName);
+  assert.doesNotMatch(mockData, retiredProductName);
+  assert.doesNotMatch(pdf, retiredProductName);
+
+  assert.match(terminologyMigration, /UPDATE global_settings/);
+  assert.match(terminologyMigration, /UPDATE email_templates/);
+  assert.match(terminologyMigration, /UPDATE seo_pages/);
+  assert.match(terminologyMigration, /UPDATE report_templates/);
+  assert.match(terminologyMigration, /UPDATE generated_reports/);
+  assert.match(terminologyMigration, /pdf_path = NULL/);
 });
 
 test("V4 report implements executive summary, ScaleBar, Meter, commitment and coaching", () => {

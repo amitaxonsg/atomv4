@@ -140,7 +140,7 @@ export function EmailPage() {
             <div className="email-template-preview__sheet">
               <img src="/media/brand/atom-global-wordmark.png" alt="Atom Global" />
               <div dangerouslySetInnerHTML={{ __html: selected.html_body }} />
-              <small>Head–Heart Alignment by Atom Global Consulting · Website · Privacy · Terms</small>
+              <small>Growth Alignment by Atom Global Consulting · Website · Privacy · Terms</small>
             </div>
           </div>
         </> : <Empty />}
@@ -199,7 +199,7 @@ export function AffiliatesPage() {
 
 export function SeoPage() {
   const loader = useLoader(() => api.adminSeoPages(), []);
-  const [form, setForm] = React.useState({ pageKey: "home", path: "/", pageTitle: "Head–Heart Alignment | Atom Global Consulting", metaDescription: "A reflective assessment balancing reason and human insight.", canonicalUrl: "https://head-heart.atomglobal.com/", robotsSetting: "index,follow", ogTitle: "Head–Heart Alignment", ogDescription: "Pause. Reflect. Choose wisely.", heading: "Head–Heart Alignment", introductoryContent: "", faq: [], structuredData: {}, includeInSitemap: true });
+  const [form, setForm] = React.useState({ pageKey: "home", path: "/", pageTitle: "Growth Alignment | Atom Global Consulting", metaDescription: "A reflective assessment balancing reason and human insight.", canonicalUrl: "https://head-heart.atomglobal.com/", robotsSetting: "index,follow", ogTitle: "Growth Alignment", ogDescription: "Pause. Reflect. Choose wisely.", heading: "Growth Alignment", introductoryContent: "", faq: [], structuredData: {}, includeInSitemap: true });
   const [notice, setNotice] = React.useState("");
 
   React.useEffect(() => {

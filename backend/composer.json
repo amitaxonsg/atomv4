@@ -1,6 +1,6 @@
 {
   "name": "atomglobal/head-heart-alignment",
-  "description": "Self-hosted Head–Heart Alignment API and administration backend",
+  "description": "Self-hosted Growth Alignment API and administration backend",
   "type": "project",
   "require": {
     "php": "^8.2",

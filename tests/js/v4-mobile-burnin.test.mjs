@@ -44,8 +44,8 @@ test("V4 CMS public logo and stage image values are honored", () => {
 
 test("V4 fallback copy matches the live UAT title and lively progress treatment", () => {
   const source = read("src/data/assessmentExperience.js");
-  assert.match(source, /title:\s*"Head–Heart Alignment"/);
-  assert.match(source, /cardTitlePrefix:\s*"Head–Heart Alignment:"/);
+  assert.match(source, /title:\s*"Growth Alignment"/);
+  assert.match(source, /cardTitlePrefix:\s*"Growth Alignment:"/);
   assert.match(source, /Hey, you’re halfway there!/);
   assert.match(source, /Well done — you’ve completed all 40 questions!/);
 });

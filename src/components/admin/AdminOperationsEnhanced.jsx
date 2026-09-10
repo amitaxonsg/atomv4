@@ -88,7 +88,7 @@ function renderTemplate(content, variables) {
 }
 
 function emailPreviewDocument(content) {
-  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;padding:26px;background:#f4f0ea;color:#443c35;font:15px/1.65 Arial,Helvetica,sans-serif}.card{max-width:620px;margin:auto;background:#fff;border:1px solid #e5ddd3;border-top:4px solid #c8483f;border-radius:10px;overflow:hidden}.head{padding:28px 30px 14px;text-align:center}.head img{width:190px;max-width:70%;height:auto}.content{padding:10px 34px 32px}.content h1,.content h2,.content h3{font-family:Georgia,Times New Roman,serif;font-weight:400;color:#241f1b}.content a{display:inline-block;padding:10px 16px;border-radius:7px;background:#c8483f;color:#fff;text-decoration:none;font-weight:700}.foot{padding:20px 24px;background:#fbf8f4;border-top:1px solid #ece5dc;text-align:center;color:#7a7168;font-size:11px}</style></head><body><div class="card"><div class="head"><img src="/media/brand/atom-global-wordmark.png" alt="Atom Global"></div><div class="content">${content}</div><div class="foot">Head–Heart Alignment by Atom Global Consulting · Website · Privacy · Terms</div></div></body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;padding:26px;background:#f4f0ea;color:#443c35;font:15px/1.65 Arial,Helvetica,sans-serif}.card{max-width:620px;margin:auto;background:#fff;border:1px solid #e5ddd3;border-top:4px solid #c8483f;border-radius:10px;overflow:hidden}.head{padding:28px 30px 14px;text-align:center}.head img{width:190px;max-width:70%;height:auto}.content{padding:10px 34px 32px}.content h1,.content h2,.content h3{font-family:Georgia,Times New Roman,serif;font-weight:400;color:#241f1b}.content a{display:inline-block;padding:10px 16px;border-radius:7px;background:#c8483f;color:#fff;text-decoration:none;font-weight:700}.foot{padding:20px 24px;background:#fbf8f4;border-top:1px solid #ece5dc;text-align:center;color:#7a7168;font-size:11px}</style></head><body><div class="card"><div class="head"><img src="/media/brand/atom-global-wordmark.png" alt="Atom Global"></div><div class="content">${content}</div><div class="foot">Growth Alignment by Atom Global Consulting · Website · Privacy · Terms</div></div></body></html>`;
 }
 
 const sampleValue = key => ({
@@ -97,7 +97,7 @@ const sampleValue = key => ({
   freeReportUrl: "https://head-heart.atomglobal.com/report/sample", paidReportUrl: "https://head-heart.atomglobal.com/report/sample",
   paymentUrl: "https://head-heart.atomglobal.com/payment/sample", resetUrl: "https://head-heart.atomglobal.com/admin/reset-password?token=sample",
   completionPercentage: "60", reminderNumber: "1", amount: "49.00", currency: "USD", affiliateCode: "SAMPLE",
-  message: "This is a safe selected-template test.", subject: "Head–Heart Alignment template test", expiresMinutes: "60",
+  message: "This is a safe selected-template test.", subject: "Growth Alignment template test", expiresMinutes: "60",
 }[key] || `Sample ${key}`);
 
 export function EmailPage({ initialSearch = "" }) {

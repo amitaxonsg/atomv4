@@ -313,7 +313,7 @@ final class FeedbackService
         }
         $lines[] = '';
         $lines[] = '_The submitter email and attachment URL remain private in the administration portal._';
-        $lines[] = '_Created from the secure Head–Heart Alignment feedback workflow._';
+        $lines[] = '_Created from the secure Growth Alignment feedback workflow._';
         return implode("\n", $lines);
     }
 
