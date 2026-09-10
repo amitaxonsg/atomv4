@@ -191,7 +191,7 @@ export function ParticipantDetails({ track, remoteExperience, participant, setPa
     <p className="latest-intake-note">Used to send you a copy of your report, and to help us understand who this assessment actually helps.</p>
     <fieldset className="latest-consents"><legend>Privacy and communication</legend>
       <label><input type="checkbox" checked={participant.privacyConsent} onChange={update("privacyConsent")} /><span>I consent to my answers being processed for this assessment. *</span></label>
-      <label><input type="checkbox" checked={participant.transactionalConsent} onChange={update("transactionalConsent")} /><span>Send essential messages including my resume link and report. *</span></label>
+      <label><input type="checkbox" checked={participant.transactionalConsent} onChange={update("transactionalConsent")} /><span>Send essential messages including my report link. *</span></label>
       <label><input type="checkbox" checked={participant.marketingConsent} onChange={update("marketingConsent")} /><span>Send occasional Atom Global insights. Optional.</span></label>
     </fieldset>
     <button className="latest-primary-button latest-primary-button--wide" disabled={!valid || busy} onClick={onContinue}>{busy ? "Creating secure session…" : "Continue to assessment →"}</button>
