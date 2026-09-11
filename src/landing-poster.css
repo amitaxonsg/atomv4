@@ -1,6 +1,5 @@
 /* V4 landing poster artwork supplied by Amit — keep the full composition visible. */
 .latest-questionnaire-shell:has(.latest-track-selection) .latest-visual-panel {
-  background-image: url("/media/stages/landing-thinking-poster.jpg") !important;
   background-size: contain !important;
   background-position: center center !important;
   background-repeat: no-repeat !important;
