@@ -89,9 +89,6 @@ export function BrandProvider({ children }) {
       .then(remote => {
         if (!active) return;
         const remoteBranding = remote.branding || {};
-        const remoteStages = remote.stages || {};
-        const versionStage = remoteStages.version || {};
-        const personalStage = remoteStages.personal || {};
         const nextBranding = {
           ...defaults.branding,
           ...remoteBranding,
@@ -99,18 +96,17 @@ export function BrandProvider({ children }) {
         };
         const next = {
           branding: nextBranding,
-          stages: {
-            ...defaults.stages,
-            ...remoteStages,
-            version: {
-              ...defaults.stages.version,
-              ...versionStage,
-              image: personalStage.image || versionStage.image || defaults.stages.version.image,
-              mobileImage: personalStage.mobileImage || versionStage.mobileImage || defaults.stages.version.mobileImage,
-            },
-          },
+          stages: { ...defaults.stages, ...(remote.stages || {}) },
           tracks: remote.tracks || {},
         };
+        const personalStage = next.stages.personal || {};
+        if (personalStage.image) {
+          next.stages.version = {
+            ...(next.stages.version || defaults.stages.version),
+            image: personalStage.image,
+            mobileImage: personalStage.mobileImage || (next.stages.version || {}).mobileImage || "",
+          };
+        }
         applyBranding(next.branding);
         setConfiguration(next);
       })
