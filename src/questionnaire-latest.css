@@ -151,6 +151,10 @@
   font-family: var(--heading-font, Georgia, "Times New Roman", serif);
 }
 
+.latest-copy--preserve-lines {
+  white-space: pre-wrap;
+}
+
 .latest-copy--last { margin-bottom: 32px; }
 
 .latest-track-cards {

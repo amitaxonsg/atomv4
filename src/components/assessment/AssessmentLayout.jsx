@@ -102,7 +102,7 @@ export function SelectVersion({ experience, onSelect }) {
   };
   if (!category) return <LatestPage width="640" className="latest-track-selection" brandVisible={landing.showBrandName} stageKey="version">
     <h1>{landing.title}</h1>
-    <p className="latest-copy"><VoteCopy text={landing.primaryCopy} /></p>
+    <p className="latest-copy latest-copy--preserve-lines"><VoteCopy text={landing.primaryCopy} /></p>
     <p className="latest-copy latest-copy--last">{landing.secondaryCopy}</p>
     <div className="latest-assessment-category-grid" aria-label="Choose assessment type">
       <button className="latest-assessment-category latest-assessment-category--personal" onClick={() => setCategory("personal")}>
