@@ -1,22 +1,3 @@
-/* V4 landing poster artwork supplied by Amit — keep the full composition visible. */
-.latest-questionnaire-shell:has(.latest-track-selection) .latest-visual-panel {
-  background-size: 100% 100% !important;
-  background-position: center center !important;
-  background-repeat: no-repeat !important;
-  background-color: #ffffff !important;
-}
-
-/* The poster already contains its own headline, prompt and Atom Global logo. */
-.latest-questionnaire-shell:has(.latest-track-selection) .latest-visual-panel::after,
-.latest-questionnaire-shell:has(.latest-track-selection) .latest-visual-panel__logo {
-  display: none !important;
-}
-
-@media (max-width: 900px) {
-  .latest-questionnaire-shell:has(.latest-track-selection) .latest-visual-panel {
-    height: auto !important;
-    aspect-ratio: 853 / 1280;
-    background-size: 100% 100% !important;
-    background-position: center top !important;
-  }
-}
+/* Landing visual now intentionally inherits the standard questionnaire visual-panel styling.
+   This keeps the landing page visually identical to the selected Personal stage when the
+   landing stage reuses Personal stage media and copy from BrandContext. */
