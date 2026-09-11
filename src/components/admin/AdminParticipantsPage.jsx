@@ -2,6 +2,30 @@ import React from "react";
 import { api } from "../../api/client";
 import { DataTable, Notice, PageHeader, Spinner, dateTime, money, useLoader } from "./AdminShared";
 
+function timeSpent(seconds) {
+  const value = Number(seconds);
+  if (!Number.isFinite(value) || value < 0) return "—";
+
+  const total = Math.floor(value);
+  const days = Math.floor(total / 86400);
+  const hours = Math.floor((total % 86400) / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const secs = total % 60;
+
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (minutes > 0) return `${minutes}m ${secs}s`;
+  return `${secs}s`;
+}
+
+function sessionTimeSpent(session) {
+  if (!session?.completed_at || !session?.created_at) return "—";
+  const start = Date.parse(session.created_at);
+  const end = Date.parse(session.completed_at);
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return "—";
+  return timeSpent((end - start) / 1000);
+}
+
 export default function AdminParticipantsPage({ initialSearch = "", initialId = null, permissions = [] }) {
   const [query, setQuery] = React.useState({ search: initialSearch, status: "", track: "", page: 1, limit: 25 });
   const [selected, setSelected] = React.useState(null);
@@ -45,13 +69,13 @@ export default function AdminParticipantsPage({ initialSearch = "", initialId = 
     </div>
 
     {loader.loading ? <Spinner /> : <section className="admin-card">
-      <DataTable columns={["Participant", "Track", "Status", "Progress", "Payment", "Last activity"]} rows={(loader.data?.items || []).map(item => [<><strong>{item.name}</strong><span>{item.email}</span></>, item.track, item.status, <div className="compact-progress"><i style={{ width: `${Number(item.progress || 0)}%` }} /><span>{item.progress || 0}%</span></div>, item.paymentStatus || "—", dateTime(item.lastActivityAt)])} onRow={index => open(loader.data.items[index])} />
+      <DataTable columns={["Participant", "Track", "Status", "Progress", "Time spent", "Payment", "Last activity"]} rows={(loader.data?.items || []).map(item => [<><strong>{item.name}</strong><span>{item.email}</span></>, item.track, item.status, <div className="compact-progress"><i style={{ width: `${Number(item.progress || 0)}%` }} /><span>{item.progress || 0}%</span></div>, item.status === "completed" ? timeSpent(item.timeSpentSeconds) : "—", item.paymentStatus || "—", dateTime(item.lastActivityAt)])} onRow={index => open(loader.data.items[index])} />
       <div className="admin-pagination"><button className="button" disabled={query.page <= 1} onClick={() => setQuery(current => ({ ...current, page: current.page - 1 }))}>Previous</button><span>Page {query.page} · {loader.data?.total || 0} records</span><button className="button" disabled={query.page * query.limit >= (loader.data?.total || 0)} onClick={() => setQuery(current => ({ ...current, page: current.page + 1 }))}>Next</button></div>
     </section>}
 
     {selected && <div className="admin-drawer"><div className="admin-drawer__panel"><button className="admin-drawer__close" onClick={() => setSelected(null)}>×</button><h2>{selected.participant.name}</h2><p>{selected.participant.email}</p>
       <div className="admin-header-actions">{allowed("participants.export") && <button className="button" onClick={exportRecord}>Export</button>}{allowed("participants.delete") && <button className="button button--danger" onClick={anonymise}>Anonymise</button>}</div>
-      <h3>Assessments</h3><DataTable columns={["Track", "Status", "Progress", "Completed"]} rows={(selected.sessions || []).map(item => [item.track, item.status, `${item.completion_percentage}%`, dateTime(item.completed_at)])} />
+      <h3>Assessments</h3><DataTable columns={["Track", "Status", "Progress", "Time spent", "Completed"]} rows={(selected.sessions || []).map(item => [item.track, item.status, `${item.completion_percentage}%`, sessionTimeSpent(item), dateTime(item.completed_at)])} />
       <h3>Answers</h3><DataTable columns={["Question", "Answer", "Note"]} rows={(selected.answers || []).map(item => [item.questionText || item.question_position, item.is_not_applicable ? "N/A" : item.answer_value, item.note || "—"])} />
       <h3>Reports</h3><DataTable columns={["Status", "Views", "Created"]} rows={(selected.reports || []).map(item => [item.is_unlocked ? "Full" : "Lite", item.view_count, dateTime(item.created_at)])} />
       <h3>Payments</h3><DataTable columns={["Status", "Amount", "Date"]} rows={(selected.payments || []).map(item => [item.status, money(item.amount, item.currency), dateTime(item.created_at)])} />
