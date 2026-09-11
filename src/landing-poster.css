@@ -8,8 +8,7 @@
 
 /* The poster already contains its own headline, prompt and Atom Global logo. */
 .latest-questionnaire-shell:has(.latest-track-selection) .latest-visual-panel::after,
-.latest-questionnaire-shell:has(.latest-track-selection) .latest-visual-panel__logo,
-.latest-questionnaire-shell:has(.latest-track-selection) .latest-visual-panel__copy {
+.latest-questionnaire-shell:has(.latest-track-selection) .latest-visual-panel__logo {
   display: none !important;
 }
 
