@@ -14,6 +14,7 @@ import "./admin-security-polish.css";
 import "./admin-support.css";
 import "./questionnaire-process.css";
 import "./questionnaire-latest.css";
+import "./landing-poster.css";
 import "./uat-layout-fix.css";
 import "./v4-mobile-burnin.css";
 import "./report-flow.css";
