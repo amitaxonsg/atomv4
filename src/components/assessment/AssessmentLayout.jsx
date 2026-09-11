@@ -36,7 +36,7 @@ function VisualPanel({ stageKey = "version" }) {
       backgroundImage: image
         ? `linear-gradient(rgba(20,16,12,${overlay}),rgba(20,16,12,${overlay})),url("${image}")`
         : `linear-gradient(rgba(20,16,12,${overlay}),rgba(20,16,12,${overlay}))`,
-      backgroundPosition: stage.focalPoint || "52% 50%",
+      backgroundPosition: "center top",
     }}
   >
     <a className="latest-visual-panel__logo" href="https://www.atomglobal.com" target="_blank" rel="noreferrer"><BrandLogo /></a>
