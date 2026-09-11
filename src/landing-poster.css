@@ -1,6 +1,6 @@
 /* V4 landing poster artwork supplied by Amit — keep the full composition visible. */
 .latest-questionnaire-shell:has(.latest-track-selection) .latest-visual-panel {
-  background-size: contain !important;
+  background-size: 100% 100% !important;
   background-position: center center !important;
   background-repeat: no-repeat !important;
   background-color: #ffffff !important;
@@ -17,7 +17,7 @@
   .latest-questionnaire-shell:has(.latest-track-selection) .latest-visual-panel {
     height: auto !important;
     aspect-ratio: 853 / 1280;
-    background-size: contain !important;
+    background-size: 100% 100% !important;
     background-position: center top !important;
   }
 }
