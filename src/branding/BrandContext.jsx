@@ -105,6 +105,11 @@ export function BrandProvider({ children }) {
             ...(next.stages.version || defaults.stages.version),
             image: personalStage.image,
             mobileImage: personalStage.mobileImage || (next.stages.version || {}).mobileImage || "",
+            focalPoint: personalStage.focalPoint || (next.stages.version || {}).focalPoint,
+            overlay: personalStage.overlay ?? (next.stages.version || {}).overlay,
+            headline: personalStage.headline || (next.stages.version || {}).headline,
+            supporting: personalStage.supporting || (next.stages.version || {}).supporting,
+            alt: personalStage.alt || (next.stages.version || {}).alt,
           };
         }
         applyBranding(next.branding);
