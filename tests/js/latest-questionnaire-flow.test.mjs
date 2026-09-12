@@ -35,9 +35,15 @@ test("public questionnaire keeps the latest process inside the approved split br
 
 test("CMS stage image remains visible above the questionnaire on mobile", () => {
   assert.match(questionnaireStyles, /@media \(max-width: 900px\)[\s\S]*\.latest-visual-panel \{[\s\S]*display: block;/);
-  assert.match(questionnaireStyles, /height: clamp\(210px, 56\.25vw, 330px\)/);
-  assert.match(questionnaireStyles, /\.latest-visual-panel__logo,[\s\S]*\.latest-visual-panel__copy \{[\s\S]*display: none;/);
+  assert.match(questionnaireStyles, /@media \(max-width: 900px\)[\s\S]*?\.latest-visual-panel \{[\s\S]*?height: auto;[\s\S]*?aspect-ratio: 16 \/ 9;[\s\S]*?background-size: 100% 100%, contain;/);
+  assert.match(questionnaireStyles, /@media \(max-width: 900px\)[\s\S]*?\.latest-visual-panel__logo \{[\s\S]*?display: none;/);
+  assert.match(questionnaireStyles, /@media \(max-width: 900px\)[\s\S]*?\.latest-visual-panel__copy \{[\s\S]*?position: absolute;[\s\S]*?display: block;/);
+  assert.match(questionnaireStyles, /@media \(max-width: 900px\)[\s\S]*?\.latest-visual-panel__copy h2 \{[\s\S]*?font-size: clamp\(23px, 7vw, 32px\);/);
   assert.doesNotMatch(questionnaireStyles, /@media \(max-width: 900px\)[\s\S]*?\.latest-visual-panel \{ display: none; \}/);
+});
+
+test("mobile Back control keeps a touch-safe target without changing desktop", () => {
+  assert.match(questionnaireStyles, /@media \(max-width: 680px\)[\s\S]*?\.latest-text-back \{[\s\S]*?min-height: 44px;/);
 });
 
 test("latest participant and question process remains wired to the real backend", () => {
