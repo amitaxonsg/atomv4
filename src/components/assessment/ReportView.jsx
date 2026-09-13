@@ -187,7 +187,7 @@ function CoachCallToAction({ report }) {
 
 function assessmentUrl() {
   if (typeof window !== "undefined" && window.location?.origin) return `${window.location.origin}/`;
-  return "https://v4.atomglobal.com/";
+  return "https://gaa.atomglobal.com/";
 }
 
 function publicShareUrl(report) {

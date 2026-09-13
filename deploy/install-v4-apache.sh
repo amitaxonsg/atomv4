@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-DOMAIN="${DOMAIN:-v4.atomglobal.com}"
+DOMAIN="${DOMAIN:-gaa.atomglobal.com}"
 APP_ROOT="${APP_ROOT:-/var/www/v4.atomglobal.com}"
 SOURCE_DIR="${SOURCE_DIR:-/srv/v4.atomglobal.com/source}"
 ENV_FILE="${ENV_FILE:-/etc/growth-alignment/v4.env}"

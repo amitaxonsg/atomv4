@@ -51,7 +51,7 @@ function ServiceWorkerUpdate() {
   React.useEffect(() => {
     const enabled = import.meta.env.VITE_ENABLE_SW === "true";
     const productionApi = import.meta.env.VITE_API_MODE === "production";
-    const correctHost = window.location.hostname === "v4.atomglobal.com";
+    const correctHost = ["gaa.atomglobal.com", "v4.atomglobal.com"].includes(window.location.hostname);
 
     if (!enabled || !productionApi || !correctHost || !("serviceWorker" in navigator)) {
       navigator.serviceWorker?.getRegistrations?.().then(registrations => {

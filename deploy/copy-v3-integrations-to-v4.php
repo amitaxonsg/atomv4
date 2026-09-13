@@ -75,7 +75,7 @@ foreach ($values as $key => $value) {
     $target->set($key, $value, in_array($key, $sensitive, true));
 }
 
-$target->set('email.public_base_url', 'https://v4.atomglobal.com');
+$target->set('email.public_base_url', 'https://gaa.atomglobal.com');
 $target->set('payments.cash_on_delivery_enabled', 'true');
 
 echo "V3 SMTP2GO/email settings and Stripe credentials copied securely into V4.\\n";
