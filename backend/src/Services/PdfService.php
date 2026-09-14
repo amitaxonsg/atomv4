@@ -14,7 +14,7 @@ final class PdfService
     public function generate(int $reportId): string
     {
         $row = $this->db->fetch(
-            'SELECT gr.*, p.name participant_name, p.email participant_email, t.name track_name, t.track_key, s.completed_at, rc.commitment_text, rc.check_in_date FROM generated_reports gr JOIN survey_sessions s ON s.id = gr.survey_session_id JOIN participants p ON p.id = s.participant_id JOIN assessment_tracks t ON t.id = s.track_id LEFT JOIN report_commitments rc ON rc.generated_report_id = gr.id WHERE gr.id = ?',
+            'SELECT gr.*, p.name participant_name, p.email participant_email, t.name track_name, t.track_key, s.created_at assessment_started_at, s.completed_at, rc.commitment_text, rc.check_in_date FROM generated_reports gr JOIN survey_sessions s ON s.id = gr.survey_session_id JOIN participants p ON p.id = s.participant_id JOIN assessment_tracks t ON t.id = s.track_id LEFT JOIN report_commitments rc ON rc.generated_report_id = gr.id WHERE gr.id = ?',
             [$reportId]
         );
         if (!$row) throw new \RuntimeException('Report not found.', 404);
@@ -47,6 +47,9 @@ final class PdfService
         $brand = $logo
             ? '<img class="logo" src="' . $this->h($logo) . '" alt="Atom Global Consulting">'
             : '<div class="brand">ATOM GLOBAL CONSULTING</div>';
+        $coverBrand = $logo
+            ? '<img class="cover-logo" src="' . $this->h($logo) . '" alt="Atom Global Consulting">'
+            : '<div class="cover-brand">ATOM GLOBAL CONSULTING</div>';
 
         $trackLabel = strtoupper((string) $row['track_name']);
         $participantName = trim((string) $row['participant_name']);
@@ -54,10 +57,17 @@ final class PdfService
             ? $participantName . ', this result was calculated by the published assessment version from your saved responses.'
             : 'This result was calculated by the published assessment version from your saved responses.';
         $completed = trim((string) ($row['completed_at'] ?? ''));
+        $assessmentDate = $this->formatAssessmentDate($completed);
+        $assessmentDuration = $this->formatAssessmentDuration(
+            trim((string) ($row['assessment_started_at'] ?? '')),
+            $completed,
+        );
+        $coverName = $participantName !== '' ? $participantName : 'Participant';
 
         $html = '<!doctype html><html><head><meta charset="utf-8"><style>'
             . '@page{margin:8mm 9mm 10mm}body{font-family:' . $this->css($body) . ';color:' . $this->css($ink) . ';font-size:8.7pt;line-height:1.4;background:' . $this->css($canvas) . ';margin:0}'
             . 'h1,h2,h3,h4{font-family:' . $this->css($heading) . ';page-break-after:avoid;color:#2B241D}h1{font-size:25.5pt;line-height:1.03;margin:1mm 0 1.8mm;color:#B54B3D}h2{font-size:15pt;margin:0 0 1.8mm}h3{font-size:12.3pt;margin:0 0 1.4mm}h4{font-size:9.6pt;margin:0 0 .8mm}p{margin:0 0 1.4mm}ul,ol{padding-left:4.5mm;margin:1mm 0 0}li{margin-bottom:.8mm}'
+            . '.cover-page{height:267mm;box-sizing:border-box;page-break-after:always;background:#FCFAF6;position:relative;padding:17mm 16mm 14mm;text-align:center;color:#1E2A43}.cover-logo{width:32mm;max-height:16mm;object-fit:contain;margin:1mm auto 0}.cover-brand{font-weight:bold;letter-spacing:.1em;color:#B54B3D;font-size:10pt;margin-top:3mm}.cover-title{font-family:' . $this->css($heading) . ';font-size:29pt;line-height:1.05;color:#1E2A43;margin:23mm 0 7mm}.cover-rule{width:76mm;height:.6mm;background:#C9A15A;margin:0 auto 22mm;position:relative}.cover-rule span{display:block;width:3mm;height:3mm;background:#B54B3D;transform:rotate(45deg);position:absolute;left:36.5mm;top:-1.2mm}.cover-details{width:122mm;margin:0 auto;text-align:left;font-size:10.4pt}.cover-detail{margin:0 0 7mm}.cover-detail-label{display:block;color:#9A8F82;font-size:7.2pt;font-weight:bold;letter-spacing:.13em;text-transform:uppercase;margin-bottom:1.7mm}.cover-detail-value{display:block;border-bottom:.35mm solid #D9B96F;padding:0 0 2.4mm;color:#1E2A43;font-size:11pt}.cover-confidential{font-family:' . $this->css($heading) . ';font-style:italic;font-size:12pt;color:#1E2A43;margin-top:19mm}.cover-bottom{position:absolute;left:16mm;right:16mm;bottom:13mm}.cover-motto{font-size:7.2pt;font-weight:bold;letter-spacing:.18em;text-transform:uppercase;color:#1E2A43;margin-bottom:6mm}.cover-address{border-top:.4mm solid #D9B96F;padding-top:5mm;color:#7A7269;font-size:7.2pt;line-height:1.5}.cover-accent-left,.cover-accent-right{position:absolute;width:31mm;height:31mm;border-radius:50%;border:1.2mm solid transparent;opacity:.9}.cover-accent-left{left:-22mm;bottom:45mm;border-top-color:#B54B3D;border-right-color:#C9A15A;transform:rotate(28deg)}.cover-accent-right{right:-22mm;top:19mm;border-left-color:#B54B3D;border-bottom-color:#C9A15A;transform:rotate(18deg)}'
             . '.brand-row{width:100%;border-collapse:collapse;margin:0 0 1.6mm}.brand-row td{border:0;padding:0}.brand-cell{text-align:right;vertical-align:top}.logo{width:39mm;max-height:12mm;object-fit:contain}.brand{font-weight:bold;letter-spacing:.08em;color:' . $this->css($heart) . ';font-size:8.4pt;text-align:right}'
             . '.eyebrow{margin:0 0 1mm;color:#B54B3D;font-size:6.8pt;font-weight:bold;letter-spacing:.12em;text-transform:uppercase}.lead{margin:0 0 .6mm;color:#4A4037;font-size:8.1pt;line-height:1.38}.completion-meta{margin:0 0 2mm;color:' . $this->css($muted) . ';font-size:6.8pt}'
             . '.hero{page-break-inside:avoid;background:#252832;color:#fff;padding:3.6mm;margin:2.8mm 0 2.4mm;border:1px solid #CAA34B;border-radius:6px}.hero-grid{width:100%;border-collapse:separate;border-spacing:2.8mm 0;table-layout:fixed}.hero-grid td{vertical-align:middle}.hero-score-cell{width:28%;height:29mm;padding:3.5mm;border:1px solid #D9B66A;background:#2A2B36;text-align:center;vertical-align:middle!important}.hero-copy{width:72%;padding:.4mm 0 0 .8mm;vertical-align:middle!important}.hero-copy h2{margin:0 0 1.4mm;color:#F2D78F;font-family:' . $this->css($body) . ';font-size:8.1pt;font-weight:bold;letter-spacing:.07em;text-transform:uppercase}.hero-copy p{margin:0;color:#fff;font-size:9.7pt;line-height:1.42}.score{font-family:' . $this->css($heading) . ';font-size:26pt;color:#fff;line-height:1;margin:0;text-align:center}.score span{display:block;margin-top:1mm;color:#F7EFE2;font-family:' . $this->css($body) . ';font-size:6.4pt;font-weight:bold;letter-spacing:.07em;text-align:center;text-transform:uppercase}.hero-meter-labels{width:100%;margin-top:3mm;border-collapse:collapse;color:#EEE7DC;font-size:5.5pt;font-weight:bold;line-height:1.2;text-transform:uppercase}.hero-meter-labels td{width:33.33%;padding:0;border:0}.hero-meter-labels td:first-child{text-align:left}.hero-meter-labels td:nth-child(2){text-align:center}.hero-meter-labels td:last-child{text-align:right}.hero-meter{height:3mm;margin-top:.9mm;background:#62636B;border-radius:2mm;overflow:hidden}.hero-meter span{display:block;height:100%;min-width:1px;background:#D8568C;border-radius:2mm}'
@@ -73,6 +83,18 @@ final class PdfService
             . '.commitment-block{background:#27302F;color:#fff;border:0}.commitment-block .block-eyebrow{color:#DDD2C4}.commitment-block h3,.commitment-block p,.commitment-block strong{color:#fff}.retake-block{border-left-color:#7964D8;background:#F8F6FF}.coach-block{border-top:3px solid #CAA34B;border-left-color:#CAA34B;background:#FFF7DE}.upgrade-block{border-top:3px solid #CAA34B;background:#FFFDF9}.feature-grid{page-break-inside:auto}.feature-grid tr{page-break-inside:avoid}.feature-grid td{width:50%;vertical-align:top;border:1px solid #E8DED2;padding:2.2mm;background:#fff}.feature-grid h4{margin-bottom:.6mm}.final-note{font-size:6.9pt;color:' . $this->css($muted) . ';background:#FFFAF2;border:1px solid #E8DED2;padding:2mm;margin-top:1.5mm}'
             . '.footer{position:fixed;bottom:-7mm;left:0;right:0;color:' . $this->css($muted) . ';font-size:6.4pt;text-align:center}'
             . '</style></head><body>'
+            . '<section class="cover-page"><div class="cover-accent-left"></div><div class="cover-accent-right"></div>'
+            . $coverBrand
+            . '<div class="cover-title">Growth Alignment Report</div>'
+            . '<div class="cover-rule"><span></span></div>'
+            . '<div class="cover-details">'
+            . '<div class="cover-detail"><span class="cover-detail-label">Full Name</span><span class="cover-detail-value">' . $this->h($coverName) . '</span></div>'
+            . '<div class="cover-detail"><span class="cover-detail-label">Assessment Date</span><span class="cover-detail-value">' . $this->h($assessmentDate) . '</span></div>'
+            . '<div class="cover-detail"><span class="cover-detail-label">Assessment Time</span><span class="cover-detail-value">' . $this->h($assessmentDuration) . '</span></div>'
+            . '</div>'
+            . '<div class="cover-confidential">Confidential Report</div>'
+            . '<div class="cover-bottom"><div class="cover-motto">Unleashing Human Potential</div><div class="cover-address">Atom Global Consulting Pte. Ltd.<br>Level 49, 1 Raffles Quay<br>Singapore 048583</div></div>'
+            . '</section>'
             . '<table class="brand-row"><tr><td></td><td class="brand-cell">' . $brand . '</td></tr></table>'
             . '<p class="eyebrow">GROWTH ALIGNMENT · ' . $this->h($trackLabel) . ' RESULT</p>'
             . '<h1>' . $this->h((string) ($free['profile'] ?? 'Growth Alignment Report')) . '</h1>'
@@ -391,6 +413,39 @@ final class PdfService
             $rows .= '<tr><td>' . $cards[$i] . '</td><td>' . ($cards[$i + 1] ?? '') . '</td></tr>';
         }
         return '<div class="report-block upgrade-block"><h3>Use this report to</h3><table class="feature-grid"><tbody>' . $rows . '</tbody></table></div>';
+    }
+
+    private function formatAssessmentDate(string $completed): string
+    {
+        if ($completed === '') return 'Not available';
+        try {
+            return (new \DateTimeImmutable($completed))->format('j F Y');
+        } catch (\Throwable) {
+            return 'Not available';
+        }
+    }
+
+    private function formatAssessmentDuration(string $started, string $completed): string
+    {
+        if ($started === '' || $completed === '') return 'Not available';
+        try {
+            $start = new \DateTimeImmutable($started);
+            $end = new \DateTimeImmutable($completed);
+            $seconds = $end->getTimestamp() - $start->getTimestamp();
+        } catch (\Throwable) {
+            return 'Not available';
+        }
+        if ($seconds < 0) return 'Not available';
+        if ($seconds === 0) return 'Less than 1 second';
+
+        $hours = intdiv($seconds, 3600);
+        $minutes = intdiv($seconds % 3600, 60);
+        $remainingSeconds = $seconds % 60;
+        $parts = [];
+        if ($hours > 0) $parts[] = $hours . ' ' . ($hours === 1 ? 'hour' : 'hours');
+        if ($minutes > 0) $parts[] = $minutes . ' ' . ($minutes === 1 ? 'minute' : 'minutes');
+        if ($remainingSeconds > 0 || !$parts) $parts[] = $remainingSeconds . ' ' . ($remainingSeconds === 1 ? 'second' : 'seconds');
+        return implode(' ', $parts);
     }
 
     private function accentClass(string $title): string
