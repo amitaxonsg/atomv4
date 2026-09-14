@@ -7,7 +7,7 @@ const pdfService = fs.readFileSync("backend/src/Services/PdfService.php", "utf8"
 test("Full Report PDF has a dedicated dynamic cover page", () => {
   assert.match(pdfService, /s\.created_at assessment_started_at/);
   assert.match(pdfService, /s\.completed_at/);
-  assert.match(pdfService, /class=\\"cover-page\\"/);
+  assert.match(pdfService, /class="cover-page"/);
   assert.match(pdfService, /page-break-after:always/);
   assert.match(pdfService, /Growth Alignment Report/);
   assert.match(pdfService, /Full Name/);
