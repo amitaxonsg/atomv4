@@ -1,12 +1,12 @@
 # Atom Global Growth Alignment — GIA
 
-> **GIA ONLY — CURRENT WORKING BRANCH FOR MIRROR AUDIT**
+> **GIA ONLY — CURRENT WORKING BRANCH FOR MIRROR AUDIT / UAT**
 >
 > This branch documents and tracks the isolated GIA environment at `https://gia.atomglobal.com/`.
 >
 > **Do not modify GAA / V4 while working from this branch.** GAA is a read-only comparison source for the GIA audit.
 
-The GIA environment is intended to mirror the approved Growth Alignment functionality while remaining isolated from GAA in hostname, environment, database, storage, scheduled processing and generated public links.
+The GIA environment mirrors the approved Growth Alignment functionality while remaining isolated from GAA in hostname, environment, database, storage, scheduled processing and generated public links.
 
 ## Current GIA control state — 18 September 2026
 
@@ -25,17 +25,69 @@ The GIA environment is intended to mirror the approved Growth Alignment function
 | Backup root | `/var/backups/growth-alignment-gia` |
 | Confirmed pre-audit backup | `/var/backups/growth-alignment-gia/gia-full-20260918-041602` |
 | GAA / V4 modification policy | **READ ONLY — DO NOT TOUCH** |
-| Audit status | **BACKUP COMPLETE / MIRROR AUDIT PENDING** |
+| Mirror audit status | **PASSED — FINAL EXECUTIVE STRIPE UAT PENDING** |
+| GIA UAT no-payment override | **ENABLED TEMPORARILY FOR CLIENT UAT** |
+| GIA full cron | **ENABLED / HEALTHY** |
 
-The Git baseline above is a safe starting point for GIA tracking. It must not be treated as proof that the current live GIA filesystem and database are identical to GAA. The live GIA server remains authoritative until the mirror audit is completed.
+## Mirror-audit result
+
+The 18 September 2026 mirror audit passed for:
+
+- frontend and backend parity;
+- database schema and migration parity;
+- all four assessment tracks;
+- 200-question CMS/questionnaire content;
+- report templates and email templates;
+- branding, media and SEO content;
+- roles/permissions and admin-user configuration;
+- public configuration and assessment-experience APIs;
+- normalized non-secret settings;
+- GIA-specific hostname/base URL isolation;
+- full cron/background processing;
+- UAT no-payment unlock flow on Personal, New Joiner, Manager and Executive;
+- Full Report unlock and PDF generation on all four tracks;
+- GIA-only report URLs in recent payment/report emails.
+
+Detailed audit record:
+
+`docs/GIA-MIRROR-AUDIT-20260918.md`
+
+### Confirmed GIA-only corrections
+
+- corrected `email.public_base_url` from GAA to `https://gia.atomglobal.com`;
+- replaced the incomplete email-only scheduler with the full GIA application cron;
+- removed the old standalone email cron from the active cron directory to prevent duplicate processing;
+- suppressed previously identified old internal UAT reminder candidates before enabling the full scheduler.
+
+Current GIA health reports `cron:true`.
+
+`feedbackGitHub:false` remains optional/non-blocking.
+
+## Remaining final UAT
+
+The final outstanding item is a **current real Stripe payment test for the Executive assessment**, to be performed on GIA by the client/Sunil.
+
+The test should confirm:
+
+1. Executive Stripe checkout opens;
+2. real payment completes;
+3. webhook/reconciliation records the payment;
+4. Full Report unlocks;
+5. report URL remains under `gia.atomglobal.com`;
+6. PDF is available;
+7. payment/report emails contain GIA-only links.
+
+After this test is accepted, disable the temporary GIA UAT no-payment override:
+
+`system.cash_on_delivery_enabled=false`
+
+Then verify GIA health again and update the audit record.
 
 ## Validated GIA pre-audit backup
 
 The following backup was created and validated before any GIA audit or repair:
 
-```text
-/var/backups/growth-alignment-gia/gia-full-20260918-041602
-```
+`/var/backups/growth-alignment-gia/gia-full-20260918-041602`
 
 Validated components:
 
@@ -69,43 +121,7 @@ aef0503c8c373cad080915aaa72c63564c942d1f57e6cf3bb77c23f2ae39ed49  gia-backend.ta
 
 Full backup record:
 
-```text
-docs/GIA-BACKUP-20260918.md
-```
-
-## GIA mirror-audit objective
-
-The audit must determine whether GIA mirrors the approved GAA functionality while preserving GIA-specific isolation.
-
-Audit areas:
-
-- public application and all four assessment tracks;
-- questionnaire flow, autosave and resume;
-- Lite Report and Full Report;
-- PDF generation and the approved confidential cover;
-- scoring and 10-area breakdown;
-- Admin/CMS;
-- participant and report history;
-- Stripe checkout, webhook and reconciliation;
-- UAT no-payment controls where applicable;
-- email templates, queue and generated links;
-- commitments and retakes;
-- Lite-safe sharing;
-- media and branding;
-- public/base URLs;
-- Apache routing;
-- database schema and migrations;
-- cron/background processing;
-- storage and generated reports;
-- old `gaa.atomglobal.com` or `v4.atomglobal.com` references that may incorrectly affect GIA.
-
-Differences must be classified as:
-
-1. **expected GIA isolation**;
-2. **harmless historical data**;
-3. **actual GIA defect requiring correction**.
-
-Only category 3 should be repaired.
+`docs/GIA-BACKUP-20260918.md`
 
 ## Mandatory GAA protection rule
 
