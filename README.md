@@ -63,6 +63,45 @@ Current GIA health reports `cron:true`.
 
 `feedbackGitHub:false` remains optional/non-blocking.
 
+
+## Work completed today — 18 September 2026
+
+Today's GIA-only audit/repair work is complete and recorded on `gia-live`.
+
+Verified today:
+
+- validated the full pre-audit GIA backup at `/var/backups/growth-alignment-gia/gia-full-20260918-041602`;
+- confirmed frontend and backend parity against GAA using read-only comparisons;
+- confirmed 47-table schema/migration parity;
+- confirmed byte-for-byte CMS/content parity for assessment, question, report, email, branding, SEO, role/permission, media, affiliate and alert-recipient configuration tables;
+- confirmed admin-user parity;
+- confirmed public configuration and assessment-experience API parity;
+- corrected GIA `email.public_base_url` to `https://gia.atomglobal.com`;
+- enabled the full GIA background cron and removed the old standalone email-only cron from the active cron directory;
+- confirmed GIA health reports `cron:true`;
+- confirmed no duplicate GIA email worker is active;
+- verified recent cron runs reconcile Stripe with zero failures and process the email queue normally;
+- verified UAT no-payment works on Executive after restoring the temporary GIA-only override to `true`;
+- confirmed recent successful UAT coverage for Personal, New Joiner, Manager and Executive;
+- confirmed the latest audited UAT report for all four tracks is unlocked and has a generated PDF;
+- confirmed recent payment/report emails use only `gia.atomglobal.com` report URLs and contain no GAA/V4 domains;
+- classified recent queue items as normal UAT/resume/report email activity rather than abandoned-survey noise.
+
+Latest audited four-track GIA UAT evidence:
+
+| Track | Session | Report | Unlock | PDF |
+|---|---:|---:|---|---|
+| Personal | 151 | 133 | UAT no-payment/manual | Ready |
+| New Joiner | 152 | 134 | UAT no-payment/manual | Ready |
+| Manager | 145 | 128 | UAT no-payment/manual | Ready |
+| Executive | 156 | 138 | UAT no-payment/manual | Ready |
+
+Current temporary UAT setting:
+
+`system.cash_on_delivery_enabled=true`
+
+Leave this enabled until Sunil completes the final real Executive Stripe payment UAT. After acceptance, set it back to `false`, verify health, and record the final sign-off.
+
 ## Remaining final UAT
 
 The final outstanding item is a **current real Stripe payment test for the Executive assessment**, to be performed on GIA by the client/Sunil.
