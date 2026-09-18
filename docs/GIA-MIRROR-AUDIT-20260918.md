@@ -155,6 +155,66 @@ Result:
 
 The additional `paid_report_ready` messages observed on some UAT reports are consistent with participant-triggered report-email actions. The public report-email route queues `paid_report_ready` without creating an administrator audit-log record.
 
+
+## Verified evidence from today's final audit pass
+
+### Four-track UAT records
+
+The latest completed GIA UAT records reviewed today were:
+
+| Track | Session | Report | Unlock reason | PDF |
+|---|---:|---:|---|---|
+| Personal | 151 | 133 | `cash_on_delivery_manual` | Ready |
+| New Joiner | 152 | 134 | `cash_on_delivery_manual` | Ready |
+| Manager | 145 | 128 | `cash_on_delivery_manual` | Ready |
+| Executive | 156 | 138 | `cash_on_delivery_manual` | Ready |
+
+### Payment coverage observed
+
+- Executive: 5 manual UAT payments
+- Manager: 2 manual UAT payments
+- New Joiner: 5 manual UAT payments
+- Personal: 48 manual UAT payments
+- Personal: 13 Stripe `checkout_started` records
+- Personal: 4 historical Stripe `paid` records
+
+A current real Executive Stripe payment remains the final client/Sunil UAT item.
+
+### Cron/background-processing evidence
+
+After the full GIA cron was installed:
+
+- Stripe reconciliation checked the recent pending checkout records with `recovered 0; failures 0`;
+- administrator alert processing returned zero pending events;
+- email queue processing completed successfully;
+- `system.cron_last_run` updated normally;
+- `/api/health` reported `cron:true`;
+- only `/etc/cron.d/growth-alignment-gia` remained active for GIA;
+- no separate `process-email-queue.php` cron remained active.
+
+Recent queue items reviewed during the audit included:
+
+- `782` — `survey_resume_link`
+- `787` — `paid_report_ready`
+- `789` — `survey_resume_link`
+
+These were normal GIA UAT participant/report activity and were not linked to `abandoned_survey_events`.
+
+### Report-email URL evidence
+
+Recent UAT report/payment email payloads for reports `128`, `133`, `134`, and `138` were checked.
+
+Observed report URLs were under:
+
+`https://gia.atomglobal.com/report/...`
+
+No recent payload in that audited set contained:
+
+- `gaa.atomglobal.com`
+- `v4.atomglobal.com`
+
+The additional `paid_report_ready` emails on reports 128, 133 and 134 were created after the initial UAT payment emails and are consistent with participant-side report-email actions. No matching admin report audit actions were present.
+
 ## Temporary UAT state
 
 The GIA UAT no-payment override is currently enabled for client testing:
