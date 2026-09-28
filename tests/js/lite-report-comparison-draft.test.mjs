@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 const reportView = readFileSync("src/components/assessment/ReportView.jsx", "utf8");
 const reportCss = readFileSync("src/report-flow.css", "utf8");
 
-test("Lite result uses the Lite vs Full comparison instead of the old two-card detail", () => {
+test("Lite result uses the Lite vs Full comparison while Full Report keeps its summary cards", () => {
   assert.match(reportView, /function LiteFullComparison/);
   assert.match(reportView, /Lite vs Full Report/);
   assert.match(reportView, /1 key strength/);
@@ -13,8 +13,9 @@ test("Lite result uses the Lite vs Full comparison instead of the old two-card d
   assert.match(reportView, /3 strengths/);
   assert.match(reportView, /3 development observations/);
   assert.match(reportView, /Complete report preview/);
-  assert.doesNotMatch(reportView, /<h2>Top three strengths<\/h2>/);
-  assert.doesNotMatch(reportView, /<h2>Development observations<\/h2>/);
+  assert.match(reportView, /unlocked && <div className="report-columns"/);
+  assert.match(reportView, /<h2>Top three strengths<\/h2>/);
+  assert.match(reportView, /<h2>Development observations<\/h2>/);
 });
 
 test("Lite comparison keeps the existing payment and UAT routes", () => {
