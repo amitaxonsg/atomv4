@@ -202,7 +202,7 @@ function RetakeComparison({ comparison, trackKey }) {
   </section>;
 }
 
-function RetakePlan({ report }) {
+function RetakePlan({ report, token }) {
   const [state, setState] = React.useState({ busy: false, error: "" });
   const recommended = report?.retakeRecommendedAt ? new Date(report.retakeRecommendedAt) : null;
   const recommendedLabel = recommended && !Number.isNaN(recommended.getTime()) ? recommended.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }) : "about three months from now";
@@ -212,7 +212,7 @@ function RetakePlan({ report }) {
     if (!available || state.busy) return;
     setState({ busy: true, error: "" });
     try {
-      const result = await api.createCheckout({ sessionId: report.sessionId, track: report.trackKey, affiliateCode: "__RETAKE__" });
+      const result = await api.createCheckout({ sessionId: report.sessionId, track: report.trackKey, affiliateCode: "__RETAKE__", reportToken: token });
       if (result.url) window.location.href = result.url;
       else if (result.preview) setState({ busy: false, error: "Preview mode does not create a live retake payment." });
       else throw new Error("Retake checkout is unavailable.");
@@ -586,7 +586,7 @@ function FullReportContent({ report, summary, content, token }) {
     <WrittenReflections items={content.writtenReflections} />
     <Methodology items={content.methodology} />
     <DevelopmentCommitment report={report} token={token} />
-    <RetakePlan report={report} />
+    <RetakePlan report={report} token={token} />
     <CoachCallToAction report={report} />
     <FullReportActions report={report} token={token} />
     <UpgradeReasons items={content.upgradeReasons} />
@@ -609,7 +609,7 @@ export default function ReportView({ payload, token, onReset }) {
     if (!checkoutAvailable) return;
     setCheckout({ busy: true, error: "" });
     try {
-      const result = await api.createCheckout({ sessionId: report.sessionId, track: report.trackKey });
+      const result = await api.createCheckout({ sessionId: report.sessionId, track: report.trackKey, reportToken: token });
       if (result.preview) window.location.reload(); else window.location.href = result.url;
     } catch (error) { setCheckout({ busy: false, error: error.message }); }
   };
