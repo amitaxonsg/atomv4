@@ -89,12 +89,12 @@ function LiteFullComparison({ summary, price, checkoutAvailable, cashOnDeliveryA
         </header>
 
         <div className="v4-lite-full-comparison__item">
-          <span>1 key strength</span>
+          <span>Key strength</span>
           <p>{liteStrength || "Your key strength from this result."}</p>
         </div>
 
         <div className="v4-lite-full-comparison__item">
-          <span>1 development observation</span>
+          <span>Development observation</span>
           <p>{liteDevelopment || "Your key development observation from this result."}</p>
         </div>
 
@@ -635,9 +635,7 @@ export default function ReportView({ payload, token, onReset }) {
       ? <button className="button button--ghost" onClick={onReset}>Start again</button>
       : <a className="button button--ghost" href="/">New assessment</a>}
     {fullReportPdfUrl && <a className="button button--ghost" href={fullReportPdfUrl} target="_blank" rel="noreferrer">Open PDF</a>}
-    {fullReportPdfUrl
-      ? <a className="button button--primary" href={fullReportPdfUrl} target="_blank" rel="noreferrer">Print report</a>
-      : <button className="button button--primary" onClick={() => window.print()}>Print report</button>}
+    {fullReportPdfUrl && <a className="button button--primary" href={fullReportPdfUrl} target="_blank" rel="noreferrer">Print report</a>}
   </>;
 
   const reportClass = report?.trackKey === "personal" ? "v4-report--personal" : "v4-report--professional";
