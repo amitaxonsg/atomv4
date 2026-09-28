@@ -329,7 +329,7 @@ Current server-verified deployed application commit:
 a2b8c735da1a5385e0751096dcb9b832db388991
 ```
 
-## Backup and rollback rule
+## Approved V4 backup procedure and rollback rule
 
 Before every meaningful production change:
 
