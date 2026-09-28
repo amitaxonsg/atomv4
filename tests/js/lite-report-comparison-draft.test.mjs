@@ -38,3 +38,19 @@ test("Comparison has responsive and print treatments", () => {
   assert.match(reportCss, /@media \(max-width: 760px\)/);
   assert.match(reportCss, /@media print/);
 });
+
+
+test("Personal coffee banner is scoped to Personal and sits before the Full Report CTA", () => {
+  assert.match(reportView, /trackKey === "personal" && <div className="v4-personal-coffee-banner">/);
+  assert.match(reportView, /For less than a cup of coffee, find out more about yourself! ✨/);
+  const banner = reportView.indexOf('className="v4-personal-coffee-banner"');
+  const fullCta = reportView.indexOf('Full Report — ${price}');
+  assert.ok(banner >= 0 && fullCta > banner, "Personal coffee banner must appear before Full Report CTA");
+});
+
+test("Print Lite Report uses a dedicated compact Lite summary", () => {
+  assert.match(reportView, /className="v4-lite-print-summary"/);
+  assert.match(reportView, /<h3>Key strength<\/h3>/);
+  assert.match(reportView, /<h3>Development observation<\/h3>/);
+  assert.match(reportCss, /\.v4-lite-print-summary\s*\{\s*display:\s*none/s);
+});
