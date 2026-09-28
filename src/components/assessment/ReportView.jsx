@@ -602,6 +602,7 @@ export default function ReportView({ payload, token, onReset }) {
   const sharedLite = Boolean(report?.sharedLite);
   const checkoutAvailable = !sharedLite && (isMockMode || Boolean(report?.checkoutAvailable));
   const cashOnDeliveryAvailable = !sharedLite && Boolean(report?.cashOnDeliveryAvailable);
+  const paymentCancelled = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("payment") === "cancelled";
   const [checkout, setCheckout] = React.useState({ busy: false, error: "" });
   const price = new Intl.NumberFormat(undefined, { style: "currency", currency: report?.currency || "USD" }).format(Number(report?.priceMinor || 0) / 100);
 
@@ -646,6 +647,7 @@ export default function ReportView({ payload, token, onReset }) {
     <p className="lead">{sharedLite
       ? "This shared Lite Report contains only the result information selected for public sharing. Private Full Report content is not included."
       : `${report?.participantName ? `${report.participantName}, this` : "This"} result was calculated by the published assessment version from your saved responses.`}</p>
+    {paymentCancelled && <p className="preview-note" role="status"><strong>Payment not completed.</strong> Nothing was charged. Your result is still here and you can try the Full Report checkout again whenever you are ready.</p>}
     <section className="report-hero"><AlignmentGauge score={summary.total} /><div><h2>Your alignment pattern</h2><p>{summary.summary}</p><AlignmentMeter score={summary.total} /></div></section>
     {unlocked && <div className="report-columns"><section className="report-card"><h2>Top three strengths</h2><ul>{summary.strengths.slice(0, 3).map(item => <li key={item}><Check />{item}</li>)}</ul></section><section className="report-card"><h2>Development observations</h2><ul>{summary.watchouts.map(item => <li key={item}><span>—</span>{item}</li>)}</ul></section></div>}
     {!unlocked && !sharedLite && <LiteFullComparison
