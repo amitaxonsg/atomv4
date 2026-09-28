@@ -647,6 +647,7 @@ export default function ReportView({ payload, token, onReset }) {
       ? "This shared Lite Report contains only the result information selected for public sharing. Private Full Report content is not included."
       : `${report?.participantName ? `${report.participantName}, this` : "This"} result was calculated by the published assessment version from your saved responses.`}</p>
     <section className="report-hero"><AlignmentGauge score={summary.total} /><div><h2>Your alignment pattern</h2><p>{summary.summary}</p><AlignmentMeter score={summary.total} /></div></section>
+    {unlocked && <div className="report-columns"><section className="report-card"><h2>Top three strengths</h2><ul>{summary.strengths.slice(0, 3).map(item => <li key={item}><Check />{item}</li>)}</ul></section><section className="report-card"><h2>Development observations</h2><ul>{summary.watchouts.map(item => <li key={item}><span>—</span>{item}</li>)}</ul></section></div>}
     {!unlocked && !sharedLite && <LiteFullComparison
       summary={summary}
       price={price}
