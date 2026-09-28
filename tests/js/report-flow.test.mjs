@@ -40,8 +40,8 @@ test("participant report shows safe Stripe readiness, simplified Lite comparison
   assert.doesNotMatch(reportView, />Lite vs Full Report</);
   assert.match(reportView, /Key strength/);
   assert.match(reportView, /Development observation/);
-  assert.match(reportView, /3 strengths/);
-  assert.match(reportView, /3 development observations/);
+  assert.match(reportView, /Your 3 strengths/);
+  assert.match(reportView, /Your 3 development observations/);
   assert.match(reportView, /Complete report preview/);
   assert.match(reportView, /Full Report checkout coming soon/);
   assert.match(reportView, /checkoutAvailable/);

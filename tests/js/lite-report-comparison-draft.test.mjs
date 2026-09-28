@@ -10,8 +10,8 @@ test("Lite result uses the Lite vs Full comparison while Full Report keeps its s
   assert.doesNotMatch(reportView, />Lite vs Full Report</);
   assert.match(reportView, /Key strength/);
   assert.match(reportView, /Development observation/);
-  assert.match(reportView, /3 strengths/);
-  assert.match(reportView, /3 development observations/);
+  assert.match(reportView, /Your 3 strengths/);
+  assert.match(reportView, /Your 3 development observations/);
   assert.match(reportView, /Complete report preview/);
   assert.match(reportView, /Print Lite Report/);
   assert.match(reportView, /unlocked && <div className="report-columns"/);

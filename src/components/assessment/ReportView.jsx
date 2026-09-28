@@ -71,8 +71,16 @@ function UpgradeReasons({ items, locked = false }) {
 }
 
 function LiteFullComparison({ summary, trackKey, price, checkoutAvailable, cashOnDeliveryAvailable, checkout, onCheckout, onCashOnDelivery }) {
-  const liteStrength = textValue(Array.isArray(summary?.strengths) ? summary.strengths[0] : "");
-  const liteDevelopment = textValue(Array.isArray(summary?.watchouts) ? summary.watchouts[0] : "");
+  const strengths = Array.isArray(summary?.strengths)
+    ? summary.strengths.map((item) => textValue(item)).filter(Boolean).slice(0, 3)
+    : [];
+
+  const developments = Array.isArray(summary?.watchouts)
+    ? summary.watchouts.map((item) => textValue(item)).filter(Boolean).slice(0, 3)
+    : [];
+
+  const liteStrength = strengths[0] || "";
+  const liteDevelopment = developments[0] || "";
 
   return <section className="paid-report locked v4-lite-full-comparison" aria-labelledby="lite-full-comparison-title">
     <div className="v4-lite-full-comparison__intro">
@@ -81,6 +89,86 @@ function LiteFullComparison({ summary, trackKey, price, checkoutAvailable, cashO
     </div>
 
     <div className="v4-lite-full-comparison__grid">
+
+      <article className="v4-lite-full-comparison__card v4-lite-full-comparison__card--full">
+        <header>
+          <span>Full Report</span>
+          <strong>Complete development view</strong>
+        </header>
+
+        <div className="v4-lite-full-comparison__feature-group">
+          <div className="v4-lite-full-comparison__feature-heading">
+            <Check />
+            <strong>Your 3 strengths</strong>
+          </div>
+
+          <ul className="v4-lite-full-comparison__detail-list">
+            {strengths.map((strength, index) =>
+              <li key={`strength-${index}`}>{strength}</li>
+            )}
+          </ul>
+        </div>
+
+        <div className="v4-lite-full-comparison__feature-group">
+          <div className="v4-lite-full-comparison__feature-heading">
+            <Check />
+            <strong>Your 3 development observations</strong>
+          </div>
+
+          <ul className="v4-lite-full-comparison__detail-list">
+            {developments.map((development, index) =>
+              <li key={`development-${index}`}>{development}</li>
+            )}
+          </ul>
+        </div>
+
+        <ul className="v4-lite-full-comparison__features">
+          <li><Check /> 10 key areas of your report to explore</li>
+          <li><Check /> Five practical ways to improve yourself</li>
+          <li><Check /> Personal development roadmap</li>
+          <li><Check /> Speak with a Coach</li>
+          <li><Check /> Retake the assessment after 3 months for just $2.99</li>
+        </ul>
+
+        <div className="v4-lite-full-comparison__blur" aria-hidden="true">
+          <div><span /><span /><span /></div>
+          <div><span /><span /></div>
+          <div><span /><span /><span /></div>
+        </div>
+
+        <p className="v4-lite-full-comparison__locked-note">
+          <Lock /> Complete report preview
+        </p>
+
+        {checkout.error && <p className="form-error" role="alert">{checkout.error}</p>}
+
+        {trackKey === "personal" && <div className="v4-personal-coffee-banner">
+          <strong>For less than a cup of coffee, find out more about yourself! ✨</strong>
+        </div>}
+
+        <button
+          className="button button--primary v4-lite-full-comparison__button"
+          type="button"
+          disabled={!checkoutAvailable || checkout.busy}
+          onClick={onCheckout}
+        >
+          {checkout.busy
+            ? "Opening checkout…"
+            : checkoutAvailable
+              ? `Full Report — ${price}`
+              : "Full Report checkout coming soon"} {checkoutAvailable && <ArrowRight />}
+        </button>
+
+        {cashOnDeliveryAvailable && <button
+          className="button button--ghost v4-lite-full-comparison__button"
+          type="button"
+          disabled={checkout.busy}
+          onClick={onCashOnDelivery}
+        >
+          UAT Test — No Payment
+        </button>}
+      </article>
+
       <article className="v4-lite-full-comparison__card v4-lite-full-comparison__card--lite">
         <header>
           <span>Lite Report</span>
@@ -97,48 +185,24 @@ function LiteFullComparison({ summary, trackKey, price, checkoutAvailable, cashO
           <p>{liteDevelopment || "Your key development observation from this result."}</p>
         </div>
 
-        <button className="button button--ghost v4-lite-full-comparison__button" type="button" onClick={() => window.print()}>
+        <button
+          className="button button--ghost v4-lite-full-comparison__button"
+          type="button"
+          onClick={() => window.print()}
+        >
           Print Lite Report
         </button>
       </article>
 
-      <article className="v4-lite-full-comparison__card v4-lite-full-comparison__card--full">
-        <header>
-          <span>Full Report</span>
-          <strong>Complete development view</strong>
-        </header>
-
-        <ul className="v4-lite-full-comparison__features">
-          <li><Check /> 3 strengths</li>
-          <li><Check /> 3 development observations</li>
-          <li><Check /> Complete report and development guidance</li>
-        </ul>
-
-        <div className="v4-lite-full-comparison__blur" aria-hidden="true">
-          <div><span /><span /><span /></div>
-          <div><span /><span /></div>
-          <div><span /><span /><span /></div>
-        </div>
-        <p className="v4-lite-full-comparison__locked-note"><Lock /> Complete report preview</p>
-
-        {checkout.error && <p className="form-error" role="alert">{checkout.error}</p>}
-
-        {trackKey === "personal" && <div className="v4-personal-coffee-banner">
-          <strong>For less than a cup of coffee, find out more about yourself! ✨</strong>
-        </div>}
-
-        <button className="button button--primary v4-lite-full-comparison__button" type="button" disabled={!checkoutAvailable || checkout.busy} onClick={onCheckout}>
-          {checkout.busy ? "Opening checkout…" : checkoutAvailable ? `Full Report — ${price}` : "Full Report checkout coming soon"} {checkoutAvailable && <ArrowRight />}
-        </button>
-
-        {cashOnDeliveryAvailable && <button className="button button--ghost v4-lite-full-comparison__button" type="button" disabled={checkout.busy} onClick={onCashOnDelivery}>
-          UAT Test — No Payment
-        </button>}
-      </article>
     </div>
 
-    {cashOnDeliveryAvailable && <p className="preview-note">UAT Test — No Payment is temporarily enabled for client testing. It unlocks the Full Report and queues the normal confirmation/report email with the PDF attachment without charging Stripe.</p>}
-    {!checkoutAvailable && !cashOnDeliveryAvailable && <p className="preview-note">Your Lite Report is ready now. Full Report purchasing will open after Atom Global completes its secure payment configuration.</p>}
+    {cashOnDeliveryAvailable && <p className="preview-note">
+      UAT Test — No Payment is temporarily enabled for client testing. It unlocks the Full Report and queues the normal confirmation/report email with the PDF attachment without charging Stripe.
+    </p>}
+
+    {!checkoutAvailable && !cashOnDeliveryAvailable && <p className="preview-note">
+      Your Lite Report is ready now. Full Report purchasing will open after Atom Global completes its secure payment configuration.
+    </p>}
   </section>;
 }
 
