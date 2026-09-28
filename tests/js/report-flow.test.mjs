@@ -37,7 +37,7 @@ test("locked report API exposes Lite content and preview but not Full content", 
 });
 
 test("participant report shows safe Stripe readiness, simplified Lite comparison and full CMS schema", () => {
-  assert.match(reportView, /Lite vs Full Report/);
+  assert.doesNotMatch(reportView, />Lite vs Full Report</);
   assert.match(reportView, /Key strength/);
   assert.match(reportView, /Development observation/);
   assert.match(reportView, /3 strengths/);

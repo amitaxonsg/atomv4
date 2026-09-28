@@ -76,7 +76,6 @@ function LiteFullComparison({ summary, trackKey, price, checkoutAvailable, cashO
 
   return <section className="paid-report locked v4-lite-full-comparison" aria-labelledby="lite-full-comparison-title">
     <div className="v4-lite-full-comparison__intro">
-      <p className="eyebrow">Lite vs Full Report</p>
       <h2 id="lite-full-comparison-title">Choose how far you want to go</h2>
       <p>Your Lite Report keeps the result concise. The Full Report unlocks the deeper development detail behind your result.</p>
     </div>
