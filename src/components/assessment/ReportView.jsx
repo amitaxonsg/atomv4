@@ -70,7 +70,7 @@ function UpgradeReasons({ items, locked = false }) {
   </section>;
 }
 
-function LiteFullComparison({ summary, price, checkoutAvailable, cashOnDeliveryAvailable, checkout, onCheckout, onCashOnDelivery }) {
+function LiteFullComparison({ summary, trackKey, price, checkoutAvailable, cashOnDeliveryAvailable, checkout, onCheckout, onCashOnDelivery }) {
   const liteStrength = textValue(Array.isArray(summary?.strengths) ? summary.strengths[0] : "");
   const liteDevelopment = textValue(Array.isArray(summary?.watchouts) ? summary.watchouts[0] : "");
 
@@ -123,6 +123,10 @@ function LiteFullComparison({ summary, price, checkoutAvailable, cashOnDeliveryA
         <p className="v4-lite-full-comparison__locked-note"><Lock /> Complete report preview</p>
 
         {checkout.error && <p className="form-error" role="alert">{checkout.error}</p>}
+
+        {trackKey === "personal" && <div className="v4-personal-coffee-banner">
+          <strong>For less than a cup of coffee, find out more about yourself! ✨</strong>
+        </div>}
 
         <button className="button button--primary v4-lite-full-comparison__button" type="button" disabled={!checkoutAvailable || checkout.busy} onClick={onCheckout}>
           {checkout.busy ? "Opening checkout…" : checkoutAvailable ? `Full Report — ${price}` : "Full Report checkout coming soon"} {checkoutAvailable && <ArrowRight />}
@@ -647,9 +651,21 @@ export default function ReportView({ payload, token, onReset }) {
       : `${report?.participantName ? `${report.participantName}, this` : "This"} result was calculated by the published assessment version from your saved responses.`}</p>
     {paymentCancelled && <p className="preview-note" role="status"><strong>Payment not completed.</strong> Nothing was charged. Your result is still here and you can try the Full Report checkout again whenever you are ready.</p>}
     <section className="report-hero"><AlignmentGauge score={summary.total} /><div><h2>Your alignment pattern</h2><p>{summary.summary}</p><AlignmentMeter score={summary.total} /></div></section>
+    {!unlocked && !sharedLite && <section className="v4-lite-print-summary" aria-label="Lite Report print summary">
+      <h2>Lite Report</h2>
+      <div>
+        <h3>Key strength</h3>
+        <p>{textValue(Array.isArray(summary?.strengths) ? summary.strengths[0] : "")}</p>
+      </div>
+      <div>
+        <h3>Development observation</h3>
+        <p>{textValue(Array.isArray(summary?.watchouts) ? summary.watchouts[0] : "")}</p>
+      </div>
+    </section>}
     {unlocked && <div className="report-columns"><section className="report-card"><h2>Top three strengths</h2><ul>{summary.strengths.slice(0, 3).map(item => <li key={item}><Check />{item}</li>)}</ul></section><section className="report-card"><h2>Development observations</h2><ul>{summary.watchouts.map(item => <li key={item}><span>—</span>{item}</li>)}</ul></section></div>}
     {!unlocked && !sharedLite && <LiteFullComparison
       summary={summary}
+      trackKey={report?.trackKey}
       price={price}
       checkoutAvailable={checkoutAvailable}
       cashOnDeliveryAvailable={cashOnDeliveryAvailable}
