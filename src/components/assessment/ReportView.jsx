@@ -70,6 +70,75 @@ function UpgradeReasons({ items, locked = false }) {
   </section>;
 }
 
+function LiteFullComparison({ summary, price, checkoutAvailable, cashOnDeliveryAvailable, checkout, onCheckout, onCashOnDelivery }) {
+  const liteStrength = textValue(Array.isArray(summary?.strengths) ? summary.strengths[0] : "");
+  const liteDevelopment = textValue(Array.isArray(summary?.watchouts) ? summary.watchouts[0] : "");
+
+  return <section className="paid-report locked v4-lite-full-comparison" aria-labelledby="lite-full-comparison-title">
+    <div className="v4-lite-full-comparison__intro">
+      <p className="eyebrow">Lite vs Full Report</p>
+      <h2 id="lite-full-comparison-title">Choose how far you want to go</h2>
+      <p>Your Lite Report keeps the result concise. The Full Report unlocks the deeper development detail behind your result.</p>
+    </div>
+
+    <div className="v4-lite-full-comparison__grid">
+      <article className="v4-lite-full-comparison__card v4-lite-full-comparison__card--lite">
+        <header>
+          <span>Lite Report</span>
+          <strong>Included now</strong>
+        </header>
+
+        <div className="v4-lite-full-comparison__item">
+          <span>1 key strength</span>
+          <p>{liteStrength || "Your key strength from this result."}</p>
+        </div>
+
+        <div className="v4-lite-full-comparison__item">
+          <span>1 development observation</span>
+          <p>{liteDevelopment || "Your key development observation from this result."}</p>
+        </div>
+
+        <button className="button button--ghost v4-lite-full-comparison__button" type="button" onClick={() => window.print()}>
+          Print Lite Report
+        </button>
+      </article>
+
+      <article className="v4-lite-full-comparison__card v4-lite-full-comparison__card--full">
+        <header>
+          <span>Full Report</span>
+          <strong>Complete development view</strong>
+        </header>
+
+        <ul className="v4-lite-full-comparison__features">
+          <li><Check /> 3 strengths</li>
+          <li><Check /> 3 development observations</li>
+          <li><Check /> Complete report and development guidance</li>
+        </ul>
+
+        <div className="v4-lite-full-comparison__blur" aria-hidden="true">
+          <div><span /><span /><span /></div>
+          <div><span /><span /></div>
+          <div><span /><span /><span /></div>
+        </div>
+        <p className="v4-lite-full-comparison__locked-note"><Lock /> Complete report preview</p>
+
+        {checkout.error && <p className="form-error" role="alert">{checkout.error}</p>}
+
+        <button className="button button--primary v4-lite-full-comparison__button" type="button" disabled={!checkoutAvailable || checkout.busy} onClick={onCheckout}>
+          {checkout.busy ? "Opening checkout…" : checkoutAvailable ? `Full Report — ${price}` : "Full Report checkout coming soon"} {checkoutAvailable && <ArrowRight />}
+        </button>
+
+        {cashOnDeliveryAvailable && <button className="button button--ghost v4-lite-full-comparison__button" type="button" disabled={checkout.busy} onClick={onCashOnDelivery}>
+          UAT Test — No Payment
+        </button>}
+      </article>
+    </div>
+
+    {cashOnDeliveryAvailable && <p className="preview-note">UAT Test — No Payment is temporarily enabled for client testing. It unlocks the Full Report and queues the normal confirmation/report email with the PDF attachment without charging Stripe.</p>}
+    {!checkoutAvailable && !cashOnDeliveryAvailable && <p className="preview-note">Your Lite Report is ready now. Full Report purchasing will open after Atom Global completes its secure payment configuration.</p>}
+  </section>;
+}
+
 function SubscaleReads({ content, trackKey }) {
   const reads = content?.subscaleReads;
   if (!reads || typeof reads !== "object" || Array.isArray(reads)) return null;
@@ -203,8 +272,8 @@ function highlightShareText(report, summary) {
     "Your alignment pattern",
     textValue(summary.summary),
   ];
-  const strengths = Array.isArray(summary.strengths) ? summary.strengths.slice(0, 3) : [];
-  const observations = Array.isArray(summary.watchouts) ? summary.watchouts.slice(0, 3) : [];
+  const strengths = Array.isArray(summary.strengths) ? summary.strengths.slice(0, 1) : [];
+  const observations = Array.isArray(summary.watchouts) ? summary.watchouts.slice(0, 1) : [];
   if (strengths.length) lines.push("", "Top strengths", ...strengths.map(item => `- ${textValue(item)}`));
   if (observations.length) lines.push("", "Development observations", ...observations.map(item => `- ${textValue(item)}`));
   lines.push("", `Take the Growth Alignment assessment: ${assessmentUrl()}`);
@@ -470,7 +539,7 @@ function ThankYouShare({ report, summary }) {
     <p className="eyebrow">Thank you</p>
     <h3>Thank you for taking the assessment.</h3>
     <p>If this is helpful, please share it with someone who will benefit from taking it!</p>
-    <p className="preview-note"><strong>Privacy:</strong> Share highlights sends only your result title, overall score, alignment summary, top strengths and development observations. Your private Full Report, PDF, private link, reflections and detailed development content are not included.</p>
+    <p className="preview-note"><strong>Privacy:</strong> Share highlights sends only your result title, overall score, alignment summary, one key strength and one development observation. Your private Full Report, PDF, private link, reflections and detailed development content are not included.</p>
     <ShareHighlightsButton report={report} summary={summary} />
   </section>;
 }
@@ -533,7 +602,6 @@ export default function ReportView({ payload, token, onReset }) {
   const sharedLite = Boolean(report?.sharedLite);
   const checkoutAvailable = !sharedLite && (isMockMode || Boolean(report?.checkoutAvailable));
   const cashOnDeliveryAvailable = !sharedLite && Boolean(report?.cashOnDeliveryAvailable);
-  const upgradePreview = report?.free?.upgradePreview || [];
   const [checkout, setCheckout] = React.useState({ busy: false, error: "" });
   const price = new Intl.NumberFormat(undefined, { style: "currency", currency: report?.currency || "USD" }).format(Number(report?.priceMinor || 0) / 100);
 
@@ -579,20 +647,24 @@ export default function ReportView({ payload, token, onReset }) {
       ? "This shared Lite Report contains only the result information selected for public sharing. Private Full Report content is not included."
       : `${report?.participantName ? `${report.participantName}, this` : "This"} result was calculated by the published assessment version from your saved responses.`}</p>
     <section className="report-hero"><AlignmentGauge score={summary.total} /><div><h2>Your alignment pattern</h2><p>{summary.summary}</p><AlignmentMeter score={summary.total} /></div></section>
-    <div className="report-columns"><section className="report-card"><h2>Top three strengths</h2><ul>{summary.strengths.slice(0, 3).map(item => <li key={item}><Check />{item}</li>)}</ul></section><section className="report-card"><h2>Development observations</h2><ul>{summary.watchouts.map(item => <li key={item}><span>—</span>{item}</li>)}</ul></section></div>
-    <section className={`paid-report ${unlocked ? "unlocked" : "locked"}`}>
-      <div className="paid-heading"><div><p className="eyebrow">Complete report</p><h2>{sharedLite ? "Shared Lite Report" : unlocked ? "Your full development report" : "This is the short version"}</h2></div>{!unlocked && !sharedLite && <span className="lock-badge"><Lock /> Locked</span>}</div>
-      {unlocked ? <FullReportContent report={report} summary={summary} content={paidContent} token={token} /> : <>
-        <p>Your Full Report goes deeper into the patterns behind this result and turns them into practical development guidance.</p><UpgradeReasons items={upgradePreview} locked />
-        {!upgradePreview.length && <div className="locked-preview"><div><h3>10-area score breakdown and deep dive</h3><p>Compare how your pattern shifts across decisions, relationships, conflict and pressure.</p></div><div><h3>Practical development roadmap</h3><p>Receive tailored actions, working-style guidance and track-specific development insights.</p></div></div>}
-        {checkout.error && <p className="form-error" role="alert">{checkout.error}</p>}
-        {sharedLite
-          ? <div className="upgrade-box"><div><span>Discover your own result</span><strong>Growth Alignment</strong><small>Complete the assessment to receive your own Lite Report and personal Growth Alignment profile.</small></div><div className="upgrade-box__actions"><a className="button button--primary" href="/">Take the assessment <ArrowRight /></a></div></div>
-          : <div className="upgrade-box"><div><span>One-time payment</span><strong>{price}</strong><small>{report?.reportExperience?.paymentWording || "Secure payment unlocks your private Full Development Report."}</small></div><div className="upgrade-box__actions"><button className="button button--primary" disabled={!checkoutAvailable || checkout.busy} onClick={openCheckout}>{checkout.busy ? "Opening checkout…" : checkoutAvailable ? "Pay by card" : "Full Report checkout coming soon"} {checkoutAvailable && <ArrowRight />}</button>{cashOnDeliveryAvailable && <button className="button button--ghost" disabled={checkout.busy} onClick={openCashOnDelivery}>UAT Test — No Payment</button>}</div></div>}
-        {cashOnDeliveryAvailable && <p className="preview-note">UAT Test — No Payment is temporarily enabled for client testing. It unlocks the Full Report and queues the normal confirmation/report email with the PDF attachment without charging Stripe.</p>}
-        {!sharedLite && !checkoutAvailable && !cashOnDeliveryAvailable && <p className="preview-note">Your Lite Report is ready now. Full Report purchasing will open after Atom Global completes its secure payment configuration.</p>}
-      </>}
-    </section>
+    {!unlocked && !sharedLite && <LiteFullComparison
+      summary={summary}
+      price={price}
+      checkoutAvailable={checkoutAvailable}
+      cashOnDeliveryAvailable={cashOnDeliveryAvailable}
+      checkout={checkout}
+      onCheckout={openCheckout}
+      onCashOnDelivery={openCashOnDelivery}
+    />}
+    {unlocked && <section className="paid-report unlocked">
+      <div className="paid-heading"><div><p className="eyebrow">Complete report</p><h2>Your full development report</h2></div></div>
+      <FullReportContent report={report} summary={summary} content={paidContent} token={token} />
+    </section>}
+    {sharedLite && <section className="paid-report locked v4-shared-lite-cta">
+      <div className="paid-heading"><div><p className="eyebrow">Shared Lite Report</p><h2>Discover your own result</h2></div></div>
+      <p>Complete the assessment to receive your own concise Lite Report and personal Growth Alignment profile.</p>
+      <div className="upgrade-box__actions"><a className="button button--primary" href="/">Take the assessment <ArrowRight /></a></div>
+    </section>}
     {sharedLite
       ? <section className="report-card v4-coach">
           <p className="eyebrow">Your turn</p>
