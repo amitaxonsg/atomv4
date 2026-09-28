@@ -724,3 +724,28 @@
     display: none !important;
   }
 }
+
+
+/* Personal-only coffee value banner above Full Report CTA. */
+.v4-personal-coffee-banner {
+  margin: 4px 0 16px;
+  padding: 14px 16px;
+  border: 1px solid #9fc7a5;
+  border-left: 5px solid #3f8b55;
+  border-radius: 12px;
+  background: #edf7ef;
+  box-shadow: 0 8px 20px rgba(48, 104, 64, .08);
+  color: #245b35;
+}
+
+.v4-personal-coffee-banner strong {
+  display: block;
+  font-family: var(--heading-font, Georgia, serif);
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+/* Screen-hidden compact Lite section used only by Print Lite Report. */
+.v4-lite-print-summary {
+  display: none;
+}
