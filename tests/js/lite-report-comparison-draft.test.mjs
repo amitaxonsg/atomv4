@@ -8,11 +8,12 @@ const reportCss = readFileSync("src/report-flow.css", "utf8");
 test("Lite result uses the Lite vs Full comparison while Full Report keeps its summary cards", () => {
   assert.match(reportView, /function LiteFullComparison/);
   assert.match(reportView, /Lite vs Full Report/);
-  assert.match(reportView, /1 key strength/);
-  assert.match(reportView, /1 development observation/);
+  assert.match(reportView, /Key strength/);
+  assert.match(reportView, /Development observation/);
   assert.match(reportView, /3 strengths/);
   assert.match(reportView, /3 development observations/);
   assert.match(reportView, /Complete report preview/);
+  assert.match(reportView, /Print Lite Report/);
   assert.match(reportView, /unlocked && <div className="report-columns"/);
   assert.match(reportView, /<h2>Top three strengths<\/h2>/);
   assert.match(reportView, /<h2>Development observations<\/h2>/);
