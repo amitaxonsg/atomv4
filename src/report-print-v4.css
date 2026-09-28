@@ -369,3 +369,64 @@
   }
 
 }
+
+
+/* 28 Sep final Lite print override:
+   print the actual Lite result content immediately after the alignment hero,
+   and remove the on-screen Lite-vs-Full sales comparison from the PDF. */
+@media print {
+  .v4-report:has(.paid-report.locked) > .v4-lite-full-comparison {
+    display: none !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .v4-lite-print-summary {
+    display: block !important;
+    margin: 0 !important;
+    padding: 5mm !important;
+    border: 1px solid #ded5ca !important;
+    border-top: 3px solid #b54b3d !important;
+    border-radius: 4mm !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    color: #211c16 !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .v4-lite-print-summary > h2 {
+    margin: 0 0 4mm !important;
+    color: #211c16 !important;
+    font-size: 15pt !important;
+    line-height: 1.1 !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .v4-lite-print-summary > div {
+    margin: 0 !important;
+    padding: 3.2mm 0 !important;
+    border-top: 1px solid #ebe4dc !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .v4-lite-print-summary > div:first-of-type {
+    border-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .v4-lite-print-summary h3 {
+    margin: 0 0 1.5mm !important;
+    color: #b54b3d !important;
+    font-size: 7.5pt !important;
+    font-weight: 800 !important;
+    letter-spacing: .08em !important;
+    text-transform: uppercase !important;
+  }
+
+  .v4-report:has(.paid-report.locked) > .v4-lite-print-summary p {
+    margin: 0 !important;
+    color: #332c25 !important;
+    font-size: 9.5pt !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+  }
+}
