@@ -37,10 +37,6 @@ final class StripeService
 
         $affiliate = null;
         if ($affiliateCode) $affiliate = $this->db->fetch('SELECT id, affiliate_code FROM affiliates WHERE affiliate_code = ? AND is_active = 1', [strtoupper(trim($affiliateCode))]);
-        $cancelUrl = $this->verifiedReportReturnUrl([
-            'secure_token_hash' => $survey['secure_token_hash'] ?? null,
-            'token_expires_at' => $survey['token_expires_at'] ?? null,
-        ], $reportToken) ?? ($this->config['url'] . '/payment/cancelled?retake=1&session=' . $sessionId);
 
         $stripe = new StripeClient($secret);
         $checkout = $stripe->checkout->sessions->create([
@@ -119,6 +115,11 @@ final class StripeService
         if ($eligibleAt > new \DateTimeImmutable('now')) {
             throw new \InvalidArgumentException('The retest becomes available 90 days after the original assessment was completed.');
         }
+
+        $cancelUrl = $this->verifiedReportReturnUrl([
+            'secure_token_hash' => $survey['secure_token_hash'] ?? null,
+            'token_expires_at' => $survey['token_expires_at'] ?? null,
+        ], $reportToken) ?? ($this->config['url'] . '/payment/cancelled?retake=1&session=' . $sessionId);
 
         $stripe = new StripeClient($secret);
         $checkout = $stripe->checkout->sessions->create([
