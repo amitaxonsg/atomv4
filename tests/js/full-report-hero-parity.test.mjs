@@ -31,7 +31,9 @@ test("V4 Lite, Full and PDF follow the approved reference result-card compositio
   assert.match(heroCss, /\.v4-meter__labels[\s\S]*color:\s*#eee7dc\s*!important/);
   assert.match(heroCss, /\.v4-meter__track[\s\S]*background-color:\s*#62636b\s*!important/);
   assert.match(reportView, /<section className="report-hero"><AlignmentGauge score=\{summary\.total\} \/><div><h2>Your alignment pattern<\/h2><p>\{summary\.summary\}<\/p><AlignmentMeter score=\{summary\.total\} \/><\/div><\/section>/);
-  assert.match(reportView, /<section className=\{`paid-report \$\{unlocked \? "unlocked" : "locked"\}`\}/);
+  assert.match(reportView, /!unlocked && !sharedLite && <LiteFullComparison/);
+  assert.match(reportView, /unlocked && <section className="paid-report unlocked">/);
+  assert.match(reportView, /v4-lite-full-comparison/);
 
   // Browser Print Report for locked Lite is a content-parity print view, not a screenshot of controls/layout.
   assert.match(main, /share-modal-final-v4\.css";\nimport "\.\/report-print-v4\.css";/);
