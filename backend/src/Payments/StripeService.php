@@ -32,8 +32,10 @@ final class StripeService
         if (!$survey || $survey['status'] !== 'completed') throw new \InvalidArgumentException('A completed assessment is required before checkout.');
         $report = $this->db->fetch('SELECT id, secure_token_hash, token_expires_at FROM generated_reports WHERE survey_session_id = ? AND revoked_at IS NULL', [$sessionId]);
         if (!$report) throw new \InvalidArgumentException('The report is not available for checkout.');
-        $cancelUrl = $this->verifiedReportReturnUrl($report, $reportToken)
-            ?? ($this->config['url'] . '/payment/cancelled?session=' . $sessionId);
+        $cancelUrl = $this->verifiedReportReturnUrl($report, $reportToken);
+        if ($cancelUrl === null) {
+            throw new \InvalidArgumentException('A valid private report link is required before checkout.');
+        }
 
         $affiliate = null;
         if ($affiliateCode) $affiliate = $this->db->fetch('SELECT id, affiliate_code FROM affiliates WHERE affiliate_code = ? AND is_active = 1', [strtoupper(trim($affiliateCode))]);
@@ -119,7 +121,10 @@ final class StripeService
         $cancelUrl = $this->verifiedReportReturnUrl([
             'secure_token_hash' => $survey['secure_token_hash'] ?? null,
             'token_expires_at' => $survey['token_expires_at'] ?? null,
-        ], $reportToken) ?? ($this->config['url'] . '/payment/cancelled?retake=1&session=' . $sessionId);
+        ], $reportToken);
+        if ($cancelUrl === null) {
+            throw new \InvalidArgumentException('A valid private report link is required before retest checkout.');
+        }
 
         $stripe = new StripeClient($secret);
         $checkout = $stripe->checkout->sessions->create([
