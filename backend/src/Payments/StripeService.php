@@ -17,10 +17,10 @@ final class StripeService
 
     public function __construct(private Database $db, private SettingsService $settings, private ReportService $reports, private array $config) {}
 
-    public function checkout(int $sessionId, string $trackKey, ?string $affiliateCode): array
+    public function checkout(int $sessionId, string $trackKey, ?string $affiliateCode, ?string $reportToken = null): array
     {
         if ($affiliateCode === self::RETAKE_MARKER) {
-            return $this->retakeCheckout($sessionId, $trackKey);
+            return $this->retakeCheckout($sessionId, $trackKey, $reportToken);
         }
 
         $secret = $this->settings->get('stripe.secret_key', $_ENV['STRIPE_SECRET_KEY'] ?? '');
@@ -30,11 +30,18 @@ final class StripeService
 
         $survey = $this->db->fetch('SELECT s.id, s.status, p.email, t.track_key FROM survey_sessions s JOIN participants p ON p.id = s.participant_id JOIN assessment_tracks t ON t.id = s.track_id WHERE s.id = ? AND t.track_key = ?', [$sessionId, $trackKey]);
         if (!$survey || $survey['status'] !== 'completed') throw new \InvalidArgumentException('A completed assessment is required before checkout.');
-        $report = $this->db->fetch('SELECT id FROM generated_reports WHERE survey_session_id = ? AND revoked_at IS NULL', [$sessionId]);
+        $report = $this->db->fetch('SELECT id, secure_token_hash, token_expires_at FROM generated_reports WHERE survey_session_id = ? AND revoked_at IS NULL', [$sessionId]);
         if (!$report) throw new \InvalidArgumentException('The report is not available for checkout.');
+        $cancelUrl = $this->verifiedReportReturnUrl($report, $reportToken)
+            ?? ($this->config['url'] . '/payment/cancelled?session=' . $sessionId);
 
         $affiliate = null;
         if ($affiliateCode) $affiliate = $this->db->fetch('SELECT id, affiliate_code FROM affiliates WHERE affiliate_code = ? AND is_active = 1', [strtoupper(trim($affiliateCode))]);
+        $cancelUrl = $this->verifiedReportReturnUrl([
+            'secure_token_hash' => $survey['secure_token_hash'] ?? null,
+            'token_expires_at' => $survey['token_expires_at'] ?? null,
+        ], $reportToken) ?? ($this->config['url'] . '/payment/cancelled?retake=1&session=' . $sessionId);
+
         $stripe = new StripeClient($secret);
         $checkout = $stripe->checkout->sessions->create([
             'mode' => 'payment',
@@ -42,7 +49,7 @@ final class StripeService
             'line_items' => [['price' => $price, 'quantity' => 1]],
             'allow_promotion_codes' => true,
             'success_url' => $this->config['url'] . '/payment/success?checkout={CHECKOUT_SESSION_ID}',
-            'cancel_url' => $this->config['url'] . '/payment/cancelled?session=' . $sessionId,
+            'cancel_url' => $cancelUrl,
             'metadata' => [
                 'survey_session_id' => (string) $sessionId,
                 'generated_report_id' => (string) $report['id'],
@@ -89,7 +96,7 @@ final class StripeService
         });
     }
 
-    private function retakeCheckout(int $sessionId, string $trackKey): array
+    private function retakeCheckout(int $sessionId, string $trackKey, ?string $reportToken = null): array
     {
         $secret = trim((string) $this->settings->get('stripe.secret_key', $_ENV['STRIPE_SECRET_KEY'] ?? ''));
         $webhook = trim((string) $this->settings->get('stripe.webhook_secret', $_ENV['STRIPE_WEBHOOK_SECRET'] ?? ''));
@@ -99,7 +106,7 @@ final class StripeService
         if ($secret === '' || $webhook === '' || $retestPriceId === '') throw new \RuntimeException('Stripe credentials and the track retest Price ID are not configured.');
 
         $survey = $this->db->fetch(
-            'SELECT s.id, s.status, s.completed_at, p.email, t.track_key, t.name track_name, gr.id report_id, gr.is_unlocked FROM survey_sessions s JOIN participants p ON p.id = s.participant_id JOIN assessment_tracks t ON t.id = s.track_id JOIN generated_reports gr ON gr.survey_session_id = s.id AND gr.revoked_at IS NULL WHERE s.id = ? AND t.track_key = ? LIMIT 1',
+            'SELECT s.id, s.status, s.completed_at, p.email, t.track_key, t.name track_name, gr.id report_id, gr.is_unlocked, gr.secure_token_hash, gr.token_expires_at FROM survey_sessions s JOIN participants p ON p.id = s.participant_id JOIN assessment_tracks t ON t.id = s.track_id JOIN generated_reports gr ON gr.survey_session_id = s.id AND gr.revoked_at IS NULL WHERE s.id = ? AND t.track_key = ? LIMIT 1',
             [$sessionId, $trackKey]
         );
         if (!$survey || $survey['status'] !== 'completed' || !(bool) $survey['is_unlocked']) {
@@ -119,7 +126,7 @@ final class StripeService
             'customer_email' => $survey['email'],
             'line_items' => [['price' => $retestPriceId, 'quantity' => 1]],
             'success_url' => $this->config['url'] . '/payment/success?retake=1&checkout={CHECKOUT_SESSION_ID}',
-            'cancel_url' => $this->config['url'] . '/payment/cancelled?retake=1&session=' . $sessionId,
+            'cancel_url' => $cancelUrl,
             'metadata' => [
                 'survey_session_id' => (string) $sessionId,
                 'source_survey_session_id' => (string) $sessionId,
@@ -240,6 +247,25 @@ final class StripeService
             'amount' => number_format($amount / 100, 2),
             'currency' => $currency,
         ]);
+    }
+
+    private function verifiedReportReturnUrl(array $report, ?string $reportToken): ?string
+    {
+        $token = strtolower(trim((string) $reportToken));
+        if (!preg_match('/^[a-f0-9]{64}$/', $token)) return null;
+
+        $storedHash = strtolower(trim((string) ($report['secure_token_hash'] ?? '')));
+        if ($storedHash === '' || !hash_equals($storedHash, hash('sha256', $token))) return null;
+
+        $expiresAt = trim((string) ($report['token_expires_at'] ?? ''));
+        if ($expiresAt === '') return null;
+        try {
+            if (new \DateTimeImmutable($expiresAt) <= new \DateTimeImmutable('now')) return null;
+        } catch (\Throwable) {
+            return null;
+        }
+
+        return rtrim((string) $this->config['url'], '/') . '/report/' . rawurlencode($token) . '?payment=cancelled';
     }
 
     private function hasPaidAssessment(int $sessionId): bool
