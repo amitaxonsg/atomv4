@@ -65,7 +65,6 @@
   }
 
   /* Print only the Lite Report content — no checkout, share controls or page actions. */
-  .v4-report:has(.paid-report.locked) > .paid-report.locked,
   .v4-report:has(.paid-report.locked) > .v4-thank-you-share,
   .latest-questionnaire-shell:has(.v4-report .paid-report.locked) .latest-page-actions,
   .latest-questionnaire-shell:has(.v4-report .paid-report.locked) .v4-share-modal__backdrop,
@@ -285,4 +284,88 @@
   .v4-report:has(.paid-report.locked) > .report-columns li:last-child {
     margin-bottom: 0 !important;
   }
+
+  /* 28 Sep Lite print: include the Lite Report contents, but never print the Full Report sales preview. */
+  .v4-report:has(.paid-report.locked) > .v4-lite-full-comparison {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .v4-report:has(.paid-report.locked) .v4-lite-full-comparison__intro,
+  .v4-report:has(.paid-report.locked) .v4-lite-full-comparison__card--full,
+  .v4-report:has(.paid-report.locked) .v4-lite-full-comparison > .preview-note {
+    display: none !important;
+  }
+
+  .v4-report:has(.paid-report.locked) .v4-lite-full-comparison__grid {
+    display: block !important;
+    margin: 0 !important;
+  }
+
+  .v4-report:has(.paid-report.locked) .v4-lite-full-comparison__card--lite {
+    display: block !important;
+    margin: 0 !important;
+    padding: 5mm !important;
+    border: 1px solid #ded5ca !important;
+    border-top: 3px solid #b54b3d !important;
+    border-radius: 4mm !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .v4-report:has(.paid-report.locked) .v4-lite-full-comparison__card--lite header {
+    display: flex !important;
+    align-items: baseline !important;
+    justify-content: space-between !important;
+    gap: 4mm !important;
+    margin: 0 0 4mm !important;
+    padding: 0 0 3mm !important;
+    border-bottom: 1px solid #ded5ca !important;
+  }
+
+  .v4-report:has(.paid-report.locked) .v4-lite-full-comparison__card--lite header span {
+    color: #211c16 !important;
+    font-size: 15pt !important;
+    font-weight: 800 !important;
+  }
+
+  .v4-report:has(.paid-report.locked) .v4-lite-full-comparison__card--lite header strong {
+    color: #6a625a !important;
+    font-size: 8pt !important;
+  }
+
+  .v4-report:has(.paid-report.locked) .v4-lite-full-comparison__item {
+    display: block !important;
+    padding: 3.5mm 0 !important;
+    border-bottom: 1px solid #ebe4dc !important;
+  }
+
+  .v4-report:has(.paid-report.locked) .v4-lite-full-comparison__item:last-of-type {
+    border-bottom: 0 !important;
+  }
+
+  .v4-report:has(.paid-report.locked) .v4-lite-full-comparison__item > span {
+    display: block !important;
+    margin: 0 0 1.5mm !important;
+    color: #b54b3d !important;
+    font-size: 7.5pt !important;
+    font-weight: 800 !important;
+    letter-spacing: .08em !important;
+    text-transform: uppercase !important;
+  }
+
+  .v4-report:has(.paid-report.locked) .v4-lite-full-comparison__item p {
+    margin: 0 !important;
+    color: #332c25 !important;
+    font-size: 10pt !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+  }
+
 }
