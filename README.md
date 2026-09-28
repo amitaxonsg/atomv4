@@ -57,6 +57,36 @@ Latest confirmed health state after deployment:
 
 > Documentation-only commits may be newer than the deployed application. `/var/www/v4.atomglobal.com/current` and `/var/www/v4.atomglobal.com/deployed-commit.txt` remain authoritative for the actual runtime release.
 
+
+## Production protection checkpoint — 28 September 2026
+
+Before starting the new Lite Report draft, a fresh GAA/V4 production rollback checkpoint was created.
+
+Git safety branches:
+
+```text
+backup/gaa-before-lite-report-draft-20260928
+backup/v4-before-lite-report-draft-20260928
+```
+
+Full server backup:
+
+```text
+/var/backups/growth-alignment-v4/gaa-full-20260928-063927
+```
+
+Recorded backup size: **113M**.
+
+The checkpoint includes the production database, current release, source checkout, persistent storage, environment/configuration, Apache configuration, scheduled jobs, manifest and SHA-256 checksum file.
+
+Backup record:
+
+```text
+docs/GAA-BACKUP-20260928.md
+```
+
+This checkpoint was created specifically before the Lite Report redesign/draft work. **GIA is out of scope and must not be modified during this GAA/V4 work.**
+
 ## Full Development Report PDF — accepted 14 September 2026
 
 The Full Development Report PDF now includes a dedicated confidential cover page before the existing report content.
