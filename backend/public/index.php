@@ -67,7 +67,12 @@ $router->add('GET', '/api/public/reports/lite/{token}', function (Request $reque
 });
 $router->add('POST', '/api/payments/checkout', function (Request $request) use ($container, $config) {
     $stripe = new StripeService($container['db'], $container['settings'], $container['reports'], $config);
-    return Response::json($stripe->checkout((int) ($request->body['sessionId'] ?? 0), (string) ($request->body['track'] ?? ''), $request->body['affiliateCode'] ?? null));
+    return Response::json($stripe->checkout(
+        (int) ($request->body['sessionId'] ?? 0),
+        (string) ($request->body['track'] ?? ''),
+        $request->body['affiliateCode'] ?? null,
+        $request->body['reportToken'] ?? null
+    ));
 });
 $router->add('POST', '/api/payments/cash-on-delivery', function (Request $request) use ($container, $config) {
     $cash = new CashOnDeliveryService($container['db'], $container['settings'], $container['reports'], $config);
