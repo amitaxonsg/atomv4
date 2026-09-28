@@ -42,7 +42,9 @@ test("V4 Lite, Full and PDF follow the approved reference result-card compositio
   assert.match(printCss, /@page[\s\S]*size:\s*A4 portrait/);
   assert.match(printCss, /:has\(\.v4-report \.paid-report\.locked\)/);
   assert.match(printCss, /> \.latest-visual-panel[\s\S]*display:\s*none\s*!important/);
-  assert.match(printCss, /> \.paid-report\.locked,[\s\S]*> \.v4-thank-you-share,[\s\S]*\.latest-page-actions/);
+  assert.match(printCss, /> \.v4-thank-you-share,[\s\S]*\.latest-page-actions/);
+  assert.match(printCss, /v4-lite-full-comparison__card--lite/);
+  assert.match(printCss, /v4-lite-full-comparison__card--full[\s\S]*display:\s*none\s*!important/);
   assert.match(printCss, /> \.report-hero[\s\S]*background-color:\s*#252832\s*!important/);
   assert.match(printCss, /> \.report-columns[\s\S]*grid-template-columns:\s*1fr 1fr\s*!important/);
   assert.match(printCss, /-webkit-print-color-adjust:\s*exact\s*!important/);
@@ -51,7 +53,8 @@ test("V4 Lite, Full and PDF follow the approved reference result-card compositio
   // Full Report Print must use the exact server-generated PDF used by email.
   assert.match(reportView, /const fullReportPdfUrl = unlocked && token/);
   assert.match(reportView, /fullReportPdfUrl[\s\S]*>Print report<\/a>/);
-  assert.match(reportView, /onClick=\{\(\) => window\.print\(\)\}>Print report<\/button>/);
+  assert.doesNotMatch(reportView, /onClick=\{\(\) => window\.print\(\)\}>Print report<\/button>/);
+  assert.match(reportView, /Print Lite Report/);
   assert.match(extraRoutes, /GET', '\/api\/reports\/\{token\}\/pdf/);
   assert.match(extraRoutes, /\$container\['pdf'\]->generate\(\(int\) \$report\['id'\]\)/);
   assert.match(extraRoutes, /Content-Disposition: inline; filename="growth-alignment-full-development-report\.pdf"/);
