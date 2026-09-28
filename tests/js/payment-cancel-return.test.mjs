@@ -20,6 +20,8 @@ test("Stripe cancellation returns to the same verified result page", () => {
   assert.match(stripe, /\/report\/.*\?payment=cancelled/);
   assert.match(stripe, /'cancel_url' => \$cancelUrl/);
   assert.match(stripe, /A valid private report link is required before checkout/);
+  assert.match(report, /get\("payment"\) === "cancelled"/);
+  assert.match(report, /Payment not completed\.<\/strong> Nothing was charged/);
 });
 
 test("retest cancellation also returns to the originating Full Report", () => {
