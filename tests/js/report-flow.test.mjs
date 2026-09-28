@@ -36,19 +36,25 @@ test("locked report API exposes Lite content and preview but not Full content", 
   assert.match(reportSmoke, /Locked report contains the approved CMS upgrade preview/);
 });
 
-test("participant report shows safe Stripe readiness and full CMS schema", () => {
-  assert.match(reportView, /This is the short version/);
+test("participant report shows safe Stripe readiness, simplified Lite comparison and full CMS schema", () => {
+  assert.match(reportView, /Lite vs Full Report/);
+  assert.match(reportView, /1 key strength/);
+  assert.match(reportView, /1 development observation/);
+  assert.match(reportView, /3 strengths/);
+  assert.match(reportView, /3 development observations/);
+  assert.match(reportView, /Complete report preview/);
   assert.match(reportView, /Full Report checkout coming soon/);
   assert.match(reportView, /checkoutAvailable/);
   assert.match(reportView, /UpgradeReasons/);
   assert.match(reportView, /Your alignment pattern/);
   assert.match(reportView, /Top three strengths/);
   assert.match(reportView, /Development observations/);
-  assert.match(reportView, /Your Full Report goes deeper into the patterns behind this result/);
+  assert.match(reportView, /unlocked && <div className="report-columns"/);
   assert.match(reportCss, /V4 Lite Report visual refresh/);
+  assert.match(reportCss, /GAA LITE REPORT DRAFT — 28 SEP 2026/);
+  assert.match(reportCss, /v4-lite-full-comparison__grid/);
   assert.match(reportCss, /v4-report:has\(\.paid-report\.locked\)/);
   assert.match(reportCss, /report-hero[\s\S]*radial-gradient/);
-  assert.match(reportCss, /report-card:first-child li:first-child[\s\S]*grid-column:\s*1 \/ -1/);
   assert.match(main, /report-editorial-v4\.css/);
   assert.match(editorialCss, /V4 Full Development Report editorial refresh/);
   assert.match(editorialCss, /v4-report:has\(\.paid-report\.unlocked\)/);
